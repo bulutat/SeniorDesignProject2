@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Ortam
+.env
+
+# Veri: ham, ara ve işlenmiş veriler repoya girmez (sample/ ve annotations/ girer)
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+*.db
+models/*
+!models/.gitkeep
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Editör / sistem
+.claude/
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

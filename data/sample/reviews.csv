@@ -1,0 +1,48 @@
+review_id,product_id,rating,text,date
+r001,s-rf-01,5,"Üç yıldır kullanıyorum, hiç bozulmadı. Elektrik faturası düştü, çok sessiz çalışıyor.",2026-03-11
+r002,s-rf-01,5,"Sağlam ve kaliteli malzeme. Eski dolabıma göre az elektrik harcıyor.",2026-04-02
+r003,s-rf-01,4,"Genel olarak memnunum, kapı contası biraz sert ama sorunsuz çalışıyor.",2026-05-19
+r004,s-rf-01,5,"Kurulumda servis hızlı geldi, ürün dayanıklı görünüyor.",2026-06-07
+r005,s-rf-02,4,"Fiyatına göre iyi, ama biraz ses yapıyor geceleri.",2026-02-14
+r006,s-rf-02,3,"Bir yıl dolmadan arızalandı, servis gelmedi iki hafta bekledim.",2026-03-28
+r007,s-rf-02,5,"Geniş ve kullanışlı, şimdilik sorunsuz.",2026-05-03
+r008,s-rf-02,4,"Tasarım güzel, elektrik tüketimi ortalama.",2026-07-21
+r009,s-rf-03,5,"Yıllardır sorunsuz, sessiz ve tasarruflu bir buzdolabı.",2026-01-09
+r010,s-rf-03,4,"Soğutması iyi, sebzelik bölmesi biraz küçük.",2026-02-22
+r011,s-rf-03,5,"Dayanıklı bir ürün, ailemde de aynısı var.",2026-04-30
+r012,s-rf-03,4,"Montaj ekibi ilgiliydi, ürünü beğendim.",2026-06-15
+r013,s-rf-04,3,"Ucuz ama çok elektrik yakıyor, fatura arttı.",2026-01-17
+r014,s-rf-04,2,"Altı ayda bozuldu, servis ilgilenmedi. Parça bekliyorum.",2026-03-05
+r015,s-rf-04,4,"Fiyat performans ürünü, öğrenci evi için yeterli.",2026-04-11
+r016,s-rf-04,2,"Gürültülü çalışıyor, titreşim de var.",2026-05-27
+r017,s-rf-04,1,"çok kötü çok kötü çok kötü çok kötü çok kötü çok kötü",2026-05-28
+r018,s-rf-05,5,"Çok geniş, sessiz ve az elektrik harcıyor. Kaliteli malzeme kullanılmış.",2026-02-03
+r019,s-rf-05,5,"Pahalı ama uzun ömürlü olacağına inanıyorum, garantisi de uzun.",2026-03-16
+r020,s-rf-05,4,"Buz makinesi bir ara hata verdi, servis hızlı çözdü.",2026-05-08
+r021,s-rf-06,3,"Kısa sürede bozuldu, termostat değişti.",2026-01-25
+r022,s-rf-06,4,"Küçük mutfaklar için ideal boyutta.",2026-03-02
+r023,s-rf-06,3,"Çok elektrik harcıyor gibi geldi, ses yapıyor.",2026-04-19
+r024,s-rf-06,4,"Fiyatı uygun, işimi görüyor.",2026-06-01
+r025,s-wm-01,5,"Az elektrik ve az su harcıyor, çok sessiz. Çok memnunum.",2026-02-10
+r026,s-wm-01,5,"İki yıldır sorunsuz çalışıyor, sağlam bir makine.",2026-03-23
+r027,s-wm-01,4,"Programları çok, sıkma performansı iyi.",2026-05-14
+r028,s-wm-01,5,"Dayanıklı ve tasarruflu, tavsiye ederim.",2026-07-02
+r029,s-wm-02,4,"Fiyatına göre iyi bir makine.",2026-01-30
+r030,s-wm-02,2,"Sıkmada çok ses yapıyor, bir de hata kodu verdi.",2026-03-12
+r031,s-wm-02,3,"Bir yılda arızalandı, servis berbat, üç kez geldiler.",2026-04-26
+r032,s-wm-02,4,"Temiz yıkıyor, şimdilik sorunsuz.",2026-06-18
+r033,s-wm-03,5,"Geniş kapasite, az elektrik harcıyor. Sessiz.",2026-02-05
+r034,s-wm-03,4,"Kaliteli malzeme, ama fiyatı yüksek.",2026-03-29
+r035,s-wm-03,4,"Motor sesi yok denecek kadar az, sorunsuz.",2026-05-21
+r036,s-wm-03,3,"Kapak contası paslandı gibi, servis problemi yaşadım.",2026-07-09
+r037,s-wm-04,2,"Çabuk bozuldu, su kaçırıyor.",2026-01-12
+r038,s-wm-04,3,"Ucuz ama gürültülü ve çok elektrik harcıyor.",2026-02-27
+r039,s-wm-04,2,"Servise ulaşamadım, parça yok dediler.",2026-04-08
+r040,s-wm-04,4,"Küçük ev için yeterli.",2026-06-03
+r041,s-wm-04,4,"Küçük ev için yeterli.",2026-06-03
+r042,s-wm-05,5,"Sessiz, tasarruflu ve dayanıklı bir makine.",2026-02-17
+r043,s-wm-05,4,"İyi yıkıyor, kurulumda servis ilgili davrandı.",2026-04-04
+r044,s-wm-05,5,"Bir buçuk yıldır sorunsuz çalışıyor.",2026-05-30
+r045,s-wm-05,4,"Ekranı kullanışlı, programlar yeterli.",2026-07-15
+r046,s-wm-06,4,"İyi ürün.",2026-08-01
+r047,s-wm-06,3,"güzel",2026-08-04

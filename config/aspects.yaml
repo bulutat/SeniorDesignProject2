@@ -1,0 +1,39 @@
+# Yorumlardan çıkarılacak aspect'ler ve kural tabanlı baseline için anahtar ifadeler.
+# İfadeler normalize edilmiş (küçük harf, noktalamasız) metin üzerinde,
+# kelime başından itibaren aranır; ekler serbesttir ("dayanıklı" -> "dayanıklılığı").
+# Eşleşme uzun ifadeden kısaya yapılır ve eşleşen bölüm tüketilir, böylece
+# "arızasız" önce olumlu eşleşir ve "arıza" olarak tekrar sayılmaz.
+#
+# Bu liste etiketleme kılavuzundaki (docs/annotation-guideline.md) aspect'lerle aynı olmalı.
+
+aspects:
+  durability:
+    name: Dayanıklılık
+    pos: [dayanıklı, sağlam, uzun ömürlü, yıllardır kullanıyorum, yıllardır sorunsuz,
+          hiç bozulmadı, bozulmadı, sorunsuz çalışıyor, sorunsuz, arızasız, kaliteli malzeme]
+    neg: [çabuk bozuldu, kısa sürede bozuldu, hemen bozuldu, dayanıksız, kırıldı, çürük,
+          paslandı, ömrü kısa, kalitesiz malzeme]
+
+  energy:
+    name: Enerji tüketimi
+    pos: [az elektrik, düşük enerji, elektrik faturası düştü, fatura düştü, tasarruflu,
+          az yakıyor, enerji tasarrufu, az tüketiyor]
+    neg: [çok elektrik, fazla elektrik, elektrik faturası arttı, fatura arttı, çok yakıyor,
+          enerji canavarı, çok tüketiyor]
+
+  service:
+    name: Servis
+    pos: [servis hızlı, servis ilgili, servis çok iyi, servis hemen geldi, hemen çözdüler]
+    neg: [servis problemi, servis sorunu, servis gelmedi, servis ilgilenmedi, servise ulaşamadım,
+          servis berbat, servis rezalet, parça yok, parça bekliyorum]
+
+  failure:
+    name: Arıza
+    pos: []
+    neg: [arıza, arızalandı, bozuldu, çalışmıyor, hata kodu, hata veriyor, su kaçırıyor,
+          soğutmuyor, sıkmıyor, motor yandı]
+
+  noise:
+    name: Gürültü
+    pos: [sessiz, çok sessiz, sesi yok, sesi çok az]
+    neg: [çok ses, gürültülü, ses yapıyor, sesli çalışıyor, titreşim, uğultu]

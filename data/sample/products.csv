@@ -1,0 +1,13 @@
+product_id,source,url,category,brand,model_code,name,price_tl,energy_class,energy_kwh_per_year,energy_kwh_per_100_cycles,water_l_per_cycle,capacity,noise_db,warranty_years,rating_avg,rating_count
+s-rf-01,sample,https://example.com/urun/s-rf-01,refrigerator,Kuzey,KZ-NF480C,Kuzey NF480 No-Frost Buzdolabı 480 L,38999,C,182,,,480,35,3,4.6,812
+s-rf-02,sample,https://example.com/urun/s-rf-02,refrigerator,Kuzey,KZ-NF450E,Kuzey NF450 No-Frost Buzdolabı 450 L,27999,E,286,,,450,39,2,4.3,1530
+s-rf-03,sample,https://example.com/urun/s-rf-03,refrigerator,Ayaz,AY-500D,Ayaz AY500 Kombi Buzdolabı 500 L,33499,D,238,,,500,37,3,4.5,640
+s-rf-04,sample,https://example.com/urun/s-rf-04,refrigerator,Ayaz,AY-420F,Ayaz AY420 Buzdolabı 420 L,21999,F,352,,,420,41,2,4.0,2210
+s-rf-05,sample,https://example.com/urun/s-rf-05,refrigerator,Buzul,BZ-600C,Buzul BZ600 Gardırop Tipi Buzdolabı 600 L,54999,C,240,,,600,36,5,4.7,310
+s-rf-06,sample,https://example.com/urun/s-rf-06,refrigerator,Buzul,BZ-380E,Buzul BZ380 Buzdolabı 380 L,"19.999,00 TL",A++,268,,,380,40,2,3.8,970
+s-wm-01,sample,https://example.com/urun/s-wm-01,washing_machine,Köpük,KP-9014A,Köpük KP9014 Çamaşır Makinesi 9 kg 1400 Devir,24999,A,,49,48,9,74,3,4.6,1210
+s-wm-02,sample,https://example.com/urun/s-wm-02,washing_machine,Köpük,KP-8012C,Köpük KP8012 Çamaşır Makinesi 8 kg 1200 Devir,16999,C,,64,52,8,77,2,4.2,2650
+s-wm-03,sample,https://example.com/urun/s-wm-03,washing_machine,Duru,DR-1014A,Duru DR1014 Çamaşır Makinesi 10 kg 1400 Devir,29999,A,,52,50,10,72,3,4.4,540
+s-wm-04,sample,https://example.com/urun/s-wm-04,washing_machine,Duru,DR-7010D,Duru DR7010 Çamaşır Makinesi 7 kg 1000 Devir,13499,D,,71,55,7,79,2,3.7,1870
+s-wm-05,sample,https://example.com/urun/s-wm-05,washing_machine,Lavanta,LV-9012B,Lavanta LV9012 Çamaşır Makinesi 9 kg 1200 Devir,21499,B,,57,49,9,75,2,4.5,830
+s-wm-06,sample,https://example.com/urun/s-wm-06,washing_machine,Lavanta,LV-8010B,Lavanta LV8010 Çamaşır Makinesi 8 kg 1000 Devir,18999,B,,59,53,8,,2,,

@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "greenchoice"
+version = "0.1.0"
+description = "GreenChoice: Yapay zeka tabanlı sürdürülebilir ve bilinçli ürün seçim sistemi"
+requires-python = ">=3.11"
+dependencies = [
+  "pandas>=2.2",
+  "numpy>=1.26",
+  "pyyaml>=6.0",
+  "pydantic>=2.6",
+  "scikit-learn>=1.4",
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
+]
+
+[project.optional-dependencies]
+# Veri toplama (Aşama 1)
+scrape = ["requests>=2.31", "beautifulsoup4>=4.12"]
+# ML ve açıklanabilirlik (Aşama 3-4)
+ml = ["xgboost>=2.0", "shap>=0.45"]
+# Transformer tabanlı NLP (Aşama 2). Büyük indirme: GPU yoksa CPU sürümü yeterli.
+nlp = ["torch>=2.2", "transformers>=4.40", "datasets>=2.19"]
+dev = ["pytest>=8.0", "httpx>=0.27", "ruff>=0.5", "jupyterlab>=4.1"]
+
+[project.scripts]
+greenchoice = "greenchoice.pipeline:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src"]

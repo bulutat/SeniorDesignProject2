@@ -1,0 +1,319 @@
+<title>GreenChoice Proje Takvimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: tek sütun; üstte özet + filtre, ortada yatay kaydırılabilir Gantt, altta kararlar ve çıktılar */
+:root {
+  --bg: #f4f7f4;
+  --surface: #ffffff;
+  --fg: #17221b;
+  --muted: #5a685f;
+  --line: #dce4dd;
+  --grid: #e9eee9;
+  --accent: #2c6a4c;
+  --a: #2f6ea6;
+  --b: #c0761b;
+  --both: #3f8f66;
+  --phase: #c9d6cc;
+  --today: #c2412f;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111713; --surface: #18201b; --fg: #e3ebe5; --muted: #95a49a;
+    --line: #2a352e; --grid: #212a24; --accent: #79c29a;
+    --a: #6aa8e0; --b: #e2a052; --both: #6cc293; --phase: #34443a; --today: #ff7a66;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111713; --surface: #18201b; --fg: #e3ebe5; --muted: #95a49a;
+  --line: #2a352e; --grid: #212a24; --accent: #79c29a;
+  --a: #6aa8e0; --b: #e2a052; --both: #6cc293; --phase: #34443a; --today: #ff7a66;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+}
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 64px; display: grid; gap: 40px; }
+@media (max-width: 600px) { .wrap { padding-inline: 16px; padding-block: 24px 48px; gap: 32px; } }
+
+header { display: grid; gap: 14px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(28px, 4.4vw, 44px); line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 22px; margin: 0 0 14px; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 68ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 13px; color: var(--muted); }
+.meta b { color: var(--fg); font-weight: 600; }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
+.sw.a { background: var(--a); } .sw.b { background: var(--b); } .sw.both { background: var(--both); }
+.sw.ms { width: 10px; height: 10px; border-radius: 1px; transform: rotate(45deg); background: var(--fg); }
+.sw.today { width: 2px; height: 14px; border-radius: 0; background: var(--today); }
+.filters { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.filters button {
+  font: 500 13px var(--font-body); color: var(--muted); background: transparent;
+  border: 0; padding: 7px 13px; cursor: pointer; border-right: 1px solid var(--line);
+}
+.filters button:last-child { border-right: 0; }
+.filters button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+.filters button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* Gantt */
+.gantt-box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+.gantt { --label: 320px; min-width: 1040px; position: relative; font-size: 13px; }
+@media (max-width: 600px) { .gantt { --label: 210px; min-width: 900px; } }
+.row { display: grid; grid-template-columns: var(--label) 1fr; min-height: 34px; border-bottom: 1px solid var(--grid); }
+.row:last-child { border-bottom: 0; }
+.lab {
+  position: sticky; left: 0; z-index: 2; background: var(--surface);
+  padding: 7px 12px 7px 14px; border-right: 1px solid var(--line);
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 10px; min-width: 0;
+}
+.lab .t { min-width: 0; }
+.lab .d { font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tag { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; padding: 1px 6px; border-radius: 4px; margin-right: 6px; color: var(--surface); vertical-align: 1px; }
+.tag.a { background: var(--a); } .tag.b { background: var(--b); } .tag.both { background: var(--both); }
+.tag.ms { background: var(--fg); }
+.track { position: relative; }
+.bar { position: absolute; top: 50%; height: 14px; transform: translateY(-50%); border-radius: 4px; }
+.bar.a { background: var(--a); } .bar.b { background: var(--b); } .bar.both { background: var(--both); }
+.diamond { position: absolute; top: 50%; width: 12px; height: 12px; background: var(--fg); transform: translate(-50%, -50%) rotate(45deg); border-radius: 2px; }
+
+.row.phase { background: var(--bg); min-height: 40px; }
+.row.phase .lab { background: var(--bg); font-weight: 600; }
+.row.phase .lab .t { font-family: var(--font-display); font-size: 15px; }
+.row.phase .bar { background: var(--phase); height: 22px; border-radius: 5px; }
+
+.row.head { position: sticky; top: 0; z-index: 3; background: var(--surface); min-height: 48px; border-bottom: 1px solid var(--line); }
+.row.head .lab { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.months, .weeks { position: absolute; left: 0; right: 0; }
+.months { top: 6px; height: 18px; }
+.weeks { bottom: 4px; height: 16px; }
+.mlab { position: absolute; font-weight: 600; font-size: 12px; padding-left: 6px; border-left: 1px solid var(--line); height: 18px; line-height: 18px; white-space: nowrap; }
+.wlab { position: absolute; font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); transform: translateX(-50%); font-variant-numeric: tabular-nums; }
+
+.overlay { position: absolute; top: 0; bottom: 0; right: 0; pointer-events: none; z-index: 1; }
+.vline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--grid); }
+.vline.month { background: var(--line); }
+.today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--today); }
+.today span { position: absolute; top: 50px; left: 5px; font: 500 11px var(--font-mono); color: var(--today); white-space: nowrap; background: var(--surface); padding: 0 3px; border-radius: 3px; }
+
+.row.hidden { display: none; }
+
+/* Alt bölümler */
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
+.cols > * { min-width: 0; }
+table.kv { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.kv th, table.kv td { text-align: left; vertical-align: top; padding: 9px 0; border-bottom: 1px solid var(--line); }
+table.kv th { width: 34%; font-weight: 600; padding-right: 14px; }
+table.kv td { color: var(--muted); }
+table.kv td b { color: var(--fg); font-weight: 600; }
+ol.out { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+ol.out li { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+ol.out .when { font-family: var(--font-mono); font-size: 12px; color: var(--accent); padding-top: 2px; font-variant-numeric: tabular-nums; }
+ol.out b { display: block; font-weight: 600; }
+ol.out span { color: var(--muted); }
+.note { font-size: 13px; color: var(--muted); border-left: 2px solid var(--accent); padding: 4px 0 4px 12px; max-width: 75ch; margin: 0; }
+@media (prefers-reduced-motion: no-preference) { .bar, .diamond { transition: opacity .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">COMP 491 · Bitirme Projesi · 2026–2027 Güz</div>
+    <h1>GreenChoice Proje Takvimi</h1>
+    <p class="lede">Yapay zekâ tabanlı sürdürülebilir ürün seçim sistemi için aşama aşama iş planı. Her aşamada iki kişi paralel çalışıyor. Ortak işler ve aşama sonu kontrol noktaları ayrıca gösteriliyor.</p>
+    <div class="meta">
+      <span><b>Ekip:</b> Atahan Bulut · Ali Rubar Kal</span>
+      <span><b>Danışman:</b> Tuna Çakar</span>
+      <span><b>Süre:</b> 15.10.2026 – 25.01.2027</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="controls" style="margin-bottom:14px">
+      <div class="legend">
+        <span><i class="sw a"></i>Kişi A · yorumlar, NLP, ML, XAI</span>
+        <span><i class="sw b"></i>Kişi B · veri, skorlama, web</span>
+        <span><i class="sw both"></i>Ortak</span>
+        <span><i class="sw ms"></i>Kontrol noktası</span>
+        <span><i class="sw today"></i>Bugün</span>
+      </div>
+      <div class="filters" role="group" aria-label="Görevleri filtrele">
+        <button id="f-all" data-f="all" aria-pressed="true">Hepsi</button>
+        <button id="f-a" data-f="a" aria-pressed="false">Kişi A</button>
+        <button id="f-b" data-f="b" aria-pressed="false">Kişi B</button>
+        <button id="f-both" data-f="both" aria-pressed="false">Ortak</button>
+      </div>
+    </div>
+    <div class="gantt-box"><div class="gantt" id="gantt"></div></div>
+  </section>
+
+  <section class="cols">
+    <div>
+      <h2>Aşama 0 kararları</h2>
+      <table class="kv">
+        <tr><th>Kategori</th><td><b>Buzdolabı + çamaşır makinesi.</b> İkisinde de enerji önemli, yorum çok, EPREL verisi var. Kriter ağırlıkları farklı olduğu için kategoriye özel ağırlık doğal olarak gösterilir.</td></tr>
+        <tr><th>Veri kaynağı</th><td><b>Trendyol / Hepsiburada + EPREL.</b> Fiyat, özellik ve yorumlar siteden; kWh, enerji sınıfı, su ve gürültü EPREL'den, model koduyla eşleştirilir. Yedek: Amazon Reviews 2023.</td></tr>
+        <tr><th>Dil</th><td><b>Türkçe</b>, BERTurk (dbmdz/bert-base-turkish-cased).</td></tr>
+        <tr><th>Kriterler</th><td>Enerji verimliliği · Uzun vadeli maliyet (TCO) · Dayanıklılık · Servis/arıza · Fiyat avantajı · Genel memnuniyet</td></tr>
+        <tr><th>TCO</th><td><b>fiyat + yıllık kWh × ₺/kWh × ömür (yıl)</b></td></tr>
+        <tr><th>Ground truth</th><td>~150–200 ürün iki kişi tarafından bağımsız etiketlenir: Önerilir / Nötr / Önerilmez. Uyum Cohen's kappa ile ölçülür. Danışmanla teyit edilecek.</td></tr>
+        <tr><th>Teknoloji</th><td>Python, pandas, scikit-learn, XGBoost, Transformers, SHAP, SQLite, FastAPI, React (Vite), Label Studio</td></tr>
+      </table>
+    </div>
+    <div>
+      <h2>Aşama çıktıları</h2>
+      <ol class="out">
+        <li><div class="when">10.11.2026</div><div><b>Temiz veri seti</b><span>Veri sözlüğü, EDA notebook'u, ortak özellik tablosu şeması</span></div></li>
+        <li><div class="when">05.12.2026</div><div><b>NLP modülü</b><span>Etiketli yorum seti, kappa, P/R/F1 karşılaştırma tablosu</span></div></li>
+        <li><div class="when">31.12.2026</div><div><b>Skorlama modeli</b><span>Baseline + LR/RF/XGBoost karşılaştırması, 0–100 GreenChoice skoru</span></div></li>
+        <li><div class="when">25.01.2027</div><div><b>Çalışan prototip</b><span>Açıklamalı web arayüzü, kullanıcı anketi sonuçları, final rapor ve sunum</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <p class="note">Ocak sınav dönemiyle çakışma riski var. Bu yüzden React iskeleti Aralık'ta mock veriyle başlıyor, rapor bölümleri de her aşama bitince yazılıyor. Son haftaya yalnızca entegrasyon ve cilalama kalıyor.</p>
+</div>
+
+<script>
+(function () {
+  const START = Date.UTC(2026, 9, 12);   // 12 Eki 2026 (Pzt)
+  const END = Date.UTC(2027, 1, 1);      // 1 Şub 2027
+  const DAY = 86400000;
+  const SPAN = (END - START) / DAY;
+  const p = s => { const [d, m, y] = s.split('.').map(Number); return Date.UTC(y, m - 1, d); };
+  const pct = t => ((t - START) / DAY / SPAN * 100);
+
+  const phases = [
+    { name: 'Aşama 0 · Kararlar', s: '22.10.2026', e: '31.10.2026', tasks: [
+      ['a', 'Yorum yapısı ve scraping yöntemi testi', '22.10.2026', '28.10.2026'],
+      ['a', 'Türkçe NLP / aspect-based sentiment ön araştırma', '24.10.2026', '31.10.2026'],
+      ['b', 'GitHub repo, klasör yapısı, ortam', '22.10.2026', '25.10.2026'],
+      ['b', 'EPREL erişim testi, alanların çıkarılması', '22.10.2026', '28.10.2026'],
+      ['both', 'Kategori ve kriterleri kesinleştirme', '27.10.2026', '30.10.2026'],
+      ['ms', 'Danışman toplantısı: ground truth kararı', '31.10.2026'],
+    ]},
+    { name: 'Aşama 1 · Veri toplama ve ön işleme', s: '15.10.2026', e: '10.11.2026', tasks: [
+      ['a', 'Yorum scraper (yorum + puan)', '27.10.2026', '05.11.2026'],
+      ['a', 'Yorum temizleme: normalizasyon, tekrar, spam', '01.11.2026', '08.11.2026'],
+      ['a', 'Etiketleme kılavuzu taslağı', '01.11.2026', '07.11.2026'],
+      ['b', 'Ürün bilgisi scraper (fiyat, model kodu, özellik)', '27.10.2026', '04.11.2026'],
+      ['b', 'EPREL eşleştirme, birimler, eksik veri', '01.11.2026', '08.11.2026'],
+      ['b', 'TCO hesabı, SQLite şeması, EDA', '04.11.2026', '10.11.2026'],
+      ['both', 'Kılavuz final, Label Studio kurulumu', '07.11.2026', '10.11.2026'],
+      ['ms', 'Özellik tablosu şeması üzerinde anlaşma', '10.11.2026'],
+    ]},
+    { name: 'Aşama 2 · NLP ve özellik çıkarımı', s: '10.11.2026', e: '05.12.2026', tasks: [
+      ['both', 'Yorum etiketleme (~300\'er, 100 ortak) + kappa', '10.11.2026', '20.11.2026'],
+      ['both', 'Literatür taraması (A: NLP, B: MCDM)', '15.11.2026', '05.12.2026'],
+      ['a', 'BERTurk fine-tune ve hiperparametre', '20.11.2026', '02.12.2026'],
+      ['a', 'Hata analizi, yöntem karşılaştırma tablosu', '28.11.2026', '05.12.2026'],
+      ['b', 'Değerlendirme script\'i (P/R/F1, confusion)', '12.11.2026', '18.11.2026'],
+      ['b', 'Kural tabanlı + TF-IDF/LR-SVM baseline', '12.11.2026', '24.11.2026'],
+      ['b', 'Yorumları ürün düzeyinde toplulaştırma', '24.11.2026', '05.12.2026'],
+      ['ms', 'NLP modülü teslim', '05.12.2026'],
+    ]},
+    { name: 'Aşama 3 · Skorlama modeli', s: '05.12.2026', e: '31.12.2026', tasks: [
+      ['both', '~150–200 ürünü bağımsız etiketleme + kappa', '05.12.2026', '12.12.2026'],
+      ['a', 'LR, Random Forest, XGBoost + cross-validation', '10.12.2026', '24.12.2026'],
+      ['a', 'Baseline karşılaştırma, SHAP hazırlığı', '22.12.2026', '31.12.2026'],
+      ['b', 'Ağırlıklı baseline skor, kategori ağırlıkları', '05.12.2026', '16.12.2026'],
+      ['b', '0–100 normalizasyon ve kriter alt skorları', '14.12.2026', '20.12.2026'],
+      ['b', 'FastAPI iskeleti (/products, /compare)', '18.12.2026', '31.12.2026'],
+      ['b', 'React iskeleti (mock veri)', '20.12.2026', '31.12.2026'],
+      ['ms', 'Skorlama modeli teslim', '31.12.2026'],
+    ]},
+    { name: 'Aşama 4 · XAI ve web arayüzü', s: '01.01.2027', e: '25.01.2027', tasks: [
+      ['a', 'SHAP → Türkçe açıklama şablonları', '01.01.2027', '10.01.2027'],
+      ['a', 'Kullanıcı anketi tasarımı', '05.01.2027', '10.01.2027'],
+      ['a', '/explain endpoint ve entegrasyon', '08.01.2027', '15.01.2027'],
+      ['a', 'Anket sonuç analizi', '18.01.2027', '22.01.2027'],
+      ['b', 'Ürün listesi, filtreler, detay sayfası', '01.01.2027', '10.01.2027'],
+      ['b', 'Karşılaştırma, ağırlık slider\'ı, skor grafiği', '08.01.2027', '17.01.2027'],
+      ['b', 'Deploy ve demo hazırlığı', '15.01.2027', '22.01.2027'],
+      ['both', 'Kullanıcı testi (kişi başı 7–8 katılımcı)', '14.01.2027', '19.01.2027'],
+      ['both', 'Final rapor (A: NLP/ML/XAI, B: veri/sistem/UI)', '05.01.2027', '25.01.2027'],
+      ['both', 'Sunum ve demo videosu', '20.01.2027', '25.01.2027'],
+      ['ms', 'Proje teslimi', '25.01.2027'],
+    ]},
+  ];
+
+  const tagText = { a: 'A', b: 'B', both: 'Ortak', ms: '◆' };
+  const short = s => s.slice(0, 5);
+  const g = document.getElementById('gantt');
+  let html = '';
+
+  // Başlık satırı: aylar ve haftalar
+  const months = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+  const monthNames = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  let mh = '', wh = '', lines = '';
+  let d = new Date(START);
+  // ay başları
+  const mStarts = [];
+  for (let y = 2026, m = 9; ; m++) {
+    if (m > 11) { m = 0; y++; }
+    const t = Date.UTC(y, m, 1);
+    if (t >= END) break;
+    mStarts.push([Math.max(t, START), y, m]);
+  }
+  mStarts.forEach(([t, y, m], i) => {
+    const next = i + 1 < mStarts.length ? mStarts[i + 1][0] : END;
+    mh += `<div class="mlab" style="left:${pct(t)}%;width:${pct(next) - pct(t)}%">${monthNames[m]} ${y}</div>`;
+    if (t > START) lines += `<div class="vline month" style="left:${pct(t)}%"></div>`;
+  });
+  for (let t = START; t < END; t += 7 * DAY) {
+    const dt = new Date(t);
+    if (t > START) lines += `<div class="vline" style="left:${pct(t)}%"></div>`;
+    wh += `<div class="wlab" style="left:${pct(t + 3.5 * DAY)}%">${String(dt.getUTCDate()).padStart(2, '0')}</div>`;
+  }
+  html += `<div class="row head"><div class="lab"><span class="t">Görev</span><span class="d">Tarih</span></div><div class="track"><div class="months">${mh}</div><div class="weeks">${wh}</div></div></div>`;
+
+  phases.forEach(ph => {
+    const s = p(ph.s), e = p(ph.e) + DAY;
+    html += `<div class="row phase"><div class="lab"><span class="t">${ph.name}</span><span class="d">${short(ph.s)}–${short(ph.e)}</span></div><div class="track"><div class="bar" style="left:${pct(s)}%;width:${pct(e) - pct(s)}%" title="${ph.name}"></div></div></div>`;
+    ph.tasks.forEach(([o, name, a, b]) => {
+      const owner = o === 'ms' ? 'ms' : o;
+      let mark, dates;
+      if (o === 'ms') {
+        mark = `<div class="diamond" style="left:${pct(p(a) + DAY / 2)}%" title="${name} · ${a}"></div>`;
+        dates = short(a);
+      } else {
+        const ts = p(a), te = p(b) + DAY;
+        mark = `<div class="bar ${o}" style="left:${pct(ts)}%;width:${pct(te) - pct(ts)}%" title="${name} · ${a} – ${b}"></div>`;
+        dates = `${short(a)}–${short(b)}`;
+      }
+      html += `<div class="row task" data-o="${owner}"><div class="lab"><span class="t"><span class="tag ${o}">${tagText[o]}</span>${name}</span><span class="d">${dates}</span></div><div class="track">${mark}</div></div>`;
+    });
+  });
+
+  // Izgara çizgileri ve bugün çizgisi (etiket sütununun sağında)
+  const now = new Date();
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  let todayEl = '';
+  if (today >= START && today < END) {
+    todayEl = `<div class="today" style="left:${pct(today + DAY / 2)}%"><span>Bugün ${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}</span></div>`;
+  }
+  html += `<div class="overlay" style="left:var(--label)">${lines}${todayEl}</div>`;
+  g.innerHTML = html;
+
+  // Filtre
+  const btns = document.querySelectorAll('.filters button');
+  btns.forEach(btn => btn.addEventListener('click', () => {
+    const f = btn.dataset.f;
+    btns.forEach(x => x.setAttribute('aria-pressed', String(x === btn)));
+    g.querySelectorAll('.row.task').forEach(r => {
+      const o = r.dataset.o;
+      r.classList.toggle('hidden', !(f === 'all' || o === 'ms' || o === f));
+    });
+  }));
+})();
+</script>

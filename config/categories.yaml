@@ -1,0 +1,45 @@
+# Kategori ve kriter tanımları.
+# Ağırlıklar taslaktır (weighted_v0). Aşama 3'te AHP veya danışmanla belirlenen
+# gerekçeli ağırlıklarla güncellenecek. Her kategoride toplamı 1 olmalı.
+
+defaults:
+  electricity_price_tl_per_kwh: 3.0   # TODO: güncel EPDK konut tarifesiyle doğrula
+  water_price_tl_per_m3: 40.0         # TODO: İstanbul/Ankara su tarifesiyle doğrula
+  rating_prior_count: 10              # Bayes ortalaması için öncül değerlendirme sayısı
+  label_thresholds:
+    recommended: 70                   # skor >= 70  -> Önerilir
+    neutral: 45                       # 45 <= skor < 70 -> Nötr, altı -> Önerilmez
+
+criteria:
+  energy_efficiency: { name: Enerji verimliliği,   source: structured }
+  lifetime_cost:     { name: Uzun vadeli maliyet,  source: structured }
+  durability:        { name: Dayanıklılık,         source: reviews }
+  service:           { name: Servis ve arıza,      source: reviews }
+  price_advantage:   { name: Fiyat avantajı,       source: structured }
+  satisfaction:      { name: Genel memnuniyet,     source: mixed }
+
+categories:
+  refrigerator:
+    name: Buzdolabı
+    lifetime_years: 12
+    eprel_group: refrigeratingappliances2019   # TODO: EPREL'de doğrula
+    weights:
+      energy_efficiency: 0.25
+      lifetime_cost: 0.25
+      durability: 0.20
+      service: 0.10
+      price_advantage: 0.10
+      satisfaction: 0.10
+
+  washing_machine:
+    name: Çamaşır makinesi
+    lifetime_years: 10
+    annual_cycles: 220                          # AB enerji etiketi varsayımı (yılda 220 yıkama)
+    eprel_group: washingmachines2019            # TODO: EPREL'de doğrula
+    weights:
+      energy_efficiency: 0.15
+      lifetime_cost: 0.20
+      durability: 0.25
+      service: 0.20
+      price_advantage: 0.10
+      satisfaction: 0.10
