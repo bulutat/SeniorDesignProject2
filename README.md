@@ -83,5 +83,6 @@ ruff check src tests
 - [API](docs/api.md)
 - [Karar kaydı](docs/decisions.md)
 - [Etiketleme kılavuzu](docs/annotation-guideline.md)
+- [Görev dağılımı](docs/gorev-dagilimi.md)
 - [Proje takvimi (Gantt)](docs/takvim.html)
 - [Çalışma kuralları](CONTRIBUTING.md)

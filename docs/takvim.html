@@ -141,8 +141,8 @@ ol.out span { color: var(--muted); }
   <section>
     <div class="controls" style="margin-bottom:14px">
       <div class="legend">
-        <span><i class="sw a"></i>Kişi A · yorumlar, NLP, ML, XAI</span>
-        <span><i class="sw b"></i>Kişi B · veri, skorlama, web</span>
+        <span><i class="sw a"></i>Kişi A · yorumlar, NLP, açıklanabilirlik</span>
+        <span><i class="sw b"></i>Kişi B · veri, skorlama, ML, web</span>
         <span><i class="sw both"></i>Ortak</span>
         <span><i class="sw ms"></i>Kontrol noktası</span>
         <span><i class="sw today"></i>Bugün</span>
@@ -181,7 +181,12 @@ ol.out span { color: var(--muted); }
     </div>
   </section>
 
-  <p class="note">Ocak sınav dönemiyle çakışma riski var. Bu yüzden React iskeleti Aralık'ta mock veriyle başlıyor, rapor bölümleri de her aşama bitince yazılıyor. Son haftaya yalnızca entegrasyon ve cilalama kalıyor.</p>
+  <section>
+    <h2>İskeletle tamamlananlar (22.10.2026)</h2>
+    <p class="lede">Repo, ortam ve CI · TCO hesabı ve SQLite şeması · temel yorum temizleme · kural tabanlı aspect çıkarımı, ürün düzeyinde toplulaştırma, P/R/F1 script'i · ağırlıklı baseline skor ve alt skorlar · açıklama şablonları · FastAPI (7 endpoint) · React iskeleti. Bu işler takvimden çıkarıldı; yerlerine iyileştirme görevleri geldi. Görevlerin ayrıntısı (ne yapılacak, çıktı, ne zaman bitmiş sayılır) repodaki <b>docs/gorev-dagilimi.md</b> dosyasında.</p>
+  </section>
+
+  <p class="note">Ocak sınav dönemiyle çakışma riski var. Rapor bölümleri her aşama bitince yazılıyor; son haftaya yalnızca entegrasyon ve cilalama kalıyor.</p>
 </div>
 
 <script>
@@ -194,55 +199,59 @@ ol.out span { color: var(--muted); }
   const pct = t => ((t - START) / DAY / SPAN * 100);
 
   const phases = [
-    { name: 'Aşama 0 · Kararlar', s: '22.10.2026', e: '31.10.2026', tasks: [
-      ['a', 'Yorum yapısı ve scraping yöntemi testi', '22.10.2026', '28.10.2026'],
-      ['a', 'Türkçe NLP / aspect-based sentiment ön araştırma', '24.10.2026', '31.10.2026'],
-      ['b', 'GitHub repo, klasör yapısı, ortam', '22.10.2026', '25.10.2026'],
-      ['b', 'EPREL erişim testi, alanların çıkarılması', '22.10.2026', '28.10.2026'],
-      ['both', 'Kategori ve kriterleri kesinleştirme', '27.10.2026', '30.10.2026'],
-      ['ms', 'Danışman toplantısı: ground truth kararı', '31.10.2026'],
+    { name: 'Aşama 0 · Kararlar ve keşif', s: '22.10.2026', e: '31.10.2026', tasks: [
+      ['a', 'A0.1 Yorum kaynağını inceleme', '22.10.2026', '28.10.2026'],
+      ['a', 'A0.2 NLP ön araştırması, BERTurk denemesi', '24.10.2026', '31.10.2026'],
+      ['b', 'B0.1 EPREL erişim testi', '22.10.2026', '28.10.2026'],
+      ['b', 'B0.2 Ürün sayfası incelemesi, eşleşme oranı', '26.10.2026', '30.10.2026'],
+      ['b', 'B0.3 Tarife ve ömür varsayımlarının kaynakları', '26.10.2026', '31.10.2026'],
+      ['both', 'O0.2 Ortamın iki bilgisayarda çalışması', '22.10.2026', '27.10.2026'],
+      ['ms', 'O0.1 Danışman toplantısı · pilot ürün listesi B→A', '31.10.2026'],
     ]},
-    { name: 'Aşama 1 · Veri toplama ve ön işleme', s: '15.10.2026', e: '10.11.2026', tasks: [
-      ['a', 'Yorum scraper (yorum + puan)', '27.10.2026', '05.11.2026'],
-      ['a', 'Yorum temizleme: normalizasyon, tekrar, spam', '01.11.2026', '08.11.2026'],
-      ['a', 'Etiketleme kılavuzu taslağı', '01.11.2026', '07.11.2026'],
-      ['b', 'Ürün bilgisi scraper (fiyat, model kodu, özellik)', '27.10.2026', '04.11.2026'],
-      ['b', 'EPREL eşleştirme, birimler, eksik veri', '01.11.2026', '08.11.2026'],
-      ['b', 'TCO hesabı, SQLite şeması, EDA', '04.11.2026', '10.11.2026'],
-      ['both', 'Kılavuz final, Label Studio kurulumu', '07.11.2026', '10.11.2026'],
-      ['ms', 'Özellik tablosu şeması üzerinde anlaşma', '10.11.2026'],
+    { name: 'Aşama 1 · Veri toplama ve ön işleme', s: '27.10.2026', e: '10.11.2026', tasks: [
+      ['a', 'A1.1 Yorum scraper\'ı', '27.10.2026', '05.11.2026'],
+      ['a', 'A1.2 Yorum temizlemenin genişletilmesi', '03.11.2026', '08.11.2026'],
+      ['a', 'A1.3 Etiketleme kılavuzunun kesinleşmesi', '01.11.2026', '07.11.2026'],
+      ['b', 'B1.1 Ürün scraper\'ı', '27.10.2026', '04.11.2026'],
+      ['b', 'B1.2 EPREL eşleştirmesi', '01.11.2026', '08.11.2026'],
+      ['b', 'B1.3 Gerçek veriyle uçtan uca çalışma', '06.11.2026', '10.11.2026'],
+      ['b', 'B1.4 Keşifsel veri analizi (EDA)', '04.11.2026', '10.11.2026'],
+      ['both', 'O1.1 Etiketleme altyapısı ve havuzu', '07.11.2026', '10.11.2026'],
+      ['ms', 'Tam ürün listesi B→A', '05.11.2026'],
+      ['ms', 'Veri sözleşmesi v1, gerçek veri hazır', '10.11.2026'],
     ]},
     { name: 'Aşama 2 · NLP ve özellik çıkarımı', s: '10.11.2026', e: '05.12.2026', tasks: [
-      ['both', 'Yorum etiketleme (~300\'er, 100 ortak) + kappa', '10.11.2026', '20.11.2026'],
-      ['both', 'Literatür taraması (A: NLP, B: MCDM)', '15.11.2026', '05.12.2026'],
-      ['a', 'BERTurk fine-tune ve hiperparametre', '20.11.2026', '02.12.2026'],
-      ['a', 'Hata analizi, yöntem karşılaştırma tablosu', '28.11.2026', '05.12.2026'],
-      ['b', 'Değerlendirme script\'i (P/R/F1, confusion)', '12.11.2026', '18.11.2026'],
-      ['b', 'Kural tabanlı + TF-IDF/LR-SVM baseline', '12.11.2026', '24.11.2026'],
-      ['b', 'Yorumları ürün düzeyinde toplulaştırma', '24.11.2026', '05.12.2026'],
-      ['ms', 'NLP modülü teslim', '05.12.2026'],
+      ['both', 'O2.1 Yorum etiketleme (~300\'er, 100 ortak) + kappa', '10.11.2026', '20.11.2026'],
+      ['both', 'O2.2 Literatür taraması', '15.11.2026', '05.12.2026'],
+      ['a', 'A2.1 BERTurk fine-tune', '18.11.2026', '02.12.2026'],
+      ['a', 'A2.2 Hata analizi, yöntem karşılaştırması', '28.11.2026', '05.12.2026'],
+      ['b', 'B2.1 TF-IDF + LR/SVM baseline', '12.11.2026', '24.11.2026'],
+      ['b', 'B2.2 Kural sözlüğünün genişletilmesi', '18.11.2026', '26.11.2026'],
+      ['b', 'B2.3 Kapasite normalizasyonu, az veri işareti', '24.11.2026', '05.12.2026'],
+      ['ms', 'Test bölünmesi A→B', '12.11.2026'],
+      ['ms', 'BERTurk çıktısı A→B', '05.12.2026'],
     ]},
     { name: 'Aşama 3 · Skorlama modeli', s: '05.12.2026', e: '31.12.2026', tasks: [
-      ['both', '~150–200 ürünü bağımsız etiketleme + kappa', '05.12.2026', '12.12.2026'],
-      ['a', 'LR, Random Forest, XGBoost + cross-validation', '10.12.2026', '24.12.2026'],
-      ['a', 'Baseline karşılaştırma, SHAP hazırlığı', '22.12.2026', '31.12.2026'],
-      ['b', 'Ağırlıklı baseline skor, kategori ağırlıkları', '05.12.2026', '16.12.2026'],
-      ['b', '0–100 normalizasyon ve kriter alt skorları', '14.12.2026', '20.12.2026'],
-      ['b', 'FastAPI iskeleti (/products, /compare)', '18.12.2026', '31.12.2026'],
-      ['b', 'React iskeleti (mock veri)', '20.12.2026', '31.12.2026'],
+      ['both', 'O3.1 Ürün etiketleme (ground truth) + kappa', '05.12.2026', '12.12.2026'],
+      ['b', 'B3.1 AHP ile kriter ağırlıkları', '05.12.2026', '14.12.2026'],
+      ['b', 'B3.2 LR / RF / XGBoost karşılaştırması', '12.12.2026', '24.12.2026'],
+      ['b', 'B3.3 Duyarlılık analizi', '20.12.2026', '31.12.2026'],
+      ['b', 'B3.4 Arayüzün gerçek veriye geçişi', '18.12.2026', '31.12.2026'],
+      ['a', 'A3.1 SHAP ile açıklamalar', '15.12.2026', '31.12.2026'],
+      ['a', 'A3.2 Açıklamalara yorum kanıtı eklemek', '20.12.2026', '31.12.2026'],
+      ['ms', 'Eğitilmiş ML modeli B→A', '20.12.2026'],
       ['ms', 'Skorlama modeli teslim', '31.12.2026'],
     ]},
-    { name: 'Aşama 4 · XAI ve web arayüzü', s: '01.01.2027', e: '25.01.2027', tasks: [
-      ['a', 'SHAP → Türkçe açıklama şablonları', '01.01.2027', '10.01.2027'],
-      ['a', 'Kullanıcı anketi tasarımı', '05.01.2027', '10.01.2027'],
-      ['a', '/explain endpoint ve entegrasyon', '08.01.2027', '15.01.2027'],
-      ['a', 'Anket sonuç analizi', '18.01.2027', '22.01.2027'],
-      ['b', 'Ürün listesi, filtreler, detay sayfası', '01.01.2027', '10.01.2027'],
-      ['b', 'Karşılaştırma, ağırlık slider\'ı, skor grafiği', '08.01.2027', '17.01.2027'],
-      ['b', 'Deploy ve demo hazırlığı', '15.01.2027', '22.01.2027'],
-      ['both', 'Kullanıcı testi (kişi başı 7–8 katılımcı)', '14.01.2027', '19.01.2027'],
-      ['both', 'Final rapor (A: NLP/ML/XAI, B: veri/sistem/UI)', '05.01.2027', '25.01.2027'],
-      ['both', 'Sunum ve demo videosu', '20.01.2027', '25.01.2027'],
+    { name: 'Aşama 4 · Açıklanabilirlik, arayüz, teslim', s: '01.01.2027', e: '25.01.2027', tasks: [
+      ['a', 'A4.1 Kullanıcı çalışması tasarımı', '01.01.2027', '10.01.2027'],
+      ['a', 'A4.2 Açıklamaların API\'ye bağlanması', '05.01.2027', '12.01.2027'],
+      ['a', 'A4.3 Kullanıcı çalışması analizi', '18.01.2027', '22.01.2027'],
+      ['b', 'B4.1 Arayüzün son hali', '01.01.2027', '15.01.2027'],
+      ['b', 'B4.2 Deploy ve demo', '13.01.2027', '20.01.2027'],
+      ['both', 'O4.1 Kullanıcı testi (kişi başı 7–8 katılımcı)', '14.01.2027', '19.01.2027'],
+      ['both', 'O4.2 Final rapor', '05.01.2027', '25.01.2027'],
+      ['both', 'O4.3 Sunum ve demo videosu', '20.01.2027', '25.01.2027'],
+      ['ms', 'Açıklama formatı A→B', '10.01.2027'],
       ['ms', 'Proje teslimi', '25.01.2027'],
     ]},
   ];

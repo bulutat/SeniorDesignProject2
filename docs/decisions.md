@@ -13,6 +13,7 @@
 | 6 | 22.10.2026 | Mimari: offline batch pipeline + SQLite + FastAPI + React | Prototip kapsamı; API basit ve hızlı kalır | Kabul |
 | 7 | 22.10.2026 | Baseline: kategoriye özel ağırlıklı toplam (weighted_v0), ML modelleri bununla karşılaştırılır | Hoca metninde açıkça isteniyor | Kabul |
 | 8 | 22.10.2026 | Eksik kriter verisi kategori medyanıyla doldurulur, açıklamada kullanılmaz | Eksik veri yüzünden yanlış açıklama üretmemek | Kabul |
+| 9 | 22.10.2026 | Görev dağılımı rev. 2: ML model karşılaştırması A'dan B'ye geçti; A NLP ve açıklanabilirliğe odaklanır | İskelet B'nin görevlerinin çoğunu bitirdi, yük dengelendi. Ayrıntı: `gorev-dagilimi.md` | Kabul, isimler atanacak |
 
 ## Açık sorular
 

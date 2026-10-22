@@ -43,12 +43,14 @@ flowchart LR
 |---|---|---|---|
 | Veri toplama | `src/greenchoice/collect/` | site / EPREL → `data/raw/`, `data/interim/*.csv` | A (yorumlar), B (ürün, EPREL) |
 | Ön işleme | `src/greenchoice/preprocess/` | ham CSV → temiz `products`, `reviews`, TCO | A (yorum), B (ürün, eşleştirme, TCO) |
-| NLP | `src/greenchoice/nlp/` | `reviews.text_clean` → `review_aspects` | A (BERTurk), B (baseline, değerlendirme, toplulaştırma) |
+| NLP | `src/greenchoice/nlp/` | `reviews.text_clean` → `review_aspects` | A (BERTurk), B (kural tabanlı, TF-IDF) |
 | Kriterler | `src/greenchoice/scoring/criteria.py` | `products` + yorum özellikleri → `c_<kriter>` (0-1) | B |
-| Skorlama | `src/greenchoice/scoring/` | `c_<kriter>` → skor, etiket, katkılar | B (weighted), A (ML) |
-| Açıklama | `src/greenchoice/explain/` | katkılar → açıklama cümleleri | A |
+| Skorlama | `src/greenchoice/scoring/` | `c_<kriter>` → skor, etiket, katkılar | B (weighted, AHP, ML) |
+| Açıklama | `src/greenchoice/explain/` | katkılar → açıklama cümleleri (SHAP dahil) | A |
 | Değerlendirme | `src/greenchoice/evaluation.py`, `nlp/evaluate.py` | tahmin + manuel etiket → P/R/F1, kappa, Spearman | Ortak |
 | API | `src/greenchoice/api/` | SQLite → JSON | B (A: `/explain`) |
+
+Ayrıntılı görev listesi ve teslim noktaları: [gorev-dagilimi.md](gorev-dagilimi.md)
 | Arayüz | `frontend/` | JSON → ekran | B |
 
 ## Genişletme noktaları
