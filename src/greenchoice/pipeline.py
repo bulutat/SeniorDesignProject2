@@ -5,6 +5,7 @@ Kullanım:
     greenchoice build --source interim     # data/interim/products.csv + reviews.csv
     greenchoice build --source <klasör> --eprel data/raw/eprel.csv --db <yol>
     greenchoice eval-nlp --gold data/annotations/reviews_gold.csv
+    greenchoice check-pilot --products data/raw/pilot_products.csv --eprel data/raw/eprel_manual.csv
 """
 
 from __future__ import annotations
@@ -16,6 +17,8 @@ from pathlib import Path
 import pandas as pd
 
 from greenchoice import db
+from greenchoice.collect.eprel_manual import load_manual_eprel
+from greenchoice.collect.pilot import load_pilot_list, pilot_report
 from greenchoice.config import INTERIM_DIR, SAMPLE_DIR, db_path
 from greenchoice.contracts import PRODUCT_COLUMNS, REVIEW_COLUMNS, conform
 from greenchoice.nlp.aggregate import product_review_features
@@ -38,7 +41,7 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None) -> dict
 
     products = clean_products(products)
     if eprel_csv:
-        products = merge_eprel(products, pd.read_csv(eprel_csv))
+        products = merge_eprel(products, load_manual_eprel(eprel_csv))
     products = add_tco(products)
     reviews = clean_reviews(reviews)
     reviews = reviews[reviews["product_id"].isin(products["product_id"])]
@@ -74,6 +77,7 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None) -> dict
     return {
         "db": str(out_db),
         "products": len(products),
+        "eprel_matched": int(products["eprel_matched"].sum()) if "eprel_matched" in products else 0,
         "reviews": len(reviews),
         "aspect_mentions": len(review_aspects),
         "nlp_method": extractor.method,
@@ -97,6 +101,15 @@ def eval_nlp(gold_csv: Path) -> pd.DataFrame:
     return evaluate_aspects(gold.dropna(subset=["aspect"]), pred, texts["review_id"].tolist())
 
 
+def check_pilot(products_csv: Path, eprel_csv: Path | None = None, out: Path | None = None) -> dict:
+    products = load_pilot_list(products_csv)
+    eprel = load_manual_eprel(eprel_csv) if eprel_csv else None
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        products[["product_id", "url", "category"]].to_csv(out, index=False)
+    return pilot_report(products, eprel)
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="greenchoice")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -109,6 +122,12 @@ def main(argv: list[str] | None = None) -> None:
     e = sub.add_parser("eval-nlp", help="NLP baseline'ını altın etiketlerle değerlendir")
     e.add_argument("--gold", type=Path, required=True)
 
+    c = sub.add_parser("check-pilot", help="Pilot ürün listesini doğrula, EPREL kapsamını raporla")
+    c.add_argument("--products", type=Path, required=True, help="Pilot ürün listesi CSV")
+    c.add_argument("--eprel", type=Path, default=None, help="Elle toplanan EPREL CSV (isteğe bağlı)")
+    c.add_argument("--out", type=Path, default=None,
+                   help="Kişi A'ya verilecek product_id, url, category dosyası")
+
     args = parser.parse_args(argv)
     if args.cmd == "build":
         source = SOURCES.get(args.source, Path(args.source))
@@ -116,6 +135,9 @@ def main(argv: list[str] | None = None) -> None:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     elif args.cmd == "eval-nlp":
         print(eval_nlp(args.gold).to_string(index=False, float_format="%.3f"))
+    elif args.cmd == "check-pilot":
+        print(json.dumps(check_pilot(args.products, args.eprel, args.out),
+                         ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
