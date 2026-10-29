@@ -88,6 +88,9 @@ cd frontend && npm run dev                         # UI at http://localhost:5173
 
 With real data: `greenchoice build --source interim --eprel data/raw/eprel_manual.csv`
 
+Check the pilot product list (and its EPREL coverage) before handing it over:
+`greenchoice check-pilot --products data/raw/pilot_products.csv --eprel data/raw/eprel_manual.csv --out data/interim/pilot_products.csv`
+
 The `--eprel` file is the hand-collected EPREL CSV (the EPREL public API needs a key that
 requires a sealed declaration). Template: `data/templates/eprel_manual.csv`; collection
 guide: `docs/eprel-manual-toplama.md` (Turkish). The file is validated row by row: energy
@@ -97,12 +100,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 39 tests
+pytest                    # 49 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-29, Python 3.12.10, Node 26.13.0 - 39 passed, ruff clean. The
+Last verified: 2026-10-29, Python 3.12.10, Node 26.13.0 - 49 passed, ruff clean. The
 frontend build was last run before the EPREL changes, which do not touch `frontend/`.
 
 ## Team workflow
@@ -112,6 +115,15 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-10-29 - Pilot product list (Person B, task B0.2)
+
+- Added `collect/pilot.py`: loader and validator for the hand-built pilot product list
+  (required fields, `ty-123456` style ids, known categories, https URLs, unique ids and
+  URLs) plus a report with products per category and EPREL coverage.
+- New command `greenchoice check-pilot` prints the report and, with `--out`, writes the
+  `product_id, url, category` hand-off file for Person A (10 new tests).
+- Added the CSV template and `docs/pilot-urun-listesi.md` (Turkish guide).
 
 ### 2026-10-29 - Hand-collected EPREL data (Person B)
 
