@@ -1,88 +1,129 @@
 # GreenChoice
 
-Yapay zekâ tabanlı sürdürülebilir ve bilinçli ürün seçim sistemi.
-COMP 491 bitirme projesi · 2026–2027 Güz · Atahan Bulut, Ali Rubar Kal · Danışman: Tuna Çakar
+AI-based decision support for sustainable and informed product choice.
+COMP 491 senior design project, 2026–2027 Fall. Authors: Atahan Bulut, Ali Rubar Kal.
+Advisor: Tuna Çakar.
 
-Ürünleri yalnızca fiyata göre değil; enerji tüketimi, uzun vadeli kullanım maliyeti,
-dayanıklılık ve kullanıcı deneyimine göre değerlendiren, skorunun nedenlerini de açıklayan
-bir karar destek sistemi prototipi.
+GreenChoice scores products by more than price: energy consumption, long-term cost of
+ownership, durability and user experience from reviews. It also explains why a product
+received its score. The current scope is two categories (refrigerators and washing
+machines) and a prototype, not a real-time marketplace system.
 
-> Şu anki durum: **iskelet**. Pipeline, API ve arayüz `data/sample/` altındaki
-> **sentetik** veriyle uçtan uca çalışıyor. Gerçek veri toplama (Aşama 1), BERTurk (Aşama 2),
-> ML modelleri (Aşama 3) ve SHAP (Aşama 4) için yerler hazır, içleri boş.
+> **Status: skeleton.** The pipeline, API and UI run end to end on the **synthetic** data in
+> `data/sample/`. Real data collection, BERTurk, ML models and SHAP are placeholders.
+> Details: [Progress](#progress-and-changelog).
 
-## Klasör yapısı
+## Architecture
+
+Two parts:
+
+1. **Offline pipeline** (`greenchoice build`): collects and cleans data, analyses reviews,
+   computes scores and explanations, and writes everything to one SQLite file.
+2. **Service** (FastAPI + React): only reads that database. The one computation it does is
+   re-scoring with user-chosen weights (a cheap weighted sum).
 
 ```
-config/          kategoriler, kriter ağırlıkları, aspect anahtar ifadeleri (YAML)
+sources (e-commerce, EPREL)
+   -> collect -> preprocess (clean, EPREL match, TCO)
+   -> nlp (aspect extraction) -> nlp.aggregate (per-product review features)
+   -> scoring.criteria (0-1 sub-scores) -> scoring (weighted / ML) -> explain
+   -> SQLite (products, reviews, review_aspects, product_features, scores)
+   -> FastAPI -> React UI
+```
+
+Scoring (`weighted_v0`): six criteria (energy efficiency, lifetime cost, durability,
+service and failures, price advantage, satisfaction), each scaled to 0-1, combined with
+per-category weights from `config/categories.yaml`. Score >= 70 is *recommended*, >= 45
+*neutral*, below that *not recommended*. Missing criteria are filled with the category
+median and are never used in explanations.
+
+More: [docs/architecture.md](docs/architecture.md) (in Turkish).
+
+## Folder structure
+
+```
+config/          categories, criteria weights, aspect key phrases (YAML)
 data/
-  sample/        sentetik örnek veri (repoda)
-  annotations/   manuel etiketler (repoda)
-  raw/ interim/ processed/   toplanan ve üretilen veri (repoya girmez)
-docs/            mimari, veri ve API sözleşmeleri, kararlar, etiketleme kılavuzu, takvim
-frontend/        React + Vite arayüzü
-notebooks/       keşif / deney notebook'ları
+  sample/        synthetic example data (committed)
+  annotations/   manual labels (committed)
+  raw/ interim/ processed/   collected and generated data (not committed)
+docs/            architecture, data and API contracts, decisions, source review, schedule
+frontend/        React + Vite UI
+notebooks/       exploration notebooks
 src/greenchoice/
-  collect/       veri toplama (e-ticaret, EPREL)
-  preprocess/    temizleme, EPREL eşleştirme, TCO
-  nlp/           aspect çıkarımı, toplulaştırma, P/R/F1
-  scoring/       kriter alt skorları, ağırlıklı baseline, ML karşılaştırma
-  explain/       açıklama cümleleri
-  api/           FastAPI
-  pipeline.py    uçtan uca komut satırı
+  collect/       data collection (e-commerce, EPREL) - not implemented yet
+  preprocess/    cleaning, EPREL matching, TCO
+  nlp/           aspect extraction, aggregation, P/R/F1 evaluation
+  scoring/       criteria sub-scores, weighted baseline, ML comparison
+  explain/       explanation sentences
+  api/           FastAPI app
+  pipeline.py    command line entry point (`greenchoice`)
 tests/           pytest
 ```
 
-Ayrıntılı mimari: [docs/architecture.md](docs/architecture.md)
+## Setup
 
-## Kurulum
-
-Gerekenler: Python 3.11+, Node.js 20+, Git.
+Requires Python 3.11+, Node.js 20+ and Git.
 
 ```bash
-# Python ortamı (proje klasöründe)
 python -m venv .venv
-.venv\Scripts\activate          # Windows (PowerShell / cmd)
-# source .venv/bin/activate      # macOS / Linux
+.venv\Scripts\activate            # Windows; on macOS/Linux: source .venv/bin/activate
 pip install -e ".[dev,ml,scrape]"
 
-# Frontend
 cd frontend
 npm install
 ```
 
-BERTurk için (Aşama 2, büyük indirme): `pip install -e ".[nlp]"`
+Optional, large download for BERTurk (stage 2): `pip install -e ".[nlp]"`
 
-## Çalıştırma
-
-```bash
-# 1) Veritabanını üret (örnek veriyle)
-greenchoice build
-
-# 2) API'yi başlat  ->  http://localhost:8000/docs
-uvicorn greenchoice.api.main:app --reload
-
-# 3) Arayüzü başlat (ayrı terminalde)  ->  http://localhost:5173
-cd frontend
-npm run dev
-```
-
-Gerçek veriyle: `greenchoice build --source interim --eprel data/raw/eprel.csv`
-
-## Test
+## Run
 
 ```bash
-pytest
-ruff check src tests
+greenchoice build                                  # build the database from data/sample
+uvicorn greenchoice.api.main:app --reload          # API at http://localhost:8000/docs
+cd frontend && npm run dev                         # UI at http://localhost:5173
 ```
 
-## Dokümanlar
+With real data: `greenchoice build --source interim --eprel data/raw/eprel.csv`
 
-- [Mimari](docs/architecture.md)
-- [Veri sözleşmeleri](docs/data-contracts.md)
-- [API](docs/api.md)
-- [Karar kaydı](docs/decisions.md)
-- [Etiketleme kılavuzu](docs/annotation-guideline.md)
-- [Görev dağılımı](docs/gorev-dagilimi.md)
-- [Proje takvimi (Gantt)](docs/takvim.html)
-- [Çalışma kuralları](CONTRIBUTING.md)
+## Tests
+
+```bash
+pytest                    # 26 tests
+ruff check src tests      # lint
+cd frontend && npm run build
+```
+
+Last verified: 2026-10-29, Python 3.12.10, Node 26.13.0 - 26 passed, ruff clean, frontend
+build succeeded.
+
+## Team workflow
+
+Roles and schedule: [docs/gorev-dagilimi.md](docs/gorev-dagilimi.md) (in Turkish).
+Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, review by the
+other person, then merge to `main`.
+
+## Progress and changelog
+
+### 2026-10-29 - Environment and EPREL access review (Person B)
+
+- Installed Python 3.12, Node.js LTS and Git; created `.venv`; baseline verified (see Tests).
+- Initialised the Git repository with the imported skeleton as the first commit.
+- Reviewed how to access EPREL (task B0.1). Result in `docs/kaynak-inceleme.md`:
+  - The EPREL public API **requires an API key**.
+  - The key requires a declaration sealed with an electronic seal or digital signature.
+  - The official API documentation and JSON field names could not be obtained, so
+    `FIELD_MAP` in `collect/eprel.py` is still unverified and unchanged.
+- Rewrote this README in English.
+
+### 2026-10-22 - Skeleton (imported)
+
+- Repository layout, CI, TCO, SQLite schema, data contracts.
+- Review cleaning, rule-based aspect extraction, per-product aggregation, P/R/F1 script.
+- Weighted baseline scoring and explanation templates.
+- FastAPI with 7 endpoints and a React UI (list, detail, compare, weight sliders).
+
+### Next
+
+- Decide how to obtain the EPREL key (advisor meeting, 2026-10-31).
+- Product listing: pilot list of 10 products per category due 2026-10-31.

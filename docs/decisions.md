@@ -19,5 +19,8 @@
 
 - [ ] Elektrik ve su birim fiyatları hangi tarifeden alınacak? (`config/categories.yaml`)
 - [ ] Ürün ömrü varsayımları (buzdolabı 12, çamaşır makinesi 10 yıl) için kaynak.
-- [ ] EPREL API anahtarı gerekiyor mu, yoksa toplu indirme yeterli mi?
+- [x] EPREL API anahtarı gerekiyor mu, yoksa toplu indirme yeterli mi? **Anahtar gerekiyor**
+  ve elektronik mühür/dijital imzalı beyan istiyor; toplu indirme bulunamadı.
+  Ayrıntı ve seçenekler: `kaynak-inceleme.md`.
+- [ ] EPREL anahtarı için imza/mühür kim sağlayacak? (31.10 danışman toplantısı)
 - [ ] Hangi site? Trendyol, Hepsiburada veya ikisi.
