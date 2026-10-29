@@ -46,12 +46,14 @@ config/          categories, criteria weights, aspect key phrases (YAML)
 data/
   sample/        synthetic example data (committed)
   annotations/   manual labels (committed)
+  templates/     empty CSV templates for hand-collected data (committed)
   raw/ interim/ processed/   collected and generated data (not committed)
 docs/            architecture, data and API contracts, decisions, source review, schedule
 frontend/        React + Vite UI
 notebooks/       exploration notebooks
 src/greenchoice/
-  collect/       data collection (e-commerce, EPREL) - not implemented yet
+  collect/       data collection (e-commerce - not implemented yet; EPREL hand-collected
+                 CSV loader with strict validation in eprel_manual.py)
   preprocess/    cleaning, EPREL matching, TCO
   nlp/           aspect extraction, aggregation, P/R/F1 evaluation
   scoring/       criteria sub-scores, weighted baseline, ML comparison
@@ -84,18 +86,24 @@ uvicorn greenchoice.api.main:app --reload          # API at http://localhost:800
 cd frontend && npm run dev                         # UI at http://localhost:5173
 ```
 
-With real data: `greenchoice build --source interim --eprel data/raw/eprel.csv`
+With real data: `greenchoice build --source interim --eprel data/raw/eprel_manual.csv`
+
+The `--eprel` file is the hand-collected EPREL CSV (the EPREL public API needs a key that
+requires a sealed declaration). Template: `data/templates/eprel_manual.csv`; collection
+guide: `docs/eprel-manual-toplama.md` (Turkish). The file is validated row by row: energy
+class must be A-G, the source URL must be an EPREL page, numbers must parse, and duplicate
+model codes must agree. The build summary reports `eprel_matched`.
 
 ## Tests
 
 ```bash
-pytest                    # 26 tests
+pytest                    # 39 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-29, Python 3.12.10, Node 26.13.0 - 26 passed, ruff clean, frontend
-build succeeded.
+Last verified: 2026-10-29, Python 3.12.10, Node 26.13.0 - 39 passed, ruff clean. The
+frontend build was last run before the EPREL changes, which do not touch `frontend/`.
 
 ## Team workflow
 
@@ -104,6 +112,15 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-10-29 - Hand-collected EPREL data (Person B)
+
+- Decision: collect EPREL values by hand from public product pages instead of waiting for an
+  API key. The terms document has not been read by the team yet; see the guide.
+- Added `collect/eprel_manual.py`: strict loader for the hand-collected CSV (13 new tests).
+- `greenchoice build --eprel` now uses the loader and reports `eprel_matched`.
+- Fixed `merge_eprel` raising `KeyError` when the product table lacks an EPREL column.
+- Added the CSV template and the collection guide.
 
 ### 2026-10-29 - Environment and EPREL access review (Person B)
 
@@ -125,5 +142,6 @@ other person, then merge to `main`.
 
 ### Next
 
-- Decide how to obtain the EPREL key (advisor meeting, 2026-10-31).
-- Product listing: pilot list of 10 products per category due 2026-10-31.
+- Read the EPREL terms document, then collect 5 refrigerator and 5 washing machine models
+  by hand and confirm the washing machine field labels (task B0.1).
+- Product listing: pilot list of 10 products per category due 2026-10-31 (task B0.2).

@@ -29,6 +29,9 @@ def merge_eprel(products: pd.DataFrame, eprel: pd.DataFrame) -> pd.DataFrame:
     e = e.dropna(subset=["_key"]).drop_duplicates(subset=["_key"])
 
     fields = [f for f in EPREL_PRIORITY_FIELDS if f in e.columns]
+    for f in fields:
+        if f not in p.columns:  # keeps the "<field>_eprel" suffix logic below valid
+            p[f] = pd.NA
     merged = p.merge(e[["_key", *fields]], on="_key", how="left", suffixes=("", "_eprel"))
     for f in fields:
         merged[f] = merged[f"{f}_eprel"].combine_first(merged[f])

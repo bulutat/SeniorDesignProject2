@@ -16,6 +16,7 @@ from pathlib import Path
 import pandas as pd
 
 from greenchoice import db
+from greenchoice.collect.eprel_manual import load_manual_eprel
 from greenchoice.config import INTERIM_DIR, SAMPLE_DIR, db_path
 from greenchoice.contracts import PRODUCT_COLUMNS, REVIEW_COLUMNS, conform
 from greenchoice.nlp.aggregate import product_review_features
@@ -38,7 +39,7 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None) -> dict
 
     products = clean_products(products)
     if eprel_csv:
-        products = merge_eprel(products, pd.read_csv(eprel_csv))
+        products = merge_eprel(products, load_manual_eprel(eprel_csv))
     products = add_tco(products)
     reviews = clean_reviews(reviews)
     reviews = reviews[reviews["product_id"].isin(products["product_id"])]
@@ -74,6 +75,7 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None) -> dict
     return {
         "db": str(out_db),
         "products": len(products),
+        "eprel_matched": int(products["eprel_matched"].sum()) if "eprel_matched" in products else 0,
         "reviews": len(reviews),
         "aspect_mentions": len(review_aspects),
         "nlp_method": extractor.method,
