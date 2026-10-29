@@ -33,6 +33,19 @@ ile aynı olmalı (boşluk ve tire farkı sorun olmaz).
 - Çamaşır makinesinde enerji, su ve gürültünün EPREL sayfasında hangi etiketle yazdığını
   `Not` kolonuna aynen yaz.
 
+## Sık hatalar (araç bunları artık yakalıyor)
+
+- **2. satır ipucu satırıdır.** Oraya ürün yazma, veriler 3. satırdan başlar. 2. satıra
+  yazılan veri için `import-sheets` hata verir.
+- **Sayı kolonlarına yalnızca sayı yaz:** `4,6` veya `4.6` olur, `4 nokta 6` olmaz.
+  Birim yazma (`10 kg`, `51 kWh`, `72 db`): kapasite `10`, enerji `51`, gürültü `72`.
+- **Puan 0–5 arasında,** değerlendirme sayısı tam sayı olmalı (`1197`, `1.197` değil).
+- **Ürün no'nun önüne site kısaltmasını ekle:** adresteki `p-1136461902` için `ty-1136461902`
+  yaz (Trendyol için `ty-`). Böylece yorumları toplayan kişiyle aynı kimliği kullanırız.
+- **Ürün adresindeki `?` ve sonrasını sil** (`?boutiqueId=...` takip parametresidir).
+- Sitedeki değerle EPREL'deki farklı çıkarsa (ör. kapasite), EPREL'dekini esas al ve
+  `Not` kolonuna yaz.
+
 ## CSV'ye çevirme ve kontrol
 
 ```bash

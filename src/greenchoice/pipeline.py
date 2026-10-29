@@ -113,7 +113,10 @@ def check_pilot(products_csv: Path, eprel_csv: Path | None = None, out: Path | N
 
 def import_sheets(xlsx: Path, out_dir: Path) -> dict[str, int]:
     """Excel -> CSV, then the same strict loaders the pipeline uses."""
-    paths = export_csvs(xlsx, out_dir)
+    try:
+        paths = export_csvs(xlsx, out_dir)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     try:
         pilot = load_pilot_list(paths["pilot"])
         eprel = load_manual_eprel(paths["eprel"])

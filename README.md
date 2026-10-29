@@ -104,12 +104,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 55 tests
+pytest                    # 67 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 55 passed, ruff clean. The
+Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 67 passed, ruff clean. The
 frontend build was last run before the EPREL changes, which do not touch `frontend/`.
 
 ## Team workflow
@@ -119,6 +119,18 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-10-30 - First real data review and hardening (Person B)
+
+- Reviewed the first 5 hand-collected washing machines against their EPREL pages: all
+  EPREL values (kWh per 100 cycles, water, noise, energy class A) matched. One site value
+  (capacity) was wrong and several cells held text instead of numbers.
+- Found and fixed silent data loss: `import-sheets` skipped a product typed into the hint
+  row (now an error), and the pilot loader turned text such as "4 nokta 6" or "10 kg" into an
+  empty value (now rejected with the row number; decimal commas are accepted; ranges checked).
+- Fixed `clean_reviews` crashing on an empty review table, so the pipeline runs before any
+  review has been collected. Smoke test on 5 real products: 5/5 EPREL matches, scores built.
+- 67 tests (up from 55).
 
 ### 2026-10-30 - Excel workbook for hand-collected data (Person B)
 

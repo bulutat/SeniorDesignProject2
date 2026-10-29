@@ -9,10 +9,11 @@ HEADER = ",".join(PRODUCT_COLUMNS)
 
 
 def row(product_id="ty-1", source="trendyol", url="https://example.com/u/1", category="refrigerator",
-        model_code="KZ-1", name="Test product", price="12.499,90 TL", energy_class="C"):
+        model_code="KZ-1", name="Test product", price="12.499,90 TL", energy_class="C", **extra):
     values = dict.fromkeys(PRODUCT_COLUMNS, "")
     values.update(product_id=product_id, source=source, url=url, category=category,
                   model_code=model_code, name=name, price_tl=price, energy_class=energy_class)
+    values.update(extra)
     return ",".join(f'"{values[c]}"' for c in PRODUCT_COLUMNS)
 
 
@@ -41,6 +42,21 @@ def test_loads_and_cleans_values(tmp_path):
 def test_rejects_bad_rows(tmp_path, bad_row, message):
     with pytest.raises(ValueError, match=message):
         load_pilot_list(write_csv(tmp_path, bad_row))
+
+
+@pytest.mark.parametrize("field,value", [
+    ("capacity", "10.0 kg"), ("rating_avg", "4 nokta 6"), ("rating_count", "107 adet"),
+    ("rating_avg", "6"), ("price_tl", "pahalı"), ("noise_db", "-3"),
+])
+def test_rejects_text_or_out_of_range_numbers_instead_of_dropping_them(tmp_path, field, value):
+    with pytest.raises(ValueError, match=f"row 2.*{field}"):
+        load_pilot_list(write_csv(tmp_path, row(**{field: value})))
+
+
+def test_accepts_decimal_comma_in_numeric_fields(tmp_path):
+    out = load_pilot_list(write_csv(tmp_path, row(rating_avg="4,6", capacity="10")))
+    assert out.loc[0, "rating_avg"] == pytest.approx(4.6)
+    assert out.loc[0, "capacity"] == pytest.approx(10.0)
 
 
 def test_rejects_duplicate_id_and_url(tmp_path):

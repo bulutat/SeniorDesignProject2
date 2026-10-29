@@ -77,6 +77,19 @@ def test_exported_files_pass_the_real_loaders(template, tmp_path):
     assert pd.read_csv(out["eprel"], dtype=str).loc[0, "collected_on"] == "2026-10-30"
 
 
+@pytest.mark.parametrize("sheet", ["Ürünler", "EPREL"])
+def test_data_typed_into_the_hint_row_is_an_error_not_silently_skipped(template, tmp_path, sheet):
+    fill(template, sheet, 2, model_code="KZ-1", product_id="ty-1")
+    with pytest.raises(ValueError, match=f"{sheet}.*row 2"):
+        export_csvs(template, tmp_path / "out")
+
+
+def test_cli_reports_hint_row_problem(template, tmp_path):
+    fill(template, "Ürünler", 2, **product())
+    with pytest.raises(SystemExit, match="row 2"):
+        main(["import-sheets", "--xlsx", str(template), "--out-dir", str(tmp_path / "csv")])
+
+
 def test_unknown_category_is_left_for_the_loader_to_reject(template, tmp_path):
     fill(template, "Ürünler", 3, **product(category="tost makinesi"))
     out = export_csvs(template, tmp_path / "out")

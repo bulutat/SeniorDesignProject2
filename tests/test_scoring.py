@@ -13,6 +13,21 @@ def test_pipeline_summary(sample_db):
     assert summary["aspect_mentions"] > 0
 
 
+def test_pipeline_runs_before_any_review_is_collected(tmp_path):
+    """Products and EPREL data exist before the review scraper has delivered anything."""
+    import shutil
+
+    from greenchoice.config import SAMPLE_DIR
+    from greenchoice.pipeline import build
+
+    shutil.copy(SAMPLE_DIR / "products.csv", tmp_path / "products.csv")
+    (tmp_path / "reviews.csv").write_text("review_id,product_id,rating,text,date\n", encoding="utf-8")
+    summary = build(tmp_path, tmp_path / "no_reviews.db")
+    assert summary["products"] == 12 and summary["reviews"] == 0
+    scores = db.read_table("scores", tmp_path / "no_reviews.db")
+    assert len(scores) == 12 and scores["score"].between(0, 100).all()
+
+
 def test_scores_are_in_range_and_explained(sample_db):
     path, _ = sample_db
     scores = db.read_table("scores", path)
