@@ -88,6 +88,10 @@ cd frontend && npm run dev                         # UI at http://localhost:5173
 
 With real data: `greenchoice build --source interim --eprel data/raw/eprel_manual.csv`
 
+Hand-collected data is entered in `data/raw/veri_toplama.xlsx` (template:
+`data/templates/veri_toplama.xlsx`, guide: `docs/veri-toplama-excel.md`), then converted:
+`greenchoice import-sheets --xlsx data/raw/veri_toplama.xlsx --out-dir data/raw`
+
 Check the pilot product list (and its EPREL coverage) before handing it over:
 `greenchoice check-pilot --products data/raw/pilot_products.csv --eprel data/raw/eprel_manual.csv --out data/interim/pilot_products.csv`
 
@@ -100,12 +104,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 49 tests
+pytest                    # 55 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-29, Python 3.12.10, Node 26.13.0 - 49 passed, ruff clean. The
+Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 55 passed, ruff clean. The
 frontend build was last run before the EPREL changes, which do not touch `frontend/`.
 
 ## Team workflow
@@ -115,6 +119,17 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-10-30 - Excel workbook for hand-collected data (Person B)
+
+- Hand-filling the two CSV files was hard to read (and Turkish-locale Excel opens
+  comma-separated CSV as a single column), so data entry now happens in one workbook.
+- `collect/sheets.py` and `collect/sheets_layout.py`: generate `veri_toplama.xlsx` (Turkish
+  headers, hints, dropdowns, frozen header rows) and export its two sheets to the CSVs the
+  existing loaders expect. The loaders are unchanged and still validate everything.
+- New commands: `greenchoice make-sheets` and `greenchoice import-sheets` (the latter also
+  runs the loaders and points to the Excel row of any error). 6 new tests, 55 in total.
+- `openpyxl` added to the `dev` and new `sheets` extras. Guide: `docs/veri-toplama-excel.md`.
 
 ### 2026-10-29 - Pilot product list (Person B, task B0.2)
 
