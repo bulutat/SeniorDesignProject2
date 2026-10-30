@@ -47,7 +47,8 @@ data/
   sample/        synthetic example data (committed)
   annotations/   manual labels (committed)
   templates/     empty CSV templates for hand-collected data (committed)
-  raw/ interim/ processed/   collected and generated data (not committed)
+  raw/ interim/ processed/   collected and generated data (not committed, except the
+                             hand-off list data/interim/pilot_products.csv)
 docs/            architecture, data and API contracts, decisions, source review, schedule
 frontend/        React + Vite UI
 notebooks/       exploration notebooks
@@ -121,6 +122,12 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-10-30 - Pilot product list in the repository (Person B)
+
+- `data/interim/pilot_products.csv` (26 products: id, public shop URL, category) is now
+  committed through a `.gitignore` exception so Person A gets it with the branch. Everything
+  else under `data/interim/` stays untracked.
 
 ### 2026-10-30 - Review of the filled workbook (Person B)
 

@@ -51,7 +51,9 @@ Person B (data, scoring, web: product and EPREL data, scoring, API, UI). Roles a
   force-push shared branches.
 - **Data is not committed.** `data/raw/`, `data/interim/`, `data/processed/`, `models/`,
   `*.db` and `.env` stay out of Git. Committed data: `data/sample/` (synthetic, must never
-  appear in results), `data/annotations/` (manual labels), `data/templates/`.
+  appear in results), `data/annotations/` (manual labels), `data/templates/`, and one
+  exception, `data/interim/pilot_products.csv` (product ids, public shop URLs and categories
+  only; it is the hand-off list for the review scraper).
 - **Contracts.** Table columns (`src/greenchoice/contracts.py`, `docs/data-contracts.md`),
   the API (`schemas.py`, `frontend/src/types.ts`, `docs/api.md`) are shared. Adding a column is
   fine; removing or renaming one needs both people's approval and a doc update.

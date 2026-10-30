@@ -33,7 +33,7 @@ SHAP, kullanıcı çalışması, etiketlenmiş veri (`reviews_gold.csv` ve `prod
 
 ## 2. Sana verilen girdi
 
-**`data/interim/pilot_products.csv`** (Kişi B elden verir, Git'e girmez). Kolonlar:
+**`data/interim/pilot_products.csv`** (repoda, `.gitignore` istisnası; dalı çekince gelir). Kolonlar:
 `product_id, url, category`.
 
 - 26 ürün. Önek `ty-` Trendyol, `hb-` Hepsiburada. `category`: `refrigerator` veya
@@ -88,7 +88,8 @@ SHAP, kullanıcı çalışması, etiketlenmiş veri (`reviews_gold.csv` ve `prod
 ## 5. Dikkat edilecekler
 
 - `main`'e doğrudan commit yok: dal → PR → diğer kişinin onayı.
-- `data/raw`, `data/interim`, `data/processed`, `models/` Git'e girmez, dosyayı elden paylaşın.
+- `data/raw`, `data/interim`, `data/processed`, `models/` Git'e girmez; tek istisna
+  `data/interim/pilot_products.csv`. Topladığın yorumları Git'e koyma, elden paylaşın.
 - Sözleşme kolonlarını (`contracts.py`) silmek/yeniden adlandırmak iki kişinin onayını ister.
 - `greenchoice build --source interim` yorum dosyası boş olsa da çalışır; yorumsuz ürünlerin
   yorum tabanlı kriterleri medyanla doldurulur ve açıklamada kullanılmaz.
