@@ -104,12 +104,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 74 tests
+pytest                    # 78 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 74 passed, ruff clean. The
+Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 78 passed, ruff clean. The
 frontend build was last run before the EPREL changes, which do not touch `frontend/`.
 
 ## Team workflow
@@ -121,6 +121,16 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-10-30 - Review of the filled workbook (Person B)
+
+- Checked all 12 refrigerator rows against their Hepsiburada pages (price, rating, review
+  count) and the washing machines already checked before. Most values matched exactly.
+- Found input errors the loader did not catch and fixed the loader: a price typed as `42.218`
+  (thousands separator read as a decimal, i.e. 42 TL) is now rejected (price must be at least
+  1000 TL), a rating of 0 for "no reviews yet" is rejected (ratings are 1-5, leave empty), and
+  `check-pilot` prints the row error instead of a traceback.
+- 78 tests (up from 74).
 
 ### 2026-10-30 - Excel shows #### (Person B)
 

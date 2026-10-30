@@ -42,15 +42,21 @@ def _check_row(record: dict, row_no: int, categories: set[str]) -> None:
 NUMERIC_LIMITS = {
     "energy_kwh_per_year": (0, None), "energy_kwh_per_100_cycles": (0, None),
     "water_l_per_cycle": (0, None), "capacity": (0, None), "noise_db": (0, 200),
-    "warranty_years": (0, 30), "rating_avg": (0, 5), "rating_count": (0, None),
+    "warranty_years": (0, 30), "rating_avg": (1, 5), "rating_count": (0, None),
 }
+MIN_PRICE_TL = 1000  # refrigerators and washing machines; catches "42.218" typed for 42,218 TL
 WHOLE_NUMBER_COLUMNS = {"rating_count"}  # "1.197" would silently become 1.197
 
 
 def _check_numbers(record: dict, row_no: int) -> dict[str, str]:
     """Validates the numeric fields; returns them with '.' as decimal separator."""
-    if record["price_tl"].strip() and parse_price(record["price_tl"]) is None:
-        _fail(row_no, f"price_tl is not a number: {record['price_tl']!r}")
+    if record["price_tl"].strip():
+        price = parse_price(record["price_tl"])
+        if price is None:
+            _fail(row_no, f"price_tl is not a number: {record['price_tl']!r}")
+        if price < MIN_PRICE_TL:
+            _fail(row_no, f"price_tl {record['price_tl']!r} is below {MIN_PRICE_TL} TL; "
+                          "a thousands separator may have been read as a decimal point")
     normalized = {}
     for column, (low, high) in NUMERIC_LIMITS.items():
         text = record[column].strip().replace(",", ".")
@@ -61,7 +67,8 @@ def _check_numbers(record: dict, row_no: int) -> dict[str, str]:
         except ValueError:
             _fail(row_no, f"{column} is not a number: {record[column]!r}")
         if value < low or (high is not None and value > high):
-            _fail(row_no, f"{column} must be between {low} and {high or 'any'}, got {text!r}")
+            _fail(row_no, f"{column} must be between {low} and {high or 'any'}, got {text!r}"
+                          " (leave the cell empty when the value is unknown)")
         if column in WHOLE_NUMBER_COLUMNS and not value.is_integer():
             _fail(row_no, f"{column} must be a whole number, got {record[column]!r}")
         normalized[column] = text

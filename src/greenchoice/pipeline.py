@@ -165,8 +165,11 @@ def main(argv: list[str] | None = None) -> None:
         for name, count in import_sheets(args.xlsx, args.out_dir).items():
             print(f"{name}: {count} satır")
     elif args.cmd == "check-pilot":
-        print(json.dumps(check_pilot(args.products, args.eprel, args.out),
-                         ensure_ascii=False, indent=2))
+        try:
+            report = check_pilot(args.products, args.eprel, args.out)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

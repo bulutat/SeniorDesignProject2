@@ -47,6 +47,9 @@ def test_rejects_bad_rows(tmp_path, bad_row, message):
 @pytest.mark.parametrize("field,value", [
     ("capacity", "10.0 kg"), ("rating_avg", "4 nokta 6"), ("rating_count", "107 adet"),
     ("rating_avg", "6"), ("price_tl", "pahalı"), ("noise_db", "-3"),
+    ("rating_avg", "0"),       # 0 means "no ratings yet": leave the cell empty instead
+    ("price_tl", "42.218"),    # thousands separator read as a decimal point: 42.2 TL
+    ("price_tl", "500"),       # no refrigerator or washing machine costs less than 1000 TL
 ])
 def test_rejects_text_or_out_of_range_numbers_instead_of_dropping_them(tmp_path, field, value):
     with pytest.raises(ValueError, match=f"row 2.*{field}"):
@@ -86,6 +89,12 @@ def test_report_counts_and_eprel_coverage():
     assert rep["eprel_matched"] == 1
     assert rep["eprel_missing"] == ["AY-500D", "KP-9014A"]
     assert pilot_report(products)["eprel_matched"] is None
+
+
+def test_cli_check_pilot_reports_a_bad_row_without_a_traceback(tmp_path):
+    pilot = write_csv(tmp_path, row(price="42.218"))
+    with pytest.raises(SystemExit, match="row 2.*price_tl"):
+        main(["check-pilot", "--products", str(pilot)])
 
 
 def test_cli_check_pilot_prints_report_and_writes_handoff(tmp_path, capsys):
