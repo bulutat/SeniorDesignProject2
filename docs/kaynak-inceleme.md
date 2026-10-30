@@ -29,12 +29,37 @@ sabit değer olarak girmez.
   istemcisinde ve koddaki tahminde geçiyor.
 - JSON alan adları (`energyClass`, `energyConsAnnual`, ...). `collect/eprel.py` içindeki
   `FIELD_MAP` hâlâ tahmin. Üç farklı aramada resmi şema bulunamadı.
-- `washingmachines2019` grup adı. Yalnızca buzdolabı grubu görüldü.
 - Toplu indirme seçeneği. Yapılan aramalarda bulunamadı, bu "yok" demek değil.
 - Şartlar PDF'inin içeriği (kullanım sınırları, yeniden dağıtım, atıf). Metin
   otomatik okunamadı, **elle okunmalı**.
 - Resmi API dokümantasyonu `webgate.ec.europa.eu` altında. Adresi alınamadı. Bir
   EPREL kılavuzuna göre geliştirici wiki'si EU Login ister (ikinci el bilgi).
+
+### Elle arama ve etiketler (30.10.2026'da denendi)
+
+| Konu | Bulgu |
+|---|---|
+| Arama | Grup sayfasında (`/screen/product/washingmachines2019`, `/screen/product/refrigeratingappliances2019`) "Model identifier / Brand or trademark / Model commercial name / GTIN" seçenekli arama var. Model arama **tam eşleşme** istiyor (`GNWM` bulunamadı, tam kod bulundu) |
+| Eski ürünler | "Include models not placed on the market anymore" kutusu işaretlenmezse piyasadan çekilmiş modeller görünmez |
+| Çamaşır makinesi etiketleri | `Weighted energy consumption (per 100 cycles, eco 40-60 programme)` kWh, `Water consumption (per cycle, eco 40-60 programme)` litre, `Airborne acoustical noise emissions (spinning phase)` dB, `Rated capacity` kg. "Energy consumption (per cycle...)" satırını **alma** |
+| Buzdolabı etiketleri | `Annual energy consumption` kWh/annum, `Airborne acoustical noise emissions` dB(A), `Total volume` litre |
+| Enerji sınıfı | Metinde harf yok. Etiket görselinin dosya adından okunuyor (`.../label/thumbnails/A-Left-DarkGreen-...svg`). Buzdolabı sayfasında ışık kaynağı için ayrı bir "Energy efficiency class" satırı var, onunla karıştırma |
+| Grup adları | `washingmachines2019` ve `refrigeratingappliances2019` gerçek sayfalarda doğrulandı |
+
+### Mağaza kodu ile EPREL kodu eşleşmesi (marka bazında deneme)
+
+Hepsiburada listelerinden alınan kodlar EPREL'de tam eşleşmeyle denendi. Sonuçlar seçim yanlılığı taşır, genel oran değildir.
+
+| Marka | Denenen | Bulunan | Not |
+|---|---|---|---|
+| Bosch | 5 + 12 buzdolabı | tümü | Türkiye ve AB kodları aynı |
+| Siemens | 12 + 9 buzdolabı | tümü | Aynı grup (BSH) |
+| Samsung | 5 çamaşır makinesi, 11 buzdolabı | 5 / 1 | Çamaşır makinesinde mağaza kodundaki sondaki `AH` eki kesilince bulunuyor. Buzdolabında 11 kodun yalnızca 1'i |
+| LG | 6 çamaşır makinesi | 2 | |
+| Beko | 8 çamaşır makinesi | 0 | EPREL'de Beko kayıtları var ama `B1WFM2841GBEE 8786033200` gibi AB kodlarıyla; Türkiye adı (`CMX 12140`) eşleşmiyor |
+| Grundig | 1 çamaşır makinesi | 0 | EPREL'de 153 Grundig kaydı var, kodlar `GW9P69416W 7006740004` biçiminde; `GNWM 91613 RS` yok |
+
+Sonuç: eşleşme markaya ve Türkiye'ye özgü model adlarına bağlı. Barkod (GTIN) ile eşleştirme denenmedi.
 
 ### Engel ve seçenekler
 

@@ -3,8 +3,14 @@
 # gerekçeli ağırlıklarla güncellenecek. Her kategoride toplamı 1 olmalı.
 
 defaults:
-  electricity_price_tl_per_kwh: 3.0   # TODO: güncel EPDK konut tarifesiyle doğrula
-  water_price_tl_per_m3: 40.0         # TODO: İstanbul/Ankara su tarifesiyle doğrula
+  # DOĞRULANMADI. Resmi EPDK mesken tablosu okunamadı; ikincil kaynaklar çelişiyor
+  # (kademe 1: 2,92 TL/kWh, kademe 2: 4,32 TL/kWh, KDV hariç, Nisan 2026 dönemi gibi).
+  # Kaynaklar ve açık soru: docs/decisions.md karar 11. Teyit edilince güncellenecek.
+  electricity_price_tl_per_kwh: 3.0
+  # İSKİ 2026 konut tarifesi, 0-15 m3/ay kademesi: su 43,70 + atık su 21,82 = 65,52 TL/m3,
+  # KDV hariç. Kaynak: https://iski.istanbul/abone-hizmetleri/abone-rehberi/su-birim-fiyatlari/
+  # (okunma tarihi 2026-10-30). Karar 10.
+  water_price_tl_per_m3: 65.52
   rating_prior_count: 10              # Bayes ortalaması için öncül değerlendirme sayısı
   label_thresholds:
     recommended: 70                   # skor >= 70  -> Önerilir
@@ -21,8 +27,8 @@ criteria:
 categories:
   refrigerator:
     name: Buzdolabı
-    lifetime_years: 12
-    eprel_group: refrigeratingappliances2019   # TODO: EPREL'de doğrula
+    lifetime_years: 12                         # KAYNAKSIZ varsayım, karar 12
+    eprel_group: refrigeratingappliances2019   # EPREL adresinde doğrulandı (2026-10-30)
     weights:
       energy_efficiency: 0.25
       lifetime_cost: 0.25
@@ -33,9 +39,9 @@ categories:
 
   washing_machine:
     name: Çamaşır makinesi
-    lifetime_years: 10
-    annual_cycles: 220                          # AB enerji etiketi varsayımı (yılda 220 yıkama)
-    eprel_group: washingmachines2019            # TODO: EPREL'de doğrula
+    lifetime_years: 12                          # Eko-tasarım çalışmalarında 12,5 yıl; karar 12
+    annual_cycles: 220                          # Yönetmelik (AB) 2019/2023 Ek V'de yılda 220 yıkama
+    eprel_group: washingmachines2019            # EPREL adresinde doğrulandı (2026-10-30)
     weights:
       energy_efficiency: 0.15
       lifetime_cost: 0.20

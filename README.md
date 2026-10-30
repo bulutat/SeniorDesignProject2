@@ -104,12 +104,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 67 tests
+pytest                    # 72 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 67 passed, ruff clean. The
+Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 72 passed, ruff clean. The
 frontend build was last run before the EPREL changes, which do not touch `frontend/`.
 
 ## Team workflow
@@ -119,6 +119,20 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-10-30 - Cost assumptions with sources (Person B, task B0.3)
+
+- Water price set to the official Istanbul (ISKI) 2026 residential tariff, 65.52 TL/m3
+  (water + wastewater, excl. VAT), replacing the placeholder 40.
+- Washing machine lifetime 10 -> 12 years (sourced); refrigerator lifetime stays 12 years and
+  is documented as unsourced. The 220 washes per year assumption was verified in Regulation
+  (EU) 2019/2023 Annex V.
+- The electricity price could not be verified from an official EPDK table (secondary sources
+  disagree), so the 3.0 TL/kWh placeholder stays and is marked as an open question.
+- Added `tests/test_config.py` (weights sum to 1, positive assumptions, ordered thresholds).
+- `docs/kaynak-inceleme.md` now records the verified EPREL search behaviour, field labels and the
+  per-brand match results; `docs/meetings/2026-10-31.md` holds the advisor meeting agenda.
+- 72 tests (up from 67).
 
 ### 2026-10-30 - First real data review and hardening (Person B)
 
