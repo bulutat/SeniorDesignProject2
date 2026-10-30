@@ -115,10 +115,18 @@ frontend build was last run before the EPREL changes, which do not touch `fronte
 ## Team workflow
 
 Roles and schedule: [docs/gorev-dagilimi.md](docs/gorev-dagilimi.md) (in Turkish).
+Current status and the next tasks for Person A: [docs/devir-kisi-a.md](docs/devir-kisi-a.md).
+Rules for AI assistants working on this repository: [AGENTS.md](AGENTS.md) (`CLAUDE.md` imports it).
 Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, review by the
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-10-30 - Hand-over report and AI rules (Person B)
+
+- Added `AGENTS.md` (operating rules and project rules for AI assistants; `CLAUDE.md` imports
+  it) and `docs/devir-kisi-a.md` (what is done, the input data, ordered tasks and deadlines
+  for Person A, and a prompt pattern). Documentation only; no code changed.
 
 ### 2026-10-30 - Cost assumptions with sources (Person B, task B0.3)
 
