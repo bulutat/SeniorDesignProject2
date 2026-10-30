@@ -31,7 +31,22 @@ REQUIRED_FILL = PatternFill("solid", fgColor="F4B183")
 OPTIONAL_FILL = PatternFill("solid", fgColor="D9D9D9")
 
 
+def format_sheet(ws, columns: list[Column]) -> None:
+    """Widths and number formats only (no headers). Also repairs an existing, filled sheet:
+    a date that carries a time part is too wide for its column and Excel shows ####."""
+    for i, col in enumerate(columns, start=1):
+        ws.column_dimensions[get_column_letter(i)].width = col.width
+        if not col.number_format:
+            continue
+        for row in range(FIRST_DATA_ROW, LAST_DATA_ROW + 1):
+            cell = ws.cell(row=row, column=i)
+            if isinstance(cell.value, datetime.datetime):
+                cell.value = cell.value.date()
+            cell.number_format = col.number_format
+
+
 def _style_sheet(ws, columns: list[Column]) -> None:
+    format_sheet(ws, columns)
     for i, col in enumerate(columns, start=1):
         label = ws.cell(row=1, column=i, value=col.label)
         label.font = Font(bold=True)
@@ -39,7 +54,6 @@ def _style_sheet(ws, columns: list[Column]) -> None:
         label.alignment = Alignment(wrap_text=True, vertical="center")
         hint = ws.cell(row=2, column=i, value=col.hint)
         hint.font = Font(italic=True, color="7F7F7F")
-        ws.column_dimensions[get_column_letter(i)].width = col.width
         if col.choices:
             dv = DataValidation(type="list", formula1='"' + ",".join(col.choices) + '"',
                                 allow_blank=True)

@@ -104,12 +104,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 72 tests
+pytest                    # 74 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 72 passed, ruff clean. The
+Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 74 passed, ruff clean. The
 frontend build was last run before the EPREL changes, which do not touch `frontend/`.
 
 ## Team workflow
@@ -121,6 +121,15 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-10-30 - Excel shows #### (Person B)
+
+- Cause: dates written by the merge script carried a time part (`yyyy-mm-dd h:mm:ss`, 19
+  characters) in a 12-character column, and the price column was narrow.
+- The template now pre-formats all data rows (dates `yyyy-mm-dd`, prices `#,##0.00`) and uses
+  wider date, price, rating and count columns. `collect.sheets.format_sheet` applies the
+  same widths and formats to an existing, filled workbook and strips time parts from dates.
+- 2 new tests; 74 in total.
 
 ### 2026-10-30 - Hand-over report and AI rules (Person B)
 

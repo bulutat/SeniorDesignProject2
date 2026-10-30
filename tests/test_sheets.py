@@ -2,11 +2,12 @@ import datetime
 
 import pandas as pd
 import pytest
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
+from openpyxl.utils import get_column_letter
 
 from greenchoice.collect.eprel_manual import load_manual_eprel
 from greenchoice.collect.pilot import load_pilot_list
-from greenchoice.collect.sheets import build_template, export_csvs
+from greenchoice.collect.sheets import build_template, export_csvs, format_sheet
 from greenchoice.collect.sheets_layout import EPREL_COLUMNS, PILOT_COLUMNS
 from greenchoice.contracts import PRODUCT_COLUMNS
 from greenchoice.pipeline import main
@@ -48,6 +49,33 @@ def test_template_layout_is_readable(template):
     category_validations = [v for v in ws.data_validations.dataValidation
                             if "buzdolabı" in (v.formula1 or "")]
     assert category_validations
+
+
+def column_of(columns, name):
+    return next(i for i, c in enumerate(columns, start=1) if c.name == name)
+
+
+def test_date_and_price_columns_are_wide_and_preformatted_so_excel_shows_no_hash_signs(template):
+    wb = load_workbook(template)
+    date_col = column_of(EPREL_COLUMNS, "collected_on")
+    ws = wb["EPREL"]
+    assert ws.column_dimensions[get_column_letter(date_col)].width >= 14
+    assert ws.cell(3, date_col).number_format == "yyyy-mm-dd"
+    assert ws.cell(300, date_col).number_format == "yyyy-mm-dd"
+    price_col = column_of(PILOT_COLUMNS, "price_tl")
+    ws = wb["Ürünler"]
+    assert ws.column_dimensions[get_column_letter(price_col)].width >= 16
+    assert ws.cell(3, price_col).number_format == "#,##0.00"
+
+
+def test_format_sheet_repairs_dates_that_carry_a_time_part():
+    ws = Workbook().active
+    date_col = column_of(EPREL_COLUMNS, "collected_on")
+    ws.cell(5, date_col, datetime.datetime(2026, 10, 30))
+    ws.cell(5, date_col).number_format = "yyyy-mm-dd h:mm:ss"
+    format_sheet(ws, EPREL_COLUMNS)
+    assert ws.cell(5, date_col).value == datetime.date(2026, 10, 30)
+    assert ws.cell(5, date_col).number_format == "yyyy-mm-dd"
 
 
 def test_export_converts_values_and_skips_blank_rows(template, tmp_path):
