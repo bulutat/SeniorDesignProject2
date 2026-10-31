@@ -61,6 +61,21 @@ Hepsiburada listelerinden alınan kodlar EPREL'de tam eşleşmeyle denendi. Sonu
 
 Sonuç: eşleşme markaya ve Türkiye'ye özgü model adlarına bağlı. Barkod (GTIN) ile eşleştirme denenmedi.
 
+### Elektrik tarifesi (EPDK, 01.11.2026'da okundu)
+
+Kaynak: EPDK Kurul Kararı **14461**, 02/04/2026; ekindeki "4 Nisan 2026 Tarihinden İtibaren
+Geçerli Vergiler Hariç Elektrik Tarifeleri" tablosu (Resmî Gazete 4 Nisan 2026, sayı 33214).
+Karar metni ve tablo ayrı dosyalar olarak indirildi; fiyatlar tablodadır.
+
+| Satır (AG Tek Terim) | Tek zamanlı enerji bedeli | Dağıtım bedeli | Toplam |
+|---|---|---|---|
+| Mesken, 8 kWh/gün ve altı | 49,4065 kr/kWh | 242,49 kr/kWh | 291,8965 kr/kWh = **2,919 TL/kWh** |
+| Mesken, 8 kWh/gün üstü | 189,5808 kr/kWh | 242,49 kr/kWh | 432,0708 kr/kWh = **4,321 TL/kWh** |
+
+Tablo notları: perakende tarife (vergiler hariç) enerji bedeli ile dağıtım bedelinin toplamıdır;
+günlük ortalama 8 kWh'e kadar olan tüketime düşük kademe, aşan kısma yüksek kademe uygulanır.
+Birim kuruş/kWh'tir (100 kr = 1 TL). Bu dönem Nisan 2026'dır; sonraki dönemler doğrulanmadı.
+
 ### Engel ve seçenekler
 
 Anahtar için **imzalı beyan** şart. Türkiye'de e-imza veya mühür her öğrencide yoktur.

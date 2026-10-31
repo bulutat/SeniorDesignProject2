@@ -3,10 +3,11 @@
 # gerekçeli ağırlıklarla güncellenecek. Her kategoride toplamı 1 olmalı.
 
 defaults:
-  # DOĞRULANMADI. Resmi EPDK mesken tablosu okunamadı; ikincil kaynaklar çelişiyor
-  # (kademe 1: 2,92 TL/kWh, kademe 2: 4,32 TL/kWh, KDV hariç, Nisan 2026 dönemi gibi).
-  # Kaynaklar ve açık soru: docs/decisions.md karar 11. Teyit edilince güncellenecek.
-  electricity_price_tl_per_kwh: 3.0
+  # EPDK Kurul Kararı 14461 (02/04/2026) ekindeki tarife tablosu, 4 Nisan 2026'dan itibaren,
+  # VERGİLER HARİÇ. AG tek terim, mesken, günlük ortalama 8 kWh ve altı (düşük kademe):
+  # enerji 49,4065 + dağıtım 242,49 = 291,8965 kr/kWh. 8 kWh/gün üstü (yüksek kademe) 4,321 TL/kWh.
+  # Düşük kademe seçildi (tipik hane). Kararlar 11 ve 15: docs/decisions.md.
+  electricity_price_tl_per_kwh: 2.919
   # İSKİ 2026 konut tarifesi, 0-15 m3/ay kademesi: su 43,70 + atık su 21,82 = 65,52 TL/m3,
   # KDV hariç. Kaynak: https://iski.istanbul/abone-hizmetleri/abone-rehberi/su-birim-fiyatlari/
   # (okunma tarihi 2026-10-30). Karar 10.

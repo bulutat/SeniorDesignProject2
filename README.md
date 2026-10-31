@@ -123,6 +123,15 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-01 - Electricity price from the official EPDK table (Person B, task B0.3)
+
+- `electricity_price_tl_per_kwh` is now 2.919 TL/kWh (placeholder was 3.0): EPDK decision 14461,
+  table valid from 2026-04-04, residential low-voltage single-time, up to 8 kWh/day, excluding
+  taxes (energy 49.4065 + distribution 242.49 kr/kWh). The high tier (above 8 kWh/day) is
+  4.321 TL/kWh. Sources and the open questions (is there a newer quarterly decision, which
+  tier a typical household is in) are in `docs/decisions.md` 15 and `docs/kaynak-inceleme.md`.
+- Config change only; 78 tests still pass.
+
 ### 2026-10-30 - Pilot product list in the repository (Person B)
 
 - `data/interim/pilot_products.csv` (26 products: id, public shop URL, category) is now
