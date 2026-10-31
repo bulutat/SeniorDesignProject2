@@ -38,6 +38,13 @@ def test_clean_reviews_drops_spam_duplicates_and_short():
     assert out["review_id"].tolist() == ["1"]
 
 
+def test_clean_reviews_accepts_an_empty_table():
+    df = pd.DataFrame(columns=["review_id", "product_id", "rating", "text", "date"])
+    out = clean_reviews(df)
+    assert out.empty
+    assert {"review_id", "product_id", "text_clean"} <= set(out.columns)
+
+
 def test_tco_refrigerator_and_washing_machine():
     cfg = {
         "defaults": {"electricity_price_tl_per_kwh": 2.0, "water_price_tl_per_m3": 10.0},

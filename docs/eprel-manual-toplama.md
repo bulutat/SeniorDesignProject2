@@ -3,6 +3,9 @@
 EPREL API'si anahtar istediği için (bkz. `kaynak-inceleme.md`), enerji verisi herkese açık
 EPREL ürün sayfalarından **elle** okunup bir CSV'ye yazılır. Otomatik toplama yapılmaz.
 
+> Doldurması daha kolay olan yol: [veri-toplama-excel.md](veri-toplama-excel.md). Aşağıdaki
+> CSV anlatımı, aynı kolonların ne anlama geldiğini açıklar.
+
 ## Başlamadan önce
 
 1. [API şartlar belgesini](https://ec.europa.eu/assets/move-ener/eprel/EPREL%20Public/Public%20API%20Term%20and%20Conditions/API_TERMS_AND_CONDITIONS_EN.pdf)

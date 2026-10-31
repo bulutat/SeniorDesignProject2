@@ -17,6 +17,9 @@ def _looks_like_spam(text_clean: str) -> bool:
 def clean_reviews(df: pd.DataFrame, min_chars: int = 10) -> pd.DataFrame:
     require_columns(df, REVIEW_COLUMNS, "reviews")
     out = df.dropna(subset=["text"]).copy()
+    if out.empty:  # boolean masks on an empty object Series would select columns, not rows
+        out["text_clean"] = pd.Series(dtype="object")
+        return out.reset_index(drop=True)
     out["text"] = out["text"].astype(str).str.strip()
     out["text_clean"] = out["text"].map(normalize_text)
     out["rating"] = pd.to_numeric(out["rating"], errors="coerce")

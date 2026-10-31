@@ -3,8 +3,15 @@
 # gerekçeli ağırlıklarla güncellenecek. Her kategoride toplamı 1 olmalı.
 
 defaults:
-  electricity_price_tl_per_kwh: 3.0   # TODO: güncel EPDK konut tarifesiyle doğrula
-  water_price_tl_per_m3: 40.0         # TODO: İstanbul/Ankara su tarifesiyle doğrula
+  # EPDK Kurul Kararı 14461 (02/04/2026) ekindeki tarife tablosu, 4 Nisan 2026'dan itibaren,
+  # VERGİLER HARİÇ. AG tek terim, mesken, günlük ortalama 8 kWh ve altı (düşük kademe):
+  # enerji 49,4065 + dağıtım 242,49 = 291,8965 kr/kWh. 8 kWh/gün üstü (yüksek kademe) 4,321 TL/kWh.
+  # Düşük kademe seçildi (tipik hane). Kararlar 11 ve 15: docs/decisions.md.
+  electricity_price_tl_per_kwh: 2.919
+  # İSKİ 2026 konut tarifesi, 0-15 m3/ay kademesi: su 43,70 + atık su 21,82 = 65,52 TL/m3,
+  # KDV hariç. Kaynak: https://iski.istanbul/abone-hizmetleri/abone-rehberi/su-birim-fiyatlari/
+  # (okunma tarihi 2026-10-30). Karar 10.
+  water_price_tl_per_m3: 65.52
   rating_prior_count: 10              # Bayes ortalaması için öncül değerlendirme sayısı
   label_thresholds:
     recommended: 70                   # skor >= 70  -> Önerilir
@@ -21,8 +28,8 @@ criteria:
 categories:
   refrigerator:
     name: Buzdolabı
-    lifetime_years: 12
-    eprel_group: refrigeratingappliances2019   # TODO: EPREL'de doğrula
+    lifetime_years: 12                         # KAYNAKSIZ varsayım, karar 12
+    eprel_group: refrigeratingappliances2019   # EPREL adresinde doğrulandı (2026-10-30)
     weights:
       energy_efficiency: 0.25
       lifetime_cost: 0.25
@@ -33,9 +40,9 @@ categories:
 
   washing_machine:
     name: Çamaşır makinesi
-    lifetime_years: 10
-    annual_cycles: 220                          # AB enerji etiketi varsayımı (yılda 220 yıkama)
-    eprel_group: washingmachines2019            # TODO: EPREL'de doğrula
+    lifetime_years: 12                          # Eko-tasarım çalışmalarında 12,5 yıl; karar 12
+    annual_cycles: 220                          # Yönetmelik (AB) 2019/2023 Ek V'de yılda 220 yıkama
+    eprel_group: washingmachines2019            # EPREL adresinde doğrulandı (2026-10-30)
     weights:
       energy_efficiency: 0.15
       lifetime_cost: 0.20

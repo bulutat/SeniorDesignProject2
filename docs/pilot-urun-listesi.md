@@ -3,6 +3,9 @@
 Teslim: **31.10.2026**, kategori başına 10 ürün, Kişi A'ya. A'nın yorum scraper'ı bu
 listeyle başlar. Tam liste (80–100 ürün/kategori) 05.11'de.
 
+> Doldurması daha kolay olan yol: [veri-toplama-excel.md](veri-toplama-excel.md). Aşağıdaki
+> CSV anlatımı, aynı kolonların ne anlama geldiğini açıklar.
+
 ## Dosya
 
 `data/templates/pilot_products.csv` dosyasını `data/raw/pilot_products.csv` olarak kopyala

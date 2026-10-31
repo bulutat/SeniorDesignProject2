@@ -18,6 +18,8 @@ data/processed/*
 !data/raw/.gitkeep
 !data/interim/.gitkeep
 !data/processed/.gitkeep
+# Istisna: yorum toplayan kişiye giden ürün listesi (yalnızca ürün no, herkese açık mağaza adresi, kategori)
+!data/interim/pilot_products.csv
 *.db
 models/*
 !models/.gitkeep

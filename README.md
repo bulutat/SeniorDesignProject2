@@ -47,7 +47,8 @@ data/
   sample/        synthetic example data (committed)
   annotations/   manual labels (committed)
   templates/     empty CSV templates for hand-collected data (committed)
-  raw/ interim/ processed/   collected and generated data (not committed)
+  raw/ interim/ processed/   collected and generated data (not committed, except the
+                             hand-off list data/interim/pilot_products.csv)
 docs/            architecture, data and API contracts, decisions, source review, schedule
 frontend/        React + Vite UI
 notebooks/       exploration notebooks
@@ -88,6 +89,10 @@ cd frontend && npm run dev                         # UI at http://localhost:5173
 
 With real data: `greenchoice build --source interim --eprel data/raw/eprel_manual.csv`
 
+Hand-collected data is entered in `data/raw/veri_toplama.xlsx` (template:
+`data/templates/veri_toplama.xlsx`, guide: `docs/veri-toplama-excel.md`), then converted:
+`greenchoice import-sheets --xlsx data/raw/veri_toplama.xlsx --out-dir data/raw`
+
 Check the pilot product list (and its EPREL coverage) before handing it over:
 `greenchoice check-pilot --products data/raw/pilot_products.csv --eprel data/raw/eprel_manual.csv --out data/interim/pilot_products.csv`
 
@@ -100,21 +105,100 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 49 tests
+pytest                    # 78 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-29, Python 3.12.10, Node 26.13.0 - 49 passed, ruff clean. The
+Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 78 passed, ruff clean. The
 frontend build was last run before the EPREL changes, which do not touch `frontend/`.
 
 ## Team workflow
 
 Roles and schedule: [docs/gorev-dagilimi.md](docs/gorev-dagilimi.md) (in Turkish).
+Current status and the next tasks for Person A: [docs/devir-kisi-a.md](docs/devir-kisi-a.md).
+Rules for AI assistants working on this repository: [AGENTS.md](AGENTS.md) (`CLAUDE.md` imports it).
 Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, review by the
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-01 - Electricity price from the official EPDK table (Person B, task B0.3)
+
+- `electricity_price_tl_per_kwh` is now 2.919 TL/kWh (placeholder was 3.0): EPDK decision 14461,
+  table valid from 2026-04-04, residential low-voltage single-time, up to 8 kWh/day, excluding
+  taxes (energy 49.4065 + distribution 242.49 kr/kWh). The high tier (above 8 kWh/day) is
+  4.321 TL/kWh. Sources and the open questions (is there a newer quarterly decision, which
+  tier a typical household is in) are in `docs/decisions.md` 15 and `docs/kaynak-inceleme.md`.
+- Config change only; 78 tests still pass.
+
+### 2026-10-30 - Pilot product list in the repository (Person B)
+
+- `data/interim/pilot_products.csv` (26 products: id, public shop URL, category) is now
+  committed through a `.gitignore` exception so Person A gets it with the branch. Everything
+  else under `data/interim/` stays untracked.
+
+### 2026-10-30 - Review of the filled workbook (Person B)
+
+- Checked all 12 refrigerator rows against their Hepsiburada pages (price, rating, review
+  count) and the washing machines already checked before. Most values matched exactly.
+- Found input errors the loader did not catch and fixed the loader: a price typed as `42.218`
+  (thousands separator read as a decimal, i.e. 42 TL) is now rejected (price must be at least
+  1000 TL), a rating of 0 for "no reviews yet" is rejected (ratings are 1-5, leave empty), and
+  `check-pilot` prints the row error instead of a traceback.
+- 78 tests (up from 74).
+
+### 2026-10-30 - Excel shows #### (Person B)
+
+- Cause: dates written by the merge script carried a time part (`yyyy-mm-dd h:mm:ss`, 19
+  characters) in a 12-character column, and the price column was narrow.
+- The template now pre-formats all data rows (dates `yyyy-mm-dd`, prices `#,##0.00`) and uses
+  wider date, price, rating and count columns. `collect.sheets.format_sheet` applies the
+  same widths and formats to an existing, filled workbook and strips time parts from dates.
+- 2 new tests; 74 in total.
+
+### 2026-10-30 - Hand-over report and AI rules (Person B)
+
+- Added `AGENTS.md` (operating rules and project rules for AI assistants; `CLAUDE.md` imports
+  it) and `docs/devir-kisi-a.md` (what is done, the input data, ordered tasks and deadlines
+  for Person A, and a prompt pattern). Documentation only; no code changed.
+
+### 2026-10-30 - Cost assumptions with sources (Person B, task B0.3)
+
+- Water price set to the official Istanbul (ISKI) 2026 residential tariff, 65.52 TL/m3
+  (water + wastewater, excl. VAT), replacing the placeholder 40.
+- Washing machine lifetime 10 -> 12 years (sourced); refrigerator lifetime stays 12 years and
+  is documented as unsourced. The 220 washes per year assumption was verified in Regulation
+  (EU) 2019/2023 Annex V.
+- The electricity price could not be verified from an official EPDK table (secondary sources
+  disagree), so the 3.0 TL/kWh placeholder stays and is marked as an open question.
+- Added `tests/test_config.py` (weights sum to 1, positive assumptions, ordered thresholds).
+- `docs/kaynak-inceleme.md` now records the verified EPREL search behaviour, field labels and the
+  per-brand match results; `docs/meetings/2026-10-31.md` holds the advisor meeting agenda.
+- 72 tests (up from 67).
+
+### 2026-10-30 - First real data review and hardening (Person B)
+
+- Reviewed the first 5 hand-collected washing machines against their EPREL pages: all
+  EPREL values (kWh per 100 cycles, water, noise, energy class A) matched. One site value
+  (capacity) was wrong and several cells held text instead of numbers.
+- Found and fixed silent data loss: `import-sheets` skipped a product typed into the hint
+  row (now an error), and the pilot loader turned text such as "4 nokta 6" or "10 kg" into an
+  empty value (now rejected with the row number; decimal commas are accepted; ranges checked).
+- Fixed `clean_reviews` crashing on an empty review table, so the pipeline runs before any
+  review has been collected. Smoke test on 5 real products: 5/5 EPREL matches, scores built.
+- 67 tests (up from 55).
+
+### 2026-10-30 - Excel workbook for hand-collected data (Person B)
+
+- Hand-filling the two CSV files was hard to read (and Turkish-locale Excel opens
+  comma-separated CSV as a single column), so data entry now happens in one workbook.
+- `collect/sheets.py` and `collect/sheets_layout.py`: generate `veri_toplama.xlsx` (Turkish
+  headers, hints, dropdowns, frozen header rows) and export its two sheets to the CSVs the
+  existing loaders expect. The loaders are unchanged and still validate everything.
+- New commands: `greenchoice make-sheets` and `greenchoice import-sheets` (the latter also
+  runs the loaders and points to the Excel row of any error). 6 new tests, 55 in total.
+- `openpyxl` added to the `dev` and new `sheets` extras. Guide: `docs/veri-toplama-excel.md`.
 
 ### 2026-10-29 - Pilot product list (Person B, task B0.2)
 

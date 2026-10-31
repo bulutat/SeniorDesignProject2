@@ -19,6 +19,7 @@ import pandas as pd
 from greenchoice import db
 from greenchoice.collect.eprel_manual import load_manual_eprel
 from greenchoice.collect.pilot import load_pilot_list, pilot_report
+from greenchoice.collect.sheets import build_template, export_csvs
 from greenchoice.config import INTERIM_DIR, SAMPLE_DIR, db_path
 from greenchoice.contracts import PRODUCT_COLUMNS, REVIEW_COLUMNS, conform
 from greenchoice.nlp.aggregate import product_review_features
@@ -110,6 +111,21 @@ def check_pilot(products_csv: Path, eprel_csv: Path | None = None, out: Path | N
     return pilot_report(products, eprel)
 
 
+def import_sheets(xlsx: Path, out_dir: Path) -> dict[str, int]:
+    """Excel -> CSV, then the same strict loaders the pipeline uses."""
+    try:
+        paths = export_csvs(xlsx, out_dir)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    try:
+        pilot = load_pilot_list(paths["pilot"])
+        eprel = load_manual_eprel(paths["eprel"])
+    except ValueError as exc:
+        raise SystemExit(f"{exc}\nExcel'deki satır = mesajdaki satır + 1 "
+                         "(ortada boş satır varsa kayar). Düzeltip komutu tekrar çalıştır.") from exc
+    return {paths["pilot"].name: len(pilot), paths["eprel"].name: len(eprel)}
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="greenchoice")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -121,6 +137,13 @@ def main(argv: list[str] | None = None) -> None:
 
     e = sub.add_parser("eval-nlp", help="NLP baseline'ını altın etiketlerle değerlendir")
     e.add_argument("--gold", type=Path, required=True)
+
+    m = sub.add_parser("make-sheets", help="Boş veri toplama Excel dosyasını üret")
+    m.add_argument("--out", type=Path, default=Path("data/raw/veri_toplama.xlsx"))
+
+    i = sub.add_parser("import-sheets", help="Doldurulmuş Excel'i pilot ve EPREL CSV'lerine çevir")
+    i.add_argument("--xlsx", type=Path, default=Path("data/raw/veri_toplama.xlsx"))
+    i.add_argument("--out-dir", type=Path, default=Path("data/raw"))
 
     c = sub.add_parser("check-pilot", help="Pilot ürün listesini doğrula, EPREL kapsamını raporla")
     c.add_argument("--products", type=Path, required=True, help="Pilot ürün listesi CSV")
@@ -135,9 +158,18 @@ def main(argv: list[str] | None = None) -> None:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     elif args.cmd == "eval-nlp":
         print(eval_nlp(args.gold).to_string(index=False, float_format="%.3f"))
+    elif args.cmd == "make-sheets":
+        build_template(args.out)
+        print(f"Excel şablonu yazıldı: {args.out}")
+    elif args.cmd == "import-sheets":
+        for name, count in import_sheets(args.xlsx, args.out_dir).items():
+            print(f"{name}: {count} satır")
     elif args.cmd == "check-pilot":
-        print(json.dumps(check_pilot(args.products, args.eprel, args.out),
-                         ensure_ascii=False, indent=2))
+        try:
+            report = check_pilot(args.products, args.eprel, args.out)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
