@@ -28,10 +28,10 @@ class AspectExtractor(ABC):
     def extract(self, text_clean: str) -> list[AspectMention]:
         """Normalize edilmiş tek bir yorumdan aspect/duygu çiftlerini çıkarır."""
 
-    def extract_df(self, reviews: pd.DataFrame) -> pd.DataFrame:
-        """reviews (review_id, text_clean) -> review_aspects tablosu."""
+    def extract_df(self, reviews: pd.DataFrame, column: str = "text_clean") -> pd.DataFrame:
+        """reviews (review_id, column) -> review_aspects tablosu."""
         rows = []
-        for review_id, text in zip(reviews["review_id"], reviews["text_clean"], strict=True):
+        for review_id, text in zip(reviews["review_id"], reviews[column], strict=True):
             seen = set()
             for m in self.extract(text):
                 if (m.aspect, m.polarity) in seen:

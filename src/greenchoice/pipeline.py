@@ -48,7 +48,7 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None) -> dict
     reviews = reviews[reviews["product_id"].isin(products["product_id"])]
 
     extractor = RuleBasedExtractor()
-    review_aspects = extractor.extract_df(reviews)
+    review_aspects = extractor.extract_df(reviews, column="text_product")
     review_feats = product_review_features(reviews, review_aspects)
 
     features = products.merge(review_feats, on="product_id", how="left")

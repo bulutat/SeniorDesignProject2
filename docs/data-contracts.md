@@ -36,6 +36,10 @@ Aşama 1 çıktısı. Ham hali `data/interim/products.csv`, temiz hali SQLite `p
 | `rating` | float | 1–5 |
 | `text` | str | Ham metin |
 | `text_clean` | str | Normalize metin (temizlemede eklenir) |
+| `text_product` | str | `text_clean` + teslimat bağlamındaki "sorunsuz/sağlam" sözcükleri çıkarılmış hali. Aspect çıkarımı bunu kullanır |
+| `mentions_logistics` | bool | Yorumda kargo, satıcı veya teslimat geçiyor mu. Filtre değil, bilgi amaçlı |
+| `truncated` | bool | Metin "Devamını Oku" açılmadan kaydedilmiş (`import-reviews`) |
+| `site_aspects` | str | Hepsiburada kriter puanları, JSON (`import-reviews`) |
 | `date` | str | ISO tarih |
 
 ## review_aspects

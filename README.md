@@ -110,12 +110,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 86 tests
+pytest                    # 103 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-01, Python 3.12.10 - 86 passed, ruff clean. The frontend build was
+Last verified: 2026-11-01, Python 3.12.10 - 103 passed, ruff clean. The frontend build was
 last run before the EPREL changes; neither those nor the review import touch `frontend/`.
 
 ## Team workflow
@@ -127,6 +127,17 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-01 - Review cleaning (Person A, task A1.2)
+
+- `normalize_text` shortens elongated letters and removes emoji. No language filter: non-Turkish
+  reviews did not appear in the pilot data (samples were Turkish typed without diacritics).
+- New `preprocess/scope.py`: "sorunsuz" and "sağlam" next to delivery or installation words no
+  longer count as durability. New columns `text_product` and `mentions_logistics`; the raw text
+  is unchanged and the extractor reads `text_product`.
+- On 1,460 pilot reviews `durability:pos` fell from 218 to 41, other aspects unchanged. Removing
+  whole clauses was tried first and dropped: it lost real product mentions.
+- 17 new tests; 103 in total. Accuracy is not measured yet, labelled data comes next.
 
 ### 2026-11-01 - Review source check and saved-page import (Person A, tasks A0.1, A1.1)
 
