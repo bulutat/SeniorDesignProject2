@@ -110,12 +110,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 149 tests
+pytest                    # 150 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 149 passed, ruff clean. The
+Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 150 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -127,6 +127,19 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-02 - 80-product list assembled (Person B)
+
+- Applied the selection rule to 15 saved Hepsiburada pages and 17 Trendyol product pages,
+  looked the chosen models up in EPREL and added 54 products and 18 EPREL records to
+  `data/raw/veri_toplama_v4.xlsx`: 40 washing machines and 40 refrigerators.
+- EPREL match rate: **48 of 80 (60%)**, below the 70% target of task B1.2. 17 products carry no
+  model code in their title (mostly Arcelik, Beko, Grundig, Altus, Vestel) and 15 have a code
+  EPREL does not know (mostly Samsung refrigerators, Profilo, LG). Washing machines match much
+  better than refrigerators. This is reported as a finding, not tuned away (decision 18).
+- `model_code` is now optional in the pilot list (empty means "not in the title"); the report
+  counts `no_model_code` separately from codes missing in EPREL. Workbooks made from an older
+  template (previous hint text) are still accepted. 150 tests.
 
 ### 2026-11-02 - Product selection rule (Person B, decision 18)
 

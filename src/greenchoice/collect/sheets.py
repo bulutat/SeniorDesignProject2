@@ -94,7 +94,7 @@ def _check_hint_row(ws, columns: list[Column]) -> None:
     hints = next(ws.iter_rows(min_row=2, max_row=2, max_col=len(columns), values_only=True), ())
     for col, cell in zip(columns, hints, strict=False):
         text = _cell_text(cell)
-        if text and text != col.hint:
+        if text and text != col.hint and text not in col.legacy_hints:
             raise ValueError(f"{ws.title} sheet, row 2 is the hint row but column {col.label!r} "
                              f"contains {text!r}. Data starts in row 3: move or clear this row.")
 
