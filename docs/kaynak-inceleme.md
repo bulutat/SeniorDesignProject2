@@ -8,8 +8,10 @@ sabit değer olarak girmez.
 İnceleme tarihi: 01.11.2026. Yalnızca yapı incelendi: robots.txt, kullanım koşulları ve pilot
 listeden birer ürün sayfası normal tarayıcıda açıldı. Yorum verisi toplanmadı ve repoya eklenmedi.
 
-**Sonuç:** İki sitede de otomatik yorum toplamaya uygun bir yol bulunamadı. A1.1 (scraper)
-danışman kararına kadar **bekliyor**. Robots.txt veya bot koruması aşılmayacak (`AGENTS.md`).
+**Sonuç:** İki sitede de otomatik yorum toplamaya uygun bir yol bulunamadı. Scraper yazılmadı;
+robots.txt veya bot koruması aşılmayacak (`AGENTS.md`). Yerine yorum sayfaları tarayıcıdan elle
+kaydedilip yerelde okunuyor: [yorum-toplama.md](yorum-toplama.md). Kullanım koşulları sorusu bu
+yöntemde de açık, danışmana sorulacak.
 
 ### Trendyol
 
