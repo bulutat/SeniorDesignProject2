@@ -21,12 +21,15 @@ from greenchoice.preprocess.text import tr_lower
 
 CARD = re.compile(r"^productCard-module_productCardRoot")
 AD = re.compile(r"^horizontalProductCard-module_article")
-PRODUCT_NUMBER = re.compile(r"-pm?-(HB[A-Za-z0-9]+)")
+PRODUCT_NUMBER = re.compile(r"-pm?-([A-Za-z0-9]+)/?(?:\?|$)")  # "...-pm-HBC0000E8D2XF" or "...-pm-mtsam..."
 PRICE = re.compile(r"Sepete ekle, fiyat:\s*([\d.,]+)\s*TL")
 RATING = re.compile(r"Ürün puanı\s*([\d.,]+),\s*([\d.]+)\s*değerlendirme")
 COLUMNS = ["product_id", "source", "url", "category", "brand_guess", "name", "price_tl",
            "rating_avg", "rating_count", "model_code_candidates", "source_file"]
-BUNDLE = re.compile(r"paket|\bset\b|\+|'l[iıuü]\b|\bikili|\büçlü")  # "3'lü Beyaz Eşya Paketi"
+# "3'lü Beyaz Eşya Paketi", "... Seti", "Çamaşır Mk.+Kurutma Mk.". A bare "+" is not enough:
+# "20+ Program", "A+++" and "İkili Soğutma" are features of single appliances.
+BUNDLE = re.compile(r"paket|\bset\b|\d'l[iıuü]\b"
+                    r"|(?:\s\+\s|\.\+).*(?:bulaşık|kurutma|ütü|fırın|ocak|davlumbaz|buzdolabı|çamaşır)")
 MIN_APPLIANCE_PRICE_TL = 5000  # filters, cleaners and other accessories that carry the same words
 
 

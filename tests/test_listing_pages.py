@@ -51,11 +51,41 @@ def test_non_target_products_are_counted_not_returned():
     assert report["skipped_other_category"] == 2
 
 
+def test_product_numbers_that_do_not_start_with_hb_are_accepted():
+    """Seen on a real page: .../buzdolabi-...-pm-mtsamrt46k6000s8tr (merchant-style number)."""
+    odd = card(7, "Samsung RT46K6000S8/TR No-Frost Çift Kapılı Buzdolabı 468 lt", "mtsamrt46k6000s8tr",
+               price="56.998")
+    items, _ = parse_listing(page(odd), "x.html")
+    assert items[0]["product_id"] == "hb-mtsamrt46k6000s8tr"
+    assert "RT46K6000S8" in items[0]["model_code_candidates"]
+
+
 def test_prices_without_decimals_keep_their_thousands_separator():
     """Real pages show both "28.493,10" and "47.930"; the dot is always a thousands separator."""
     items, _ = parse_listing(page(card(1, "Bosch WGA142Z0TR 9 kg Çamaşır Makinesi", "HBC0000NODEC",
                                        price="47.930")), "x.html")
     assert items[0]["price_tl"] == pytest.approx(47930.0)
+
+
+@pytest.mark.parametrize("title,category", [
+    ("Samsung RB58DS75EWW/TR 580 Lt Alttan Donduruculu İkili Soğutma No-Frost Buzdolabı", "refrigerator"),
+    ("Bosch WGB264A0TR Serie 8, 11 Kg, Maks. 1400 Dev./dak. 20+ Program Sayısı Çamaşır Makinesi",
+     "washing_machine"),
+    ("Arçelik 9100 DMX 9 Kg Çamaşır Makinesi Enerji Sınıfı A+++ 1000 Devir", "washing_machine"),
+])
+def test_feature_words_that_look_like_bundle_marks_do_not_drop_real_appliances(title, category):
+    """"İkili Soğutma", "20+ Program" and "A+++" were wrongly read as bundles on real pages."""
+    items, report = parse_listing(page(card(6, title, "HBC0000REAL01", price="52.199")), "x.html")
+    assert [i["category"] for i in items] == [category] and report["skipped_other_category"] == 0
+
+
+@pytest.mark.parametrize("title,price", [
+    ("Bosch WGK264ZRTR ÇAMAŞIR MK.+WQJ2520RTR KURUTMA MK.", "94.499"),
+    ("Arçelik 10121 10 kg Çamaşır Makinesi + A 710 B Bulaşık Makinesi Paketi", "44.188"),
+])
+def test_bundles_written_with_a_plus_sign_are_still_skipped(title, price):
+    items, report = parse_listing(page(card(6, title, "HBC0000BNDL02", price=price)), "x.html")
+    assert items == [] and report["skipped_other_category"] == 1
 
 
 @pytest.mark.parametrize("title,price", [

@@ -110,12 +110,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 127 tests
+pytest                    # 149 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 127 passed, ruff clean. The
+Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 149 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -127,6 +127,17 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-02 - Product selection rule (Person B, decision 18)
+
+- `collect/selection.py` and `greenchoice select-candidates`: pick the products that bring each
+  category to 40 from the saved-page candidates and the Trendyol pages. Rank by rating count
+  (at least 30), one entry per model (market-suffix variants and codeless titles with the same
+  words count as one model), at most 12 per brand, models already held skipped, compact
+  fridges (mini, office, under-counter, hotel) excluded. EPREL availability plays no part.
+- Real data again found problems that are now tests: "İkili Soğutma", "20+ Program" and "A+++"
+  were read as bundle marks and dropped real appliances; a merchant-style product number
+  (`pm-mtsam...`) was rejected. 149 tests.
 
 ### 2026-11-02 - Candidate products from saved Hepsiburada search pages (Person B)
 
