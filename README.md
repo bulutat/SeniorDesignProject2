@@ -53,8 +53,8 @@ docs/            architecture, data and API contracts, decisions, source review,
 frontend/        React + Vite UI
 notebooks/       exploration notebooks
 src/greenchoice/
-  collect/       data collection (e-commerce - not implemented yet; EPREL hand-collected
-                 CSV loader with strict validation in eprel_manual.py)
+  collect/       data collection: reviews from browser-saved pages (saved_pages.py), EPREL
+                 hand-collected CSV loader with strict validation (eprel_manual.py)
   preprocess/    cleaning, EPREL matching, TCO
   nlp/           aspect extraction, aggregation, P/R/F1 evaluation
   scoring/       criteria sub-scores, weighted baseline, ML comparison
@@ -96,6 +96,11 @@ Hand-collected data is entered in `data/raw/veri_toplama.xlsx` (template:
 Check the pilot product list (and its EPREL coverage) before handing it over:
 `greenchoice check-pilot --products data/raw/pilot_products.csv --eprel data/raw/eprel_manual.csv --out data/interim/pilot_products.csv`
 
+Reviews come from pages saved by hand in a normal browser, because the sites do not allow
+automated collection (`docs/kaynak-inceleme.md`). This command only reads local files and never
+extracts usernames; guide: `docs/yorum-toplama.md`:
+`greenchoice import-reviews --pages data/raw/yorum_sayfalari --out data/interim/reviews.csv`
+
 The `--eprel` file is the hand-collected EPREL CSV (the EPREL public API needs a key that
 requires a sealed declaration). Template: `data/templates/eprel_manual.csv`; collection
 guide: `docs/eprel-manual-toplama.md` (Turkish). The file is validated row by row: energy
@@ -105,13 +110,13 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 78 tests
+pytest                    # 86 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 78 passed, ruff clean. The
-frontend build was last run before the EPREL changes, which do not touch `frontend/`.
+Last verified: 2026-11-01, Python 3.12.10 - 86 passed, ruff clean. The frontend build was
+last run before the EPREL changes; neither those nor the review import touch `frontend/`.
 
 ## Team workflow
 
@@ -122,6 +127,18 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-01 - Review source check and saved-page import (Person A, tasks A0.1, A1.1)
+
+- Source check: Trendyol reviews load from `apigw.trendyol.com`, whose robots.txt disallows
+  everything; Hepsiburada answers automated requests with 403. No scraper was written.
+- New `greenchoice import-reviews` parses pages saved by hand in a browser (`collect/saved_pages.py`).
+  No network access, no usernames. Unreadable pages fail with the file name; the report lists
+  missing reviews or pages, and truncated text.
+- Checked on real pages: 87 reviews from 2 products. All 9 Hepsiburada reviews with text in the
+  page's JSON-LD match on text, rating and date. Trendyol has no such check: ratings come from
+  the star bar width.
+- 8 new tests with synthetic HTML (no user content in the repository); 86 in total.
 
 ### 2026-11-01 - Electricity price from the official EPDK table (Person B, task B0.3)
 

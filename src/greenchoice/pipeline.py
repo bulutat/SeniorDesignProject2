@@ -126,6 +126,17 @@ def import_sheets(xlsx: Path, out_dir: Path) -> dict[str, int]:
     return {paths["pilot"].name: len(pilot), paths["eprel"].name: len(eprel)}
 
 
+def import_reviews(pages: Path, products: Path, out: Path) -> dict:
+    """Saved review pages -> reviews CSV. Importing here keeps bs4 optional for other commands."""
+    from greenchoice.collect.saved_pages import import_folder
+
+    known = set(pd.read_csv(products, dtype=str)["product_id"])
+    table, report = import_folder(pages, known)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(out, index=False)
+    return {"reviews": len(table), "out": str(out), "products": report}
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="greenchoice")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -151,6 +162,11 @@ def main(argv: list[str] | None = None) -> None:
     c.add_argument("--out", type=Path, default=None,
                    help="Kişi A'ya verilecek product_id, url, category dosyası")
 
+    r = sub.add_parser("import-reviews", help="Tarayıcıdan kaydedilen yorum sayfalarını CSV'ye çevir")
+    r.add_argument("--pages", type=Path, default=Path("data/raw/yorum_sayfalari"))
+    r.add_argument("--products", type=Path, default=Path("data/interim/pilot_products.csv"))
+    r.add_argument("--out", type=Path, default=Path("data/interim/reviews.csv"))
+
     args = parser.parse_args(argv)
     if args.cmd == "build":
         source = SOURCES.get(args.source, Path(args.source))
@@ -167,6 +183,12 @@ def main(argv: list[str] | None = None) -> None:
     elif args.cmd == "check-pilot":
         try:
             report = check_pilot(args.products, args.eprel, args.out)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    elif args.cmd == "import-reviews":
+        try:
+            report = import_reviews(args.pages, args.products, args.out)
         except ValueError as exc:
             raise SystemExit(str(exc)) from exc
         print(json.dumps(report, ensure_ascii=False, indent=2))
