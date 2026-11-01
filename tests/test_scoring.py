@@ -64,6 +64,18 @@ def test_review_explanations_need_evidence(sample_db):
     assert all(e["criterion"] != "durability" for e in expl)
 
 
+def test_energy_criterion_ignores_reviews(sample_db):
+    """Decision 16: energy comes from the energy class and kWh, never from review text."""
+    from greenchoice.scoring.criteria import compute_criteria
+
+    path, _ = sample_db
+    features = db.read_table("product_features", path)
+    changed = features.assign(energy_score=-1.0, energy_pos=0, energy_neg=99)
+    before = compute_criteria(features)["c_energy_efficiency"]
+    after = compute_criteria(changed)["c_energy_efficiency"]
+    assert before.tolist() == after.tolist()
+
+
 def test_weights_are_normalized_and_overridable():
     scorer = WeightedScorer()
     w = scorer.weights_for("refrigerator", {"energy_efficiency": 5})

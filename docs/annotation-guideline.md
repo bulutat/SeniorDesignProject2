@@ -62,25 +62,14 @@ Etiketlenmeyen konular: fiyat, iade, fatura, kapasite, ölçü, tasarım, yıkam
 Emin değilseniz boş bırakmayın: `note` sütununa yazın, haftalık toplantıda karar verip bu tabloya
 ekleyin.
 
-### Açık sorular (Kişi B ile karara bağlanacak)
+### Açık sorular
 
 - [ ] **Dayanıklılık için alt süre:** "1 aydır sorunsuz" sayılsın mı? Öneri: en az 6 ay. Pilot
   yorumların çoğu yeni ürünlerden geldiği için `durability:pos` çok az kalabilir.
 - [ ] **Performans aspect'i:** Yıkama ve soğutma yorumları çok sık, ama beş aspect'in dışında kalıyor.
   Hepsiburada kriterlerinde de var (Yıkama, Soğutma). Eklensin mi?
-- [ ] **Enerji:** 1.460 yorumda anahtar sözcükle yalnızca 21 aday çıktı, baktığımız 4 adaydan 1'i
-  gerçekten enerjiyle ilgiliydi. Enerji kriteri yorumdan değil EPREL ve Hepsiburada "Enerji Tüketimi"
-  puanlarından beslensin mi?
-
-### Dosya biçimi
-
-`data/annotations/reviews_gold.csv`: `review_id, product_id, annotator, text, aspect, polarity`
-
-```
-r101,ty-1,A,"3 yıldır sorunsuz ama çok ses yapıyor",durability,pos
-r101,ty-1,A,"3 yıldır sorunsuz ama çok ses yapıyor",noise,neg
-r102,ty-1,A,"Kargo hızlıydı",,
-```
+- [x] **Enerji:** Enerji kriteri yorumlardan beslenmez (karar 16). `energy` etiketi yine yazılır,
+  ama skora girmez; yalnızca analiz ve raporlama içindir.
 
 ### Etiketlenecek yorumların seçimi
 

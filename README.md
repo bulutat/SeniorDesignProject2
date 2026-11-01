@@ -110,12 +110,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 103 tests
+pytest                    # 104 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-01, Python 3.12.10 - 103 passed, ruff clean. The frontend build was
+Last verified: 2026-11-01, Python 3.12.10 - 104 passed, ruff clean. The frontend build was
 last run before the EPREL changes; neither those nor the review import touch `frontend/`.
 
 ## Team workflow
@@ -127,6 +127,13 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-01 - Annotation guideline and energy decision (Person A, task A1.3)
+
+- `docs/annotation-guideline.md` tried on 32 real reviews chosen to be difficult: aspect scopes,
+  a table of confusing cases (examples are invented) and a pool plan with a random test set.
+- Decision 16: the energy criterion is not fed from reviews. Scoring already used only the energy
+  class and kWh, so no scoring code changed; a new test guards it. 104 tests.
 
 ### 2026-11-01 - Review cleaning (Person A, task A1.2)
 
