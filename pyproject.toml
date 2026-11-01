@@ -27,7 +27,7 @@ ml = ["xgboost>=2.0", "shap>=0.45"]
 # Transformer tabanlı NLP (Aşama 2). Büyük indirme: GPU yoksa CPU sürümü yeterli.
 nlp = ["torch>=2.2", "transformers>=4.40", "datasets>=2.19"]
 dev = ["pytest>=8.0", "httpx>=0.27", "ruff>=0.5", "jupyterlab>=4.1", "openpyxl>=3.1",
-       "beautifulsoup4>=4.12"]
+       "beautifulsoup4>=4.12", "requests>=2.31"]
 
 [project.scripts]
 greenchoice = "greenchoice.pipeline:main"

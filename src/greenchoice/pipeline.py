@@ -18,6 +18,7 @@ import pandas as pd
 
 from greenchoice import db
 from greenchoice.collect.eprel_manual import load_manual_eprel
+from greenchoice.collect.http import PoliteClient
 from greenchoice.collect.pilot import load_pilot_list, pilot_report
 from greenchoice.collect.sheets import build_template, export_csvs
 from greenchoice.config import INTERIM_DIR, SAMPLE_DIR, db_path
@@ -126,6 +127,14 @@ def import_sheets(xlsx: Path, out_dir: Path) -> dict[str, int]:
     return {paths["pilot"].name: len(pilot), paths["eprel"].name: len(eprel)}
 
 
+def fetch_trendyol(urls: list[str], category: str, client=None) -> list[dict]:
+    """Known Trendyol product pages -> product facts. Polite client; bs4 stays optional."""
+    from greenchoice.collect.ecommerce import TrendyolSource
+
+    source = TrendyolSource(client or PoliteClient())
+    return [source.fetch_product(url, category) for url in urls]
+
+
 def import_reviews(pages: Path, products: Path, out: Path) -> dict:
     """Saved review pages -> reviews CSV. Importing here keeps bs4 optional for other commands."""
     from greenchoice.collect.saved_pages import import_folder
@@ -156,6 +165,10 @@ def main(argv: list[str] | None = None) -> None:
     i.add_argument("--xlsx", type=Path, default=Path("data/raw/veri_toplama.xlsx"))
     i.add_argument("--out-dir", type=Path, default=Path("data/raw"))
 
+    t = sub.add_parser("fetch-trendyol", help="Bilinen Trendyol ürün sayfalarını nazikçe oku (JSON)")
+    t.add_argument("--url", nargs="+", required=True, help="Trendyol ürün sayfası adres(ler)i")
+    t.add_argument("--category", required=True, help="refrigerator | washing_machine")
+
     c = sub.add_parser("check-pilot", help="Pilot ürün listesini doğrula, EPREL kapsamını raporla")
     c.add_argument("--products", type=Path, required=True, help="Pilot ürün listesi CSV")
     c.add_argument("--eprel", type=Path, default=None, help="Elle toplanan EPREL CSV (isteğe bağlı)")
@@ -180,6 +193,12 @@ def main(argv: list[str] | None = None) -> None:
     elif args.cmd == "import-sheets":
         for name, count in import_sheets(args.xlsx, args.out_dir).items():
             print(f"{name}: {count} satır")
+    elif args.cmd == "fetch-trendyol":
+        try:
+            products = fetch_trendyol(args.url, args.category)
+        except (ValueError, PermissionError) as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(products, ensure_ascii=False, indent=2))
     elif args.cmd == "check-pilot":
         try:
             report = check_pilot(args.products, args.eprel, args.out)
