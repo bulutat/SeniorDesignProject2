@@ -105,13 +105,13 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 78 tests
+pytest                    # 107 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-10-30, Python 3.12.10, Node 26.13.0 - 78 passed, ruff clean. The
-frontend build was last run before the EPREL changes, which do not touch `frontend/`.
+Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 107 passed, ruff clean. The frontend
+build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
 
@@ -122,6 +122,23 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-02 - Polite data collection (Person B, decision 17)
+
+- Tried one honest-User-Agent request per shop: Hepsiburada answers 403 with a CAPTCHA page
+  (no scraper, nothing is circumvented), Trendyol serves product pages. Decision 17 records
+  the collection method: saved pages for Hepsiburada, a polite reader for known Trendyol
+  product pages, product selection by review count rather than by EPREL availability.
+- `collect/robots.py`: robots.txt parser with `*` and `$` support (`urllib.robotparser` ignores
+  them, so Trendyol's `Disallow: /*?q=` would have been missed). An unreadable robots.txt (403,
+  429, 5xx, network error) closes the site. `PoliteClient` now uses it and accepts an injected
+  session, so it is tested without network (`tests/test_robots.py`, `tests/test_http.py`).
+- `collect/trendyol_product.py` + `TrendyolSource.fetch_product` + `greenchoice fetch-trendyol`:
+  reads price, rating and counts, capacity and warranty from the page's schema.org product
+  data. Reviews and authors are never returned; the model code is only suggested. Checked on
+  the five known Trendyol products. Search, listing and reviews stay unavailable (robots.txt).
+- `requests` and `beautifulsoup4` added to the `dev` extra. 107 tests (up from 78).
+- Fixed `docs/decisions.md`, where a previous edit had removed the "Açık sorular" heading.
 
 ### 2026-11-01 - Electricity price from the official EPDK table (Person B, task B0.3)
 
