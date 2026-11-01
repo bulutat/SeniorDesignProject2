@@ -3,6 +3,53 @@
 Her bilgi için kaynağı ve doğrulama durumu yazılır. "Doğrulanmadı" yazan satırlar koda
 sabit değer olarak girmez.
 
+## Yorumlar (Kişi A · A0.1)
+
+İnceleme tarihi: 01.11.2026. Yalnızca yapı incelendi: robots.txt, kullanım koşulları ve pilot
+listeden birer ürün sayfası normal tarayıcıda açıldı. Yorum verisi toplanmadı ve repoya eklenmedi.
+
+**Sonuç:** İki sitede de otomatik yorum toplamaya uygun bir yol bulunamadı. A1.1 (scraper)
+danışman kararına kadar **bekliyor**. Robots.txt veya bot koruması aşılmayacak (`AGENTS.md`).
+
+### Trendyol
+
+| Konu | Bulgu | Durum |
+|---|---|---|
+| Ürün yorum sayfası | `/<marka>/<ürün>-p-<id>/yorumlar` açılıyor; `www.trendyol.com/robots.txt` bu yolu yasaklamıyor | Doğrulandı |
+| Yorumların yüklenmesi | Sayfanın HTML'inde yorum yok (`productReviews: null`). Yorumlar tarayıcıda sonradan, kaydırdıkça 20'şer yükleniyor. HTML'de `apigw.trendyol.com` altında `review-detail` ve `product-reviews-seo` adresleri geçiyor | İstek ağ kaydında görülemedi; adres HTML'den okundu |
+| `apigw.trendyol.com/robots.txt` | `User-agent: *` için `Disallow: /` | Doğrulandı. **Engel** |
+| `www.trendyol.com/robots.txt` | `/gw/` yasak. Diğer dillerde `/get/api/review/*` ve `/reviews` yasak | Doğrulandı |
+| Kullanım koşulları | `/kullanim_kosullari`: site materyalleri önceden izin alınmadan ve kaynak gösterilmeden kopyalanamaz, çoğaltılamaz, başka bilgisayara yüklenemez. Kullanıcı yorumlarının bu kapsamda olup olmadığı açıkça yazmıyor | Metin okundu, hukuki yorum yapılmadı |
+| Sayfa içi veri | `__review-detail__PROPS`: ortalama puan, puan ve yorum sayısı, teknik özellikler (örnek ürün: 4,6 · 108 değerlendirme · 64 yorum) | Doğrulandı |
+
+### Hepsiburada
+
+| Konu | Bulgu | Durum |
+|---|---|---|
+| Otomatik istek | `robots.txt`, proje `User-Agent`'ı ile istendiğinde **403** ve güvenlik/CAPTCHA sayfası döndü. Normal tarayıcıda açıldı | Doğrulandı. **Engel** (`PoliteClient`, 403 alınan robots.txt'de hiçbir adrese izin vermez) |
+| robots.txt | `/api/` ve `/product-comment/` yasak. `product-review` site haritası var, `-yorumlari` ile biten sayfalar yasaklı görünmüyor | Doğrulandı |
+| Yorum sayfası | `<ürün>-pm-<id>-yorumlari` açılıyor, yorumlar sayfa HTML'inde. Puan alt başlıkları da var: Yıkama, Sessiz Çalışma, Enerji Tüketimi, Program | Doğrulandı (normal tarayıcıda) |
+| Kullanım koşulları | `/uyelik-sozlesmesi` giriş sayfasına yönlendiriyor, metin okunamadı | **Doğrulanmadı** |
+
+### Seçenekler
+
+1. **Elle toplama:** EPREL'de olduğu gibi yorumlar tarayıcıdan elle Excel'e alınır. Yorum sayısı
+   düşük ürünlerde mümkün, 80–100 ürün/kategori için zor. Koşullar açısından danışmana sorulmalı.
+2. **Site izni:** Danışman veya bölüm üzerinden Trendyol/Hepsiburada'dan akademik izin veya veri
+   istenir. Temiz yol ama süre belirsiz.
+3. **Hazır veri seti, yorum modeli için:** [MüşteriYorumları](https://huggingface.co/datasets/turkish-nlp-suite/MusteriYorumlari)
+   (Hepsiburada ve Trendyol, ~104 bin yorum, CC-BY-SA-4.0). Yalnızca `text` ve yıldız etiketi var;
+   ürün veya kategori bilgisi yok, bu yüzden pilot ürünlerle **eşleştirilemez**. BERTurk
+   ön eğitimi için kullanılabilir, ürün skorlaması için yetmez. Veri setinin toplanma
+   koşulları doğrulanmadı. Beyaz eşya odaklı Türkçe etiketli ABSA veri seti aramalarda bulunamadı.
+4. **Amazon Reviews 2023:** Karar #2'deki yedek. İngilizce; enerji sınıfı yok, dil ve model değişir.
+
+### Doğrulanmadı
+
+- Trendyol yorum isteğinin tam adresi, parametreleri ve JSON alanları. Engel nedeniyle araştırılmadı.
+- Seçilecek site. Elle toplamada Hepsiburada sayfası daha uygun görünüyor (21/26 pilot ürün,
+  yorumlar HTML'de), ama bu yalnızca tek ürünle bakıldı.
+
 ## EPREL (Kişi B · B0.1)
 
 İnceleme tarihi: 29.10.2026. Kaynak: EPREL'in resmi
