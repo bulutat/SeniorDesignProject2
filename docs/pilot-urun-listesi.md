@@ -28,6 +28,25 @@ EPREL'den alıyoruz.
 
 Ürün seçerken: en az 30 yorumu olanlar, farklı marka ve fiyat aralıkları.
 
+## Aday ürünleri bulmak (kaydedilen arama sayfaları, karar 17)
+
+Hepsiburada otomatik isteği engellediği için aday ürünler, tarayıcıda kaydedilen arama sonuç
+sayfalarından çevrimdışı çıkarılır.
+
+1. Hepsiburada arama kutusuna `bosch buzdolabı` gibi bir arama yaz, Enter. Sıralama ve filtre
+   düğmelerine basma (robots.txt yasaklıyor), yalnızca düz arama.
+2. `Ctrl+S` → **Web Sayfası, Tamamı** → `data/raw/listeleme_sayfalari/`.
+3. Her kategori için farklı markaları ve ikinci sayfaları kaydet.
+4. `greenchoice import-listings` komutu `data/interim/aday_urunler.csv` dosyasını yazar:
+   ürün no, adres, ad, fiyat, puan, değerlendirme sayısı, model kodu adayı.
+
+Komut reklam kartlarını, paketleri (`3'lü ... Paketi`, `... Seti`), aksesuarları (5.000 TL'nin
+altı) ve çamaşır makinesi/buzdolabı olmayan ürünleri atar ve sayıp raporlar. Aynı model iki
+satırda geçerse değerlendirme sayısı yüksek olanı tutar. Fiyatlardaki nokta binlik ayracıdır
+(`47.930` = 47.930 TL). **Model kodu yalnızca bir öneridir**; başlıkta kod yoksa boş kalır
+(Arçelik ve Beko başlıklarında çoğu zaman yok), EPREL araması için insan bakar. Sayfa değişirse
+komut dosya adıyla durur.
+
 ## Kontrol
 
 ```bash

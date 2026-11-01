@@ -110,12 +110,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 115 tests
+pytest                    # 127 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 115 passed, ruff clean. The
+Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 127 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -127,6 +127,17 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-02 - Candidate products from saved Hepsiburada search pages (Person B)
+
+- `collect/listing_pages.py` and `greenchoice import-listings`: read search pages saved in a
+  browser (no network) and write `data/interim/aday_urunler.csv` with title, URL, price, rating,
+  rating count and suggested model codes. Advertisement cards, bundles, accessories and other
+  appliances are skipped and counted; a page that parses to nothing fails with its file name.
+- Checked on 9 real saved pages. Real data exposed three bugs, now covered by tests: prices
+  without decimals (`47.930`) were read as 47.93 TL, a "3-piece appliance package" counted as a
+  washing machine, and a 1.6k TL accessory counted as an appliance.
+- Shared helper `collect/model_codes.py` (also used by the Trendyol reader). 127 tests.
 
 ### 2026-11-02 - Polite data collection (Person B, decision 17)
 
