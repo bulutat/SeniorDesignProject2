@@ -146,6 +146,16 @@ def import_reviews(pages: Path, products: Path, out: Path) -> dict:
     return {"reviews": len(table), "out": str(out), "products": report}
 
 
+def import_listings(pages: Path, out: Path) -> dict:
+    """Saved Hepsiburada search pages -> candidate products CSV. bs4 stays optional."""
+    from greenchoice.collect.listing_pages import import_listings as read_folder
+
+    table, report = read_folder(pages)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(out, index=False)
+    return {**report, "out": str(out)}
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="greenchoice")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -168,6 +178,10 @@ def main(argv: list[str] | None = None) -> None:
     t = sub.add_parser("fetch-trendyol", help="Bilinen Trendyol ürün sayfalarını nazikçe oku (JSON)")
     t.add_argument("--url", nargs="+", required=True, help="Trendyol ürün sayfası adres(ler)i")
     t.add_argument("--category", required=True, help="refrigerator | washing_machine")
+
+    li = sub.add_parser("import-listings", help="Kaydedilen Hepsiburada arama sayfalarından aday ürün listesi")
+    li.add_argument("--pages", type=Path, default=Path("data/raw/listeleme_sayfalari"))
+    li.add_argument("--out", type=Path, default=Path("data/interim/aday_urunler.csv"))
 
     c = sub.add_parser("check-pilot", help="Pilot ürün listesini doğrula, EPREL kapsamını raporla")
     c.add_argument("--products", type=Path, required=True, help="Pilot ürün listesi CSV")
@@ -193,6 +207,12 @@ def main(argv: list[str] | None = None) -> None:
     elif args.cmd == "import-sheets":
         for name, count in import_sheets(args.xlsx, args.out_dir).items():
             print(f"{name}: {count} satır")
+    elif args.cmd == "import-listings":
+        try:
+            report = import_listings(args.pages, args.out)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
     elif args.cmd == "fetch-trendyol":
         try:
             products = fetch_trendyol(args.url, args.category)

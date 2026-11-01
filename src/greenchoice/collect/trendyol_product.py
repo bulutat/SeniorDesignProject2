@@ -13,8 +13,9 @@ import re
 
 from bs4 import BeautifulSoup
 
+from greenchoice.collect.model_codes import model_code_candidates
+
 NUMBER = re.compile(r"\d+(?:[.,]\d+)?")
-MODEL_TOKEN = re.compile(r"[A-Za-z0-9-]{6,}")
 
 
 def _product_block(html: str) -> dict:
@@ -45,11 +46,6 @@ def _warranty_years(text: str) -> float | None:
     return value / 12 if "ay" in unit else None
 
 
-def _model_candidates(name: str) -> list[str]:
-    return [t for t in MODEL_TOKEN.findall(name)
-            if any(c.isdigit() for c in t) and any(c.isalpha() for c in t)]
-
-
 def parse_product(html: str, category: str) -> dict:
     item = _product_block(html)
     offers = item.get("offers")
@@ -73,7 +69,7 @@ def parse_product(html: str, category: str) -> dict:
     return {
         "product_id": f"ty-{sku}", "source": "trendyol", "url": url, "category": category,
         "brand": (item.get("brand") or {}).get("name"), "model_code": None,
-        "model_code_candidates": _model_candidates(name), "name": name,
+        "model_code_candidates": model_code_candidates(name), "name": name,
         "price_tl": float(offer["price"]), "capacity": capacity, "warranty_years": warranty,
         "rating_avg": rating.get("ratingValue"), "rating_count": rating.get("ratingCount"),
         "review_count": rating.get("reviewCount"), "warnings": warnings,
