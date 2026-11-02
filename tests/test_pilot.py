@@ -37,7 +37,6 @@ def test_loads_and_cleans_values(tmp_path):
     (row(product_id="123"), "row 2.*product_id"),
     (row(category="toaster"), "row 2.*category"),
     (row(url="http://example.com/x"), "row 2.*url"),
-    (row(model_code=" "), "row 2.*model_code"),
 ])
 def test_rejects_bad_rows(tmp_path, bad_row, message):
     with pytest.raises(ValueError, match=message):
@@ -60,6 +59,18 @@ def test_accepts_decimal_comma_in_numeric_fields(tmp_path):
     out = load_pilot_list(write_csv(tmp_path, row(rating_avg="4,6", capacity="10")))
     assert out.loc[0, "rating_avg"] == pytest.approx(4.6)
     assert out.loc[0, "capacity"] == pytest.approx(10.0)
+
+
+def test_a_product_without_a_model_code_is_kept_and_counted_as_unmatched(tmp_path):
+    """Turkish-brand titles often carry no code. They stay on the list (decision 17c); EPREL cannot
+    match them, which is a finding, not a data error."""
+    loaded = load_pilot_list(write_csv(tmp_path, row(model_code=" "),
+                                       row("ty-2", url="https://example.com/u/2", model_code="KZ-2")))
+    assert len(loaded) == 2
+    eprel = pd.DataFrame({"model_code": ["KZ-2"]})
+    report = pilot_report(loaded, eprel)
+    assert report["no_model_code"] == 1 and report["eprel_matched"] == 1
+    assert report["eprel_missing"] == []  # a missing code is not a "code missing from EPREL"
 
 
 def test_rejects_duplicate_id_and_url(tmp_path):

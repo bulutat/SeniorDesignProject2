@@ -24,7 +24,8 @@ ile aynı olmalı (boşluk ve tire farkı sorun olmaz).
 
 ## Kurallar
 
-- Zorunlu alanı eksik ürünü yazma, başka ürüne geç. Model kodu yoksa EPREL'le eşleşemez.
+- Zorunlu alanı eksik ürünü yazma, başka ürüne geç. **Model kodu zorunlu değil:** başlıkta
+  yoksa boş bırak, ürün listede kalır ve EPREL'de eşleşmez (karar 17). Eşleşme oranı raporlanır.
 - EPREL'de bulamadığın ürün için EPREL sayfasına satır ekleme, Ürünler'de kalsın.
   Eşleşme oranını raporda kullanacağız.
 - Sayfada **gördüğün** değeri yaz, görmediğini boş bırak. Sayıları sayı olarak yaz
