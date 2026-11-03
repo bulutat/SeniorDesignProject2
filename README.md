@@ -47,7 +47,8 @@ data/
   sample/        synthetic example data (committed)
   annotations/   manual labels (committed)
   templates/     empty CSV templates for hand-collected data (committed)
-  toplanan/      small product-fact files of the collected data (committed, guarded by a test)
+  toplanan/      small product-fact files of the collected data and the hand-read EPREL
+                 records (eprel_kayitlari.json); committed, guarded by a test
   raw/ interim/ processed/   collected and generated data (not committed, except the
                              hand-off list data/interim/pilot_products.csv)
 docs/            architecture, data and API contracts, decisions, source review, schedule
@@ -94,6 +95,13 @@ Hand-collected data is entered in `data/raw/veri_toplama.xlsx` (template:
 `data/templates/veri_toplama.xlsx`, guide: `docs/veri-toplama-excel.md`), then converted:
 `greenchoice import-sheets --xlsx data/raw/veri_toplama.xlsx --out-dir data/raw`
 
+Building the 80-product list is a chain of commands (`import-listings`, `fetch-trendyol`,
+`select-candidates`, `append-selection`, `import-sheets`, `check-pilot`); the steps, including how
+the EPREL records are found and read by hand, are in `docs/urun-listesi-uretimi.md` (Turkish).
+`append-selection` writes the selected products and the records of
+`data/toplanan/eprel_kayitlari.json` into a copy of the workbook and never changes the original:
+`greenchoice append-selection --base data/raw/veri_toplama_birlesik_v3.xlsx --out data/raw/veri_toplama_v4.xlsx`
+
 Check the pilot product list (and its EPREL coverage) before handing it over:
 `greenchoice check-pilot --products data/raw/pilot_products.csv --eprel data/raw/eprel_manual.csv --out data/interim/pilot_products.csv`
 
@@ -111,12 +119,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 157 tests
+pytest                    # 166 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 157 passed, ruff clean. The
+Last verified: 2026-11-03, Python 3.12.10, Node 26.13.0 - 166 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -133,7 +141,17 @@ other person, then merge to `main`.
 
 - `greenchoice fetch-trendyol` now drops tracking parameters (`?boutiqueId=...`) from shared
   links before requesting a page and can write its result with `--out file.json` (UTF-8, which a
-  PowerShell redirect does not guarantee). 2 new tests; 157 in total.
+  PowerShell redirect does not guarantee). 2 new tests.
+- New `collect/workbook_append.py` and `greenchoice append-selection`: appends the selected
+  products and the hand-read EPREL records to a copy of the workbook (the original is never
+  overwritten; running it twice adds nothing twice). The 22 records read by hand now live in
+  `data/toplanan/eprel_kayitlari.json` and are checked by a strict loader (category/group,
+  energy class A-G, duplicate identifiers). Verified: regenerating the workbook from v3 with the
+  committed selection gives cell-for-cell the same `Ürünler` and `EPREL` sheets as the committed
+  `veri_toplama_v4.xlsx` (54 products appended: 22 matched, 15 with a code but no record, 17
+  without a code; 18 EPREL rows). 7 new tests; 166 in total.
+- `docs/urun-listesi-uretimi.md` (Turkish) is the runbook from saved pages to the hand-off list,
+  including the console helper that finds EPREL record numbers.
 
 ### 2026-11-03 - Collected product data backed up in the repository (Person B, decision 19)
 

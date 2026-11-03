@@ -21,6 +21,7 @@ from greenchoice.collect.eprel_manual import load_manual_eprel
 from greenchoice.collect.http import PoliteClient
 from greenchoice.collect.pilot import load_pilot_list, pilot_report
 from greenchoice.collect.sheets import build_template, export_csvs
+from greenchoice.collect.workbook_append import append_selection
 from greenchoice.config import INTERIM_DIR, SAMPLE_DIR, db_path
 from greenchoice.contracts import PRODUCT_COLUMNS, REVIEW_COLUMNS, conform
 from greenchoice.nlp.aggregate import product_review_features
@@ -207,6 +208,12 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--brand-cap", type=int, default=12, help="kategori başına marka başına en fazla ürün")
     s.add_argument("--min-ratings", type=int, default=30)
 
+    a = sub.add_parser("append-selection", help="Seçilen ürünleri ve EPREL kayıtlarını Excel'in kopyasına ekle")
+    a.add_argument("--base", type=Path, required=True, help="Mevcut veri toplama Excel'i (değişmez)")
+    a.add_argument("--selection", type=Path, default=Path("data/interim/secilen_urunler.csv"))
+    a.add_argument("--records", type=Path, default=Path("data/toplanan/eprel_kayitlari.json"))
+    a.add_argument("--out", type=Path, required=True, help="Yeni Excel dosyası")
+
     c = sub.add_parser("check-pilot", help="Pilot ürün listesini doğrula, EPREL kapsamını raporla")
     c.add_argument("--products", type=Path, required=True, help="Pilot ürün listesi CSV")
     c.add_argument("--eprel", type=Path, default=None, help="Elle toplanan EPREL CSV (isteğe bağlı)")
@@ -256,6 +263,14 @@ def main(argv: list[str] | None = None) -> None:
             print(f"{len(products)} ürün yazıldı: {args.out}")
         else:
             print(text)
+    elif args.cmd == "append-selection":
+        if args.out.resolve() == args.base.resolve():
+            raise SystemExit("--out must differ from --base: the existing workbook is never overwritten")
+        try:
+            summary = append_selection(args.base, args.selection, args.records, args.out)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
     elif args.cmd == "check-pilot":
         try:
             report = check_pilot(args.products, args.eprel, args.out)
