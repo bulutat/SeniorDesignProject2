@@ -132,7 +132,8 @@ def fetch_trendyol(urls: list[str], category: str, client=None) -> list[dict]:
     from greenchoice.collect.ecommerce import TrendyolSource
 
     source = TrendyolSource(client or PoliteClient())
-    return [source.fetch_product(url, category) for url in urls]
+    # shared links carry tracking parameters (?boutiqueId=...); the page itself needs none
+    return [source.fetch_product(url.split("?")[0], category) for url in urls]
 
 
 def import_reviews(pages: Path, products: Path, out: Path) -> dict:
@@ -191,6 +192,7 @@ def main(argv: list[str] | None = None) -> None:
     t = sub.add_parser("fetch-trendyol", help="Bilinen Trendyol ürün sayfalarını nazikçe oku (JSON)")
     t.add_argument("--url", nargs="+", required=True, help="Trendyol ürün sayfası adres(ler)i")
     t.add_argument("--category", required=True, help="refrigerator | washing_machine")
+    t.add_argument("--out", type=Path, default=None, help="JSON dosyasına yaz (UTF-8) yerine ekrana bas")
 
     li = sub.add_parser("import-listings", help="Kaydedilen Hepsiburada arama sayfalarından aday ürün listesi")
     li.add_argument("--pages", type=Path, default=Path("data/raw/listeleme_sayfalari"))
@@ -247,7 +249,13 @@ def main(argv: list[str] | None = None) -> None:
             products = fetch_trendyol(args.url, args.category)
         except (ValueError, PermissionError) as exc:
             raise SystemExit(str(exc)) from exc
-        print(json.dumps(products, ensure_ascii=False, indent=2))
+        text = json.dumps(products, ensure_ascii=False, indent=2)
+        if args.out:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            args.out.write_text(text, encoding="utf-8")
+            print(f"{len(products)} ürün yazıldı: {args.out}")
+        else:
+            print(text)
     elif args.cmd == "check-pilot":
         try:
             report = check_pilot(args.products, args.eprel, args.out)

@@ -111,12 +111,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 155 tests
+pytest                    # 157 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 155 passed, ruff clean. The
+Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 157 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -128,6 +128,12 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-03 - One-off scripts turned into commands (Person B)
+
+- `greenchoice fetch-trendyol` now drops tracking parameters (`?boutiqueId=...`) from shared
+  links before requesting a page and can write its result with `--out file.json` (UTF-8, which a
+  PowerShell redirect does not guarantee). 2 new tests; 157 in total.
 
 ### 2026-11-03 - Collected product data backed up in the repository (Person B, decision 19)
 

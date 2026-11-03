@@ -89,6 +89,21 @@ def test_search_and_review_discovery_stay_unavailable():
         source.fetch_reviews({}, 10)
 
 
+def test_tracking_parameters_are_dropped_before_the_page_is_requested(html):
+    """Shared links carry ?boutiqueId=...&merchantId=...; only the clean address is requested."""
+    client = FakeClient(html)
+    fetch_trendyol([URL + "?boutiqueId=61&merchantId=1261641"], "washing_machine", client)
+    assert client.requested == [URL]
+
+
+def test_cli_can_write_the_products_to_a_json_file(html, monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr("greenchoice.pipeline.PoliteClient", lambda: FakeClient(html))
+    out = tmp_path / "out" / "trendyol.json"
+    main(["fetch-trendyol", "--url", URL, "--category", "washing_machine", "--out", str(out)])
+    assert json.loads(out.read_text(encoding="utf-8"))[0]["product_id"] == "ty-1136461902"
+    assert "1 ürün" in capsys.readouterr().out
+
+
 def test_cli_prints_the_product_json(html, monkeypatch, capsys):
     monkeypatch.setattr("greenchoice.pipeline.PoliteClient", lambda: FakeClient(html))
     main(["fetch-trendyol", "--url", URL, "--category", "washing_machine"])
