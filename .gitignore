@@ -34,3 +34,6 @@ frontend/dist/
 .idea/
 Thumbs.db
 .DS_Store
+
+# archives of collected data are backed up by hand, never committed
+*.zip
