@@ -47,6 +47,7 @@ data/
   sample/        synthetic example data (committed)
   annotations/   manual labels (committed)
   templates/     empty CSV templates for hand-collected data (committed)
+  toplanan/      small product-fact files of the collected data (committed, guarded by a test)
   raw/ interim/ processed/   collected and generated data (not committed, except the
                              hand-off list data/interim/pilot_products.csv)
 docs/            architecture, data and API contracts, decisions, source review, schedule
@@ -110,12 +111,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 150 tests
+pytest                    # 155 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 150 passed, ruff clean. The
+Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 155 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -127,6 +128,15 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-03 - Collected product data backed up in the repository (Person B, decision 19)
+
+- New `data/toplanan/` holds the small factual files only: the 80-product workbook, the
+  selected and candidate product tables and the Trendyol product facts (about 0.2 MB). Saved
+  shop pages (214 MB), the HTTP cache (it contains review authors), review text and old
+  workbook versions stay out of Git and are backed up by hand.
+- `tests/test_collected_data.py` guards the folder: allowed file types, at most 1 MB per file,
+  no review text, authors, secrets or tracking parameters. 155 tests.
 
 ### 2026-11-02 - 80-product list assembled (Person B)
 
