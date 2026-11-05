@@ -80,6 +80,22 @@ Rastgele seçimde enerji, arıza ve gürültü yorumları çok az çıkar. 400 y
 - **Eğitim (300 yorum):** Bilerek zenginleştirilmiş: anahtar sözcükle bulunan enerji, arıza, servis
   ve gürültü adayları ile düşük puanlı yorumlar, kalanı rastgele.
 
+Seçim komutu: `greenchoice annotation-pool` (`src/greenchoice/nlp/pool.py`, sabit tohum 491).
+
+- Eğitimde her nadir aspect için en fazla 40 anahtar sözcük adayı (önce enerji, sonra arıza,
+  gürültü, servis), en fazla 60 düşük puanlı (3 ve altı) yorum alınır, kalan rastgele doldurulur
+  ve kategoriler sırayla seçilir. Bir üründen en fazla 30 eğitim yorumu girer.
+- Eğitim yorumları A ve B arasında yarı yarıya bölünür. Her etiketçi 250 yorumluk bir tablo alır:
+  ortak 100 test yorumu ve kendi 150 eğitim yorumu, karışık sırada. Tabloda yorumun neden
+  seçildiği, test mi eğitim mi olduğu ve yıldız puanı yoktur; etiket yalnızca metinden verilir.
+- `pool.csv` yalnızca kimlikleri tutar. Tablolar yorum metni içerdiği için `data/interim/etiketleme/`
+  altında kalır, repoya girmez, ikimiz arasında elden paylaşılır.
+- Etiketleme başladıktan sonra havuz yeniden seçilmez; komut var olan havuzun üstüne `--force`
+  olmadan yazmaz.
+- 1.460 pilot yorumla deneme: anahtar sözcükle enerji 1, servis 6, arıza 14 aday bulundu, gürültü
+  178. Yani zenginleştirme sınırlı kaldı, 300 eğitim yorumunun 180'i rastgele. 80 ürünün yorumları
+  gelince komut yeniden çalıştırılır.
+
 ### Uyum ölçümü
 
 - İlk 100 yorumu ikiniz ayrı ayrı etiketleyin. Aspect bazında Cohen's kappa hesaplayın.

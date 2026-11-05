@@ -101,6 +101,10 @@ automated collection (`docs/kaynak-inceleme.md`). This command only reads local 
 extracts usernames; guide: `docs/yorum-toplama.md`:
 `greenchoice import-reviews --pages data/raw/yorum_sayfalari --out data/interim/reviews.csv`
 
+Choose the reviews to annotate and write one sheet per annotator (`nlp/pool.py`). Sheets contain
+review text and stay in `data/interim/etiketleme/`, which is not committed:
+`greenchoice annotation-pool`
+
 The `--eprel` file is the hand-collected EPREL CSV (the EPREL public API needs a key that
 requires a sealed declaration). Template: `data/templates/eprel_manual.csv`; collection
 guide: `docs/eprel-manual-toplama.md` (Turkish). The file is validated row by row: energy
@@ -110,12 +114,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 168 tests
+pytest                    # 176 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-05, Python 3.12.10 - 168 passed, ruff clean. The
+Last verified: 2026-11-05, Python 3.12.10 - 176 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -127,6 +131,18 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-05 - Annotation pool (Person A, task O1.1)
+
+- New `greenchoice annotation-pool` (`nlp/pool.py`): 100 random test reviews that both people
+  label, and 300 train reviews enriched with keyword candidates (energy, failure, noise,
+  service), reviews rated 3 or lower, then random reviews alternating between categories. At
+  most 30 train reviews per product. Fixed seed; it refuses to overwrite an existing pool.
+- Each annotator gets one sheet of 250 reviews (shared 100 + own 150) in random order, without
+  the split, the reason or the rating.
+- Dry run on the 1,460 pilot reviews: the rule extractor finds few candidates (energy 1,
+  service 6, failure 14), so 180 of the 300 train reviews are random. To be run again on the
+  80-product reviews before labelling starts. 176 tests.
 
 ### 2026-11-02 - 80-product list assembled (Person B)
 

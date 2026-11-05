@@ -169,6 +169,27 @@ def select_candidates(listings: Path | None, trendyol: Path | None, existing: Pa
     return report
 
 
+def annotation_pool(reviews: Path, products: Path, out_dir: Path, seed: int,
+                    force: bool = False) -> dict:
+    """Raw reviews -> annotation manifest and one sheet per annotator (nlp/pool.py)."""
+    from greenchoice.nlp.pool import ANNOTATORS, PoolPlan, annotation_sheet, select_pool
+
+    manifest = out_dir / "pool.csv"
+    if manifest.exists() and not force:
+        raise ValueError(f"{manifest} zaten var. Etiketleme başladıysa havuzu değiştirmeyin; "
+                         "yine de yeniden seçmek için --force")
+    cleaned = clean_reviews(pd.read_csv(reviews, dtype={"review_id": str, "product_id": str}))
+    pool, report = select_pool(cleaned, pd.read_csv(products, dtype=str), PoolPlan(seed=seed))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    pool.to_csv(manifest, index=False)
+    for name in ANNOTATORS:
+        sheet = annotation_sheet(pool, cleaned, name, seed)
+        # utf-8-sig so that Excel shows Turkish letters correctly
+        sheet.to_csv(out_dir / f"etiketleme_{name}.csv", index=False, encoding="utf-8-sig")
+        report[f"sheet_{name}"] = len(sheet)
+    return {**report, "out_dir": str(out_dir), "seed": seed}
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="greenchoice")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -216,6 +237,13 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--products", type=Path, default=Path("data/interim/pilot_products.csv"))
     r.add_argument("--out", type=Path, default=Path("data/interim/reviews.csv"))
 
+    a = sub.add_parser("annotation-pool", help="Etiketlenecek yorumları seç, etiketçi tablolarını yaz")
+    a.add_argument("--reviews", type=Path, default=Path("data/interim/reviews.csv"))
+    a.add_argument("--products", type=Path, default=Path("data/interim/pilot_products.csv"))
+    a.add_argument("--out-dir", type=Path, default=Path("data/interim/etiketleme"))
+    a.add_argument("--seed", type=int, default=491)
+    a.add_argument("--force", action="store_true", help="var olan havuzun üstüne yaz")
+
     args = parser.parse_args(argv)
     if args.cmd == "build":
         source = SOURCES.get(args.source, Path(args.source))
@@ -257,6 +285,12 @@ def main(argv: list[str] | None = None) -> None:
     elif args.cmd == "import-reviews":
         try:
             report = import_reviews(args.pages, args.products, args.out)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    elif args.cmd == "annotation-pool":
+        try:
+            report = annotation_pool(args.reviews, args.products, args.out_dir, args.seed, args.force)
         except ValueError as exc:
             raise SystemExit(str(exc)) from exc
         print(json.dumps(report, ensure_ascii=False, indent=2))
