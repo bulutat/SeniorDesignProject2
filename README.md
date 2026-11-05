@@ -110,12 +110,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 150 tests
+pytest                    # 152 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 150 passed, ruff clean. The
+Last verified: 2026-11-05, Python 3.12.10, Node 26.13.0 - 152 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -127,6 +127,13 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-05 - Clear error for a broken Trendyol review card (Person A)
+
+- `import-reviews` crashed with `AttributeError` when a saved Trendyol review card had no star bar
+  or no width in it (reported by Person B). It now stops with a `ValueError` that names the file
+  and the review id, like the other parse errors.
+- 2 new tests; 152 in total. The 1,492 pilot reviews still import unchanged.
 
 ### 2026-11-02 - 80-product list assembled (Person B)
 
