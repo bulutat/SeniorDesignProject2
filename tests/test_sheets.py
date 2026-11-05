@@ -112,6 +112,15 @@ def test_data_typed_into_the_hint_row_is_an_error_not_silently_skipped(template,
         export_csvs(template, tmp_path / "out")
 
 
+def test_workbooks_made_from_an_older_template_keep_working(template, tmp_path):
+    """The hint of 'Model kodu' changed; a workbook still carrying the old hint is not data."""
+    wb = load_workbook(template)
+    wb["Ürünler"].cell(2, column_of(PILOT_COLUMNS, "model_code"), "sitedeki model kodu")
+    wb.save(template)
+    fill(template, "Ürünler", 3, **product())
+    assert export_csvs(template, tmp_path / "out")["pilot"].exists()
+
+
 def test_cli_reports_hint_row_problem(template, tmp_path):
     fill(template, "Ürünler", 2, **product())
     with pytest.raises(SystemExit, match="row 2"):
@@ -139,6 +148,6 @@ def test_cli_make_and_import_sheets(tmp_path, capsys):
 def test_cli_import_reports_row_problems_in_excel_terms(tmp_path):
     xlsx = tmp_path / "sheet.xlsx"
     build_template(xlsx)
-    fill(xlsx, "Ürünler", 3, **product(model_code=None))
+    fill(xlsx, "Ürünler", 3, **product(name=None))  # a required value; model_code may be empty
     with pytest.raises(SystemExit, match="Excel"):
         main(["import-sheets", "--xlsx", str(xlsx), "--out-dir", str(tmp_path / "csv")])

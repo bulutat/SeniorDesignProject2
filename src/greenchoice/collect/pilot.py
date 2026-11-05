@@ -17,7 +17,8 @@ from greenchoice.contracts import PRODUCT_COLUMNS, conform, require_columns
 from greenchoice.preprocess.matching import normalize_model_code
 from greenchoice.preprocess.products import clean_products, parse_price
 
-REQUIRED_COLUMNS = ["product_id", "source", "url", "category", "model_code", "name"]
+REQUIRED_COLUMNS = ["product_id", "source", "url", "category", "model_code", "name"]  # must exist
+REQUIRED_VALUES = ["product_id", "source", "url", "category", "name"]  # model_code may be empty
 PRODUCT_ID = re.compile(r"^[a-z]+-[A-Za-z0-9]+$")  # source prefix + id, e.g. "ty-123456"
 
 
@@ -26,7 +27,7 @@ def _fail(row_no: int, message: str) -> None:
 
 
 def _check_row(record: dict, row_no: int, categories: set[str]) -> None:
-    for column in REQUIRED_COLUMNS:
+    for column in REQUIRED_VALUES:
         if not record[column].strip():
             _fail(row_no, f"{column} is empty")
     if not PRODUCT_ID.match(record["product_id"].strip()):
@@ -99,15 +100,17 @@ def pilot_report(products: pd.DataFrame, eprel: pd.DataFrame | None = None,
                  target_per_category: int = 10) -> dict:
     counts = products["category"].value_counts()
     per_category = {c: int(counts.get(c, 0)) for c in categories_config()["categories"]}
+    keys = products["model_code"].map(normalize_model_code)
     report = {
         "per_category": per_category,
         "below_target": [c for c, n in per_category.items() if n < target_per_category],
+        "no_model_code": int(keys.isna().sum()),
         "eprel_matched": None,
         "eprel_missing": None,
     }
     if eprel is not None:
         known = set(eprel["model_code"].map(normalize_model_code).dropna())
-        keys = products["model_code"].map(normalize_model_code)
-        report["eprel_matched"] = int(keys.isin(known).sum())
-        report["eprel_missing"] = list(dict.fromkeys(products.loc[~keys.isin(known), "model_code"]))
+        matched = keys.isin(known)
+        report["eprel_matched"] = int(matched.sum())
+        report["eprel_missing"] = list(dict.fromkeys(products.loc[keys.notna() & ~matched, "model_code"]))
     return report

@@ -60,8 +60,9 @@ Person B (data, scoring, web: product and EPREL data, scoring, API, UI). Roles a
 - **Ownership.** The owner of a module is responsible for it and approves PRs touching it
   (table in `docs/gorev-dagilimi.md`).
 - **Collecting data.** Check `robots.txt` and the terms of the site first. Use
-  `collect/http.py::PoliteClient` (robots.txt, at least 2 s between requests, disk cache).
-  Do not bypass blocks, logins or bot detection. Inspect the real response before writing a
+  `collect/http.py::PoliteClient` (wildcard-aware `collect/robots.py`, honest User-Agent, at
+  least 2 s between requests, disk cache; an unreadable robots.txt closes the site).
+  Do not bypass blocks, logins or bot detection. Decision 17 lists what is allowed per site. Inspect the real response before writing a
   parser, and save a small fixture for the tests.
 - **Silent data loss is a bug.** Do not turn invalid input into empty values. Validate, fail
   with a row number, and test it (see `collect/pilot.py`, `collect/eprel_manual.py`).
@@ -77,7 +78,7 @@ Person B (data, scoring, web: product and EPREL data, scoring, API, UI). Roles a
 ```bash
 python -m venv .venv && .venv\Scripts\activate    # Windows
 pip install -e ".[dev,ml,scrape]"                  # add ,nlp for BERTurk
-pytest && ruff check src tests                     # must stay green (72 tests on 2026-10-30)
+pytest && ruff check src tests                     # must stay green
 greenchoice build                                  # sample data -> data/processed/greenchoice.db
 ```
 

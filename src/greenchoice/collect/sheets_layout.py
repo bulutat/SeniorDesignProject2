@@ -18,6 +18,7 @@ class Column:
     choices: tuple[str, ...] = ()
     width: int = 16
     number_format: str = ""  # applied to every data row, so typed values never show as ####
+    legacy_hints: tuple[str, ...] = ()  # hints of older templates, still recognised as "not data"
 
 DATE_FORMAT = "yyyy-mm-dd"
 PRICE_FORMAT = "#,##0.00"
@@ -33,7 +34,7 @@ PILOT_COLUMNS = [
     Column("url", "Ürün adresi *", "https://...", True, width=38),
     Column("category", "Kategori *", "listeden seç", True, tuple(CATEGORY_LABELS), 18),
     Column("brand", "Marka", width=14),
-    Column("model_code", "Model kodu *", "sitedeki model kodu", True, width=18),
+    Column("model_code", "Model kodu", "yoksa boş bırak", width=18, legacy_hints=("sitedeki model kodu",)),
     Column("name", "Ürün adı *", "sitedeki ad", True, width=44),
     Column("price_tl", "Fiyat (TL)", "sayı", width=16, number_format=PRICE_FORMAT),
     Column("energy_class", "Enerji sınıfı", "sitede yazan", width=14),
@@ -60,7 +61,8 @@ INSTRUCTIONS = [
     "",
     "1) 'Ürünler' sayfası: Trendyol/Hepsiburada'daki ürünler. Her ürün için bir satır.",
     "   Turuncu başlıklı ve * işaretli alanlar zorunlu. Gri başlıklı alanları bilmiyorsan boş bırak.",
-    "   Zorunlu alanı eksik olan ürünü yazma, başka ürüne geç (özellikle model kodu şart).",
+    "   Zorunlu alanı eksik olan ürünü yazma, başka ürüne geç. Model kodu başlıkta yoksa boş bırak:",
+    "   ürün listede kalır, EPREL'de eşleşmez (karar 17).",
     "2) 'EPREL' sayfası: aynı ürünlerin EPREL sayfasındaki değerleri. Model kodu 'Ürünler'dekiyle aynı olmalı.",
     "   Yalnızca EPREL sayfasında GÖRDÜĞÜN değeri yaz. Görmediğini boş bırak, tahmin etme.",
     "   EPREL'de bulamadığın ürün için satır ekleme. Ürünler sayfasında kalsın.",

@@ -18,6 +18,7 @@ import pandas as pd
 
 from greenchoice import db
 from greenchoice.collect.eprel_manual import load_manual_eprel
+from greenchoice.collect.http import PoliteClient
 from greenchoice.collect.pilot import load_pilot_list, pilot_report
 from greenchoice.collect.sheets import build_template, export_csvs
 from greenchoice.config import INTERIM_DIR, SAMPLE_DIR, db_path
@@ -126,6 +127,14 @@ def import_sheets(xlsx: Path, out_dir: Path) -> dict[str, int]:
     return {paths["pilot"].name: len(pilot), paths["eprel"].name: len(eprel)}
 
 
+def fetch_trendyol(urls: list[str], category: str, client=None) -> list[dict]:
+    """Known Trendyol product pages -> product facts. Polite client; bs4 stays optional."""
+    from greenchoice.collect.ecommerce import TrendyolSource
+
+    source = TrendyolSource(client or PoliteClient())
+    return [source.fetch_product(url, category) for url in urls]
+
+
 def import_reviews(pages: Path, products: Path, out: Path) -> dict:
     """Saved review pages -> reviews CSV. Importing here keeps bs4 optional for other commands."""
     from greenchoice.collect.saved_pages import import_folder
@@ -135,6 +144,29 @@ def import_reviews(pages: Path, products: Path, out: Path) -> dict:
     out.parent.mkdir(parents=True, exist_ok=True)
     table.to_csv(out, index=False)
     return {"reviews": len(table), "out": str(out), "products": report}
+
+
+def import_listings(pages: Path, out: Path) -> dict:
+    """Saved Hepsiburada search pages -> candidate products CSV. bs4 stays optional."""
+    from greenchoice.collect.listing_pages import import_listings as read_folder
+
+    table, report = read_folder(pages)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(out, index=False)
+    return {**report, "out": str(out)}
+
+
+def select_candidates(listings: Path | None, trendyol: Path | None, existing: Path, out: Path,
+                      target: int, brand_cap: int, min_ratings: int) -> dict:
+    """Candidate tables -> the products to add (decision 17c). Rules: collect/selection.py."""
+    from greenchoice.collect.selection import pool_from_sources, select_products
+
+    pool = pool_from_sources(pd.read_csv(listings) if listings else None,
+                             json.loads(trendyol.read_text(encoding="utf-8")) if trendyol else None)
+    chosen, report = select_products(pool, pd.read_csv(existing), target, min_ratings, brand_cap)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    chosen.assign(model_codes=chosen["model_codes"].map(" | ".join)).to_csv(out, index=False)
+    return report
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -155,6 +187,23 @@ def main(argv: list[str] | None = None) -> None:
     i = sub.add_parser("import-sheets", help="Doldurulmuş Excel'i pilot ve EPREL CSV'lerine çevir")
     i.add_argument("--xlsx", type=Path, default=Path("data/raw/veri_toplama.xlsx"))
     i.add_argument("--out-dir", type=Path, default=Path("data/raw"))
+
+    t = sub.add_parser("fetch-trendyol", help="Bilinen Trendyol ürün sayfalarını nazikçe oku (JSON)")
+    t.add_argument("--url", nargs="+", required=True, help="Trendyol ürün sayfası adres(ler)i")
+    t.add_argument("--category", required=True, help="refrigerator | washing_machine")
+
+    li = sub.add_parser("import-listings", help="Kaydedilen Hepsiburada arama sayfalarından aday ürün listesi")
+    li.add_argument("--pages", type=Path, default=Path("data/raw/listeleme_sayfalari"))
+    li.add_argument("--out", type=Path, default=Path("data/interim/aday_urunler.csv"))
+
+    s = sub.add_parser("select-candidates", help="Aday ürünlerden listeye eklenecekleri seç (karar 17c)")
+    s.add_argument("--listings", type=Path, default=None, help="import-listings çıktısı (CSV)")
+    s.add_argument("--trendyol", type=Path, default=None, help="fetch-trendyol çıktısı (JSON)")
+    s.add_argument("--existing", type=Path, default=Path("data/raw/pilot_products.csv"))
+    s.add_argument("--out", type=Path, default=Path("data/interim/secilen_urunler.csv"))
+    s.add_argument("--target", type=int, default=40, help="kategori başına hedef ürün sayısı")
+    s.add_argument("--brand-cap", type=int, default=12, help="kategori başına marka başına en fazla ürün")
+    s.add_argument("--min-ratings", type=int, default=30)
 
     c = sub.add_parser("check-pilot", help="Pilot ürün listesini doğrula, EPREL kapsamını raporla")
     c.add_argument("--products", type=Path, required=True, help="Pilot ürün listesi CSV")
@@ -180,6 +229,25 @@ def main(argv: list[str] | None = None) -> None:
     elif args.cmd == "import-sheets":
         for name, count in import_sheets(args.xlsx, args.out_dir).items():
             print(f"{name}: {count} satır")
+    elif args.cmd == "select-candidates":
+        try:
+            report = select_candidates(args.listings, args.trendyol, args.existing, args.out,
+                                       args.target, args.brand_cap, args.min_ratings)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    elif args.cmd == "import-listings":
+        try:
+            report = import_listings(args.pages, args.out)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    elif args.cmd == "fetch-trendyol":
+        try:
+            products = fetch_trendyol(args.url, args.category)
+        except (ValueError, PermissionError) as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(products, ensure_ascii=False, indent=2))
     elif args.cmd == "check-pilot":
         try:
             report = check_pilot(args.products, args.eprel, args.out)

@@ -1,4 +1,4 @@
-# GreenChoice
+﻿# GreenChoice
 
 AI-based decision support for sustainable and informed product choice.
 COMP 491 senior design project, 2026–2027 Fall. Authors: Atahan Bulut, Ali Rubar Kal.
@@ -110,13 +110,13 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 104 tests
+pytest                    # 168 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-01, Python 3.12.10 - 104 passed, ruff clean. The frontend build was
-last run before the EPREL changes; neither those nor the review import touch `frontend/`.
+Last verified: 2026-11-05, Python 3.12.10 - 168 passed, ruff clean. The
+frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
 
@@ -127,6 +127,58 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-02 - 80-product list assembled (Person B)
+
+- Applied the selection rule to 15 saved Hepsiburada pages and 17 Trendyol product pages,
+  looked the chosen models up in EPREL and added 54 products and 18 EPREL records to
+  `data/raw/veri_toplama_v4.xlsx`: 40 washing machines and 40 refrigerators.
+- EPREL match rate: **48 of 80 (60%)**, below the 70% target of task B1.2. 17 products carry no
+  model code in their title (mostly Arcelik, Beko, Grundig, Altus, Vestel) and 15 have a code
+  EPREL does not know (mostly Samsung refrigerators, Profilo, LG). Washing machines match much
+  better than refrigerators. This is reported as a finding, not tuned away (decision 18).
+- `model_code` is now optional in the pilot list (empty means "not in the title"); the report
+  counts `no_model_code` separately from codes missing in EPREL. Workbooks made from an older
+  template (previous hint text) are still accepted. 150 tests.
+
+### 2026-11-02 - Product selection rule (Person B, decision 18)
+
+- `collect/selection.py` and `greenchoice select-candidates`: pick the products that bring each
+  category to 40 from the saved-page candidates and the Trendyol pages. Rank by rating count
+  (at least 30), one entry per model (market-suffix variants and codeless titles with the same
+  words count as one model), at most 12 per brand, models already held skipped, compact
+  fridges (mini, office, under-counter, hotel) excluded. EPREL availability plays no part.
+- Real data again found problems that are now tests: "İkili Soğutma", "20+ Program" and "A+++"
+  were read as bundle marks and dropped real appliances; a merchant-style product number
+  (`pm-mtsam...`) was rejected. 149 tests.
+
+### 2026-11-02 - Candidate products from saved Hepsiburada search pages (Person B)
+
+- `collect/listing_pages.py` and `greenchoice import-listings`: read search pages saved in a
+  browser (no network) and write `data/interim/aday_urunler.csv` with title, URL, price, rating,
+  rating count and suggested model codes. Advertisement cards, bundles, accessories and other
+  appliances are skipped and counted; a page that parses to nothing fails with its file name.
+- Checked on 9 real saved pages. Real data exposed three bugs, now covered by tests: prices
+  without decimals (`47.930`) were read as 47.93 TL, a "3-piece appliance package" counted as a
+  washing machine, and a 1.6k TL accessory counted as an appliance.
+- Shared helper `collect/model_codes.py` (also used by the Trendyol reader). 127 tests.
+
+### 2026-11-02 - Polite data collection (Person B, decision 17)
+
+- Tried one honest-User-Agent request per shop: Hepsiburada answers 403 with a CAPTCHA page
+  (no scraper, nothing is circumvented), Trendyol serves product pages. Decision 17 records
+  the collection method: saved pages for Hepsiburada, a polite reader for known Trendyol
+  product pages, product selection by review count rather than by EPREL availability.
+- `collect/robots.py`: robots.txt parser with `*` and `$` support (`urllib.robotparser` ignores
+  them, so Trendyol's `Disallow: /*?q=` would have been missed). An unreadable robots.txt (403,
+  429, 5xx, network error) closes the site. `PoliteClient` now uses it and accepts an injected
+  session, so it is tested without network (`tests/test_robots.py`, `tests/test_http.py`).
+- `collect/trendyol_product.py` + `TrendyolSource.fetch_product` + `greenchoice fetch-trendyol`:
+  reads price, rating and counts, capacity and warranty from the page's schema.org product
+  data. Reviews and authors are never returned; the model code is only suggested. Checked on
+  the five known Trendyol products. Search, listing and reviews stay unavailable (robots.txt).
+- `requests` and `beautifulsoup4` added to the `dev` extra. 29 new tests.
+- Fixed `docs/decisions.md`, where a previous edit had removed the "Açık sorular" heading.
 
 ### 2026-11-01 - Annotation guideline and energy decision (Person A, task A1.3)
 

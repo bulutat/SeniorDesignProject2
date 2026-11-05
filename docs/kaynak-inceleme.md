@@ -125,6 +125,34 @@ Tablo notları: perakende tarife (vergiler hariç) enerji bedeli ile dağıtım 
 günlük ortalama 8 kWh'e kadar olan tüketime düşük kademe, aşan kısma yüksek kademe uygulanır.
 Birim kuruş/kWh'tir (100 kr = 1 TL). Bu dönem Nisan 2026'dır; sonraki dönemler doğrulanmadı.
 
+### Mağaza sitelerinde otomasyon denemesi (02.11.2026)
+
+Her siteye dürüst kimlikli (`GreenChoice-AcademicResearch`) **tek** istek, izin verilen bir ürün
+sayfasına. Kimlik taklidi veya engel aşma yok.
+
+| Site | Sonuç | robots.txt (kendi okumam) |
+|---|---|---|
+| Hepsiburada | **HTTP 403**, sayfada "captcha". İlk istekte engelledi | `User-agent: *` altında 76 `Disallow`. Düz arama (`/ara?q=`) yasak değil; `*?siralama=`, `*?filtreler=...`, `/product/`, `/brand/` yasak |
+| Trendyol | **HTTP 200**, ürün sayfası geldi (model kodu içinde) | Arama yasak: `/sr?`, `/sr/`, `/*?q=`, `/*?qt=`. Daha önce: `apigw` altı yasak. Yoğun kullanımda ban olup olmadığı **test edilmedi** |
+
+Sonuç: Hepsiburada otomatiğe kapalı, kaydedilen sayfa yöntemi sürüyor. Trendyol'da yalnızca
+bilinen ürün adresleri okunabilir; ürün keşfi (arama, listeleme) ve yorumlar için yol yok.
+
+Not: Hepsiburada'nın `robots.txt` dosyası bu denemede dürüst kimlikle `requests` ile okunabildi
+(404 veya 200, "hepsini yasakla" değil), ama ürün sayfası yine 403 verdi. Kişi A'nın gördüğü
+`robots.txt` 403'ü Python'un varsayılan `urllib` kimliğiyle olmuş olabilir; nedeni doğrulanmadı.
+
+### Trendyol ürün sayfası verisi (02.11.2026, bir çamaşır makinesi sayfasında bakıldı)
+
+Sayfada `application/ld+json` içinde schema.org `Product` bloğu var: `name`, `brand.name`, `sku`
+(ürün no, adresteki `-p-<no>` ile aynı), `offers.price`, `offers.url`, `aggregateRating`
+(`ratingValue`, `ratingCount` = puan sayısı, `reviewCount` = metinli yorum sayısı) ve
+`additionalProperty` (Kapasite, Garanti Süresi, Maksimum Sıkma Devri, boyutlar, ...).
+**Model kodu ve enerji sınıfı ayrı bir alan olarak yok**; model kodu ürün adından aday olarak
+önerilir, insan onaylar. Aynı blokta yorum örnekleri ve yazar adları da geliyor, bunlar
+**alınmaz ve test örneğine konmaz**. Buzdolabı sayfasının alan adları bakılmadı. Fiyatlar günlük
+değişiyor: 5 üründe 3'ünün fiyatı Excel'deki değerden farklı çıktı.
+
 ### Engel ve seçenekler
 
 Anahtar için **imzalı beyan** şart. Türkiye'de e-imza veya mühür her öğrencide yoktur.
