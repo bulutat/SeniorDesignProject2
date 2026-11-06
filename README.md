@@ -128,6 +128,14 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-06 - 80-product list handed to review collection (Person A)
+
+- `data/interim/pilot_products.csv` now holds the 80 products of Person B's
+  `veri_toplama_v4.xlsx` (40 washing machines, 40 refrigerators), produced with
+  `import-sheets` and `check-pilot --out`. The workbook was only read, not changed.
+- All 26 earlier products are kept; 54 are new (47 Hepsiburada, 7 Trendyol). Reviews for
+  the new products still have to be saved by hand (`docs/yorum-toplama.md`).
+
 ### 2026-11-02 - 80-product list assembled (Person B)
 
 - Applied the selection rule to 15 saved Hepsiburada pages and 17 Trendyol product pages,
