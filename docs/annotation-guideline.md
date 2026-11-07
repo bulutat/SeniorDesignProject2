@@ -109,9 +109,25 @@ Seçim komutu: `greenchoice annotation-pool` (`src/greenchoice/nlp/pool.py`, sab
   178. Yani zenginleştirme sınırlı kaldı, 300 eğitim yorumunun 180'i rastgele. 80 ürünün yorumları
   gelince komut yeniden çalıştırılır.
 
+### Tabloyu doldurma
+
+Her kişi `data/interim/etiketleme/etiketleme_A.csv` (veya `_B`) dosyasını Excel'de açar.
+
+- Aspect kolonlarına (`durability`, `energy`, `service`, `failure`, `noise`) `pos`, `neg` veya ikisi
+  birden geçiyorsa `pos,neg` yazılır. `failure` yalnızca `neg` olabilir. Aspect yoksa hücre boş kalır.
+- Bitirilen her satırın `checked` kolonuna `x` yazılır. Boş ama `checked` işaretli satır "hiç aspect
+  yok" demektir; `checked` boşsa satır henüz etiketlenmemiş sayılır ve altın etikete girmez.
+- `note` serbesttir (ör. "kısa süre", "emin değilim").
+- Dosya **CSV UTF-8** olarak kaydedilir, adı ve kolonları değiştirilmez.
+- Etiketleme bitince (veya ara verirken): `greenchoice collect-labels`. Komut değer hatalarını satır
+  numarasıyla bildirir, kappa tablosunu ve anlaşmazlık dosyasını yazar.
+- Anlaşmazlıklar `uzlasma.csv` dosyasında konuşulur; `decision` kolonuna `pos`, `neg`, `pos,neg` veya
+  `yok` yazılır, komut yeniden çalıştırılır.
+
 ### Uyum ölçümü
 
-- İlk 100 yorumu ikiniz ayrı ayrı etiketleyin. Aspect bazında Cohen's kappa hesaplayın.
+- Ortak 100 test yorumunu (tablolarda diğerleriyle karışık) ikiniz ayrı ayrı etiketleyin. Aspect
+  bazında Cohen's kappa `collect-labels` ile hesaplanır (`data/annotations/kappa.csv`).
 - Kappa < 0.6 olan aspect'lerde tanımı netleştirip o 100 yorumu yeniden konuşun.
 
 ## 2. Ürün etiketleme (ground truth)

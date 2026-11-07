@@ -114,12 +114,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 176 tests
+pytest                    # 184 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-05, Python 3.12.10 - 176 passed, ruff clean. The
+Last verified: 2026-11-05, Python 3.12.10 - 184 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -131,6 +131,20 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-07 - Label collection, kappa and gold file (Person A, task O2.1 tools)
+
+- New `greenchoice collect-labels` (`nlp/labels.py`): reads the filled sheets, checks every value
+  (row number in the error), computes Cohen's kappa per aspect on the shared test reviews, writes
+  the disagreements to `data/interim/etiketleme/uzlasma.csv` for a decision and builds the gold
+  file. 20% of train becomes `val` for threshold tuning. Undecided test reviews stay out.
+- **Contract change, needs Person B's approval:** `data/annotations/reviews_gold.csv` no longer has
+  a `text` column (review text is never committed); it now has `split`. `eval-nlp` joins the text
+  from `data/interim/reviews.csv`, cleans it like `build` and scores the `test` split by default.
+- Sheets have a `checked` column, so an empty row can mean "no aspect". Sheets were regenerated;
+  the 400 chosen reviews did not change. 184 tests.
+- Guideline: counts and proposals for the two open questions (durability at least 6 months; add a
+  `performance` label that does not enter the score yet).
 
 ### 2026-11-05 - Annotation pool (Person A, task O1.1)
 

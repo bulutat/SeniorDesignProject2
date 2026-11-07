@@ -83,7 +83,7 @@ def test_sheets_share_test_split_train_and_hide_the_reason():
     assert len(a) == len(b) == 20 + 30
     assert set(a["review_id"]) & set(b["review_id"]) == test
     assert not {"split", "reason", "rating"} & set(a.columns)
-    assert {"durability", "energy", "service", "failure", "noise", "note"} <= set(a.columns)
+    assert {"durability", "energy", "service", "failure", "noise", "checked", "note"} <= set(a.columns)
     assert a["text"].notna().all() and (a["noise"] == "").all()
 
 

@@ -112,12 +112,14 @@ def _report(pool: pd.DataFrame, available: dict[str, int]) -> dict:
 
 def annotation_sheet(pool: pd.DataFrame, reviews: pd.DataFrame, annotator: str,
                      seed: int = PoolPlan.seed) -> pd.DataFrame:
-    """The reviews one annotator labels: text plus an empty column per aspect (pos / neg)."""
+    """The reviews one annotator labels: text, an empty column per aspect (pos / neg) and
+    "checked", marked once a row is done, so an empty row can mean "no aspect" (nlp/labels.py)."""
     mine = pool[pool["annotators"].str.split(",").map(lambda names: annotator in names)]
     text = reviews.drop_duplicates("review_id").set_index("review_id")["text"]
     sheet = mine[["review_id", "product_id"]].assign(text=mine["review_id"].map(text))
     sheet = sheet.sample(frac=1, random_state=seed + ord(annotator)).reset_index(drop=True)
     for aspect in aspects_config()["aspects"]:
         sheet[aspect] = ""
+    sheet["checked"] = ""
     sheet["note"] = ""
     return sheet
