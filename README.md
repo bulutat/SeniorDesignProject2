@@ -134,7 +134,8 @@ other person, then merge to `main`.
   sentences, three Turkish studies, Cohen's kappa), each checked against its publisher page.
   Two Turkish papers were read only as abstract or metadata; this is marked in the file.
 - `notebooks/02_A_berturk_denemesi.ipynb` for Colab: tokenizer, sentence vectors and a 9-label
-  multi-label head with a short training run on invented sentences. Not run yet.
+  multi-label head with a short training run on invented sentences. Ran without errors in
+  Colab on 2026-11-07; the loss fell from 0.560 to 0.235 in 30 steps (setup check only).
 
 ### 2026-11-02 - 80-product list assembled (Person B)
 

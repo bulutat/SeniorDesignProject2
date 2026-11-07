@@ -94,4 +94,8 @@ okunmalı.
 Defter: `notebooks/02_A_berturk_denemesi.ipynb` (uydurma cümlelerle; tokenizer, `[CLS]` temsili,
 9 etiketli sınıflandırma başı ve 30 adımlık deneme eğitimi).
 
-- [ ] Colab'da çalıştırıldı mı, GPU türü, süreler: _henüz çalıştırılmadı_
+- [x] 07.11.2026'da Colab'da (T4 GPU seçilerek) hatasız çalıştı. Model indirildi, tokenizer ve
+  9 etiketli sınıflandırma başı çalışıyor. Deneme eğitiminde kayıp 30 adımda 0,560'tan 0,235'e
+  düştü (5. adım 0,560, 10. 0,431, 15. 0,373, 20. 0,348, 25. 0,288, 30. 0,235).
+- Bu yalnızca kurulumun çalıştığını gösterir: 8 uydurma cümle ezberlendi, genelleme ölçülmedi.
+- Süreler ve kullanılan GPU kaydedilmedi; A2.1'deki ilk gerçek eğitimde not edilecek.
