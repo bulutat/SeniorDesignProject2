@@ -128,6 +128,17 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-07 - First end-to-end run on real data (Person A for Person B, task B1.3)
+
+- `greenchoice build` ran on the 80 products, EPREL records and 3,467 collected reviews; the
+  API serves the real products. No code changed. Steps and findings: `docs/gercek-veri-ilk-calisma.md`.
+- Findings for the scoring work (B3): the label depends mostly on the category (37/40 washing
+  machines but 10/40 refrigerators are "recommended"). Most of the 15-point gap comes from the
+  service criterion, which is nearly constant (0.98) but weighted 0.20 for washing machines and
+  0.10 for refrigerators; energy class adds only 2.3 points. Products without an energy class score
+  higher because the median fills the gap. No product is "not recommended". Options were tried on
+  the same data and are listed; nothing was changed before Person B decides.
+
 ### 2026-11-02 - 80-product list assembled (Person B)
 
 - Applied the selection rule to 15 saved Hepsiburada pages and 17 Trendyol product pages,
