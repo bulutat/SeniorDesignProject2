@@ -66,8 +66,21 @@ ekleyin.
 
 - [ ] **Dayanıklılık için alt süre:** "1 aydır sorunsuz" sayılsın mı? Öneri: en az 6 ay. Pilot
   yorumların çoğu yeni ürünlerden geldiği için `durability:pos` çok az kalabilir.
+  - Sayım (07.11, 3.386 temiz yorum, düzenli ifadeyle kaba sayım): süre ifadesi ve "sorunsuz,
+    arızasız, bozulmadı" gibi bir sözcük birlikte 112 yorumda geçiyor. Süreye göre: 1 aydan az 65
+    (çoğu "2 günde geldi" gibi teslimat), 1–3 ay 13, 3–6 ay 6, 6–12 ay 3, 1 yıl ve üstü 25.
+  - Sonuç: 6 ay sınırıyla bütün veride yaklaşık 28 yorum `durability:pos` olur, 400'lük havuzda
+    birkaç tane. 1 ay sınırıyla yaklaşık 47.
+  - Öneri: **6 ay kalsın.** Dayanıklılık uzun süreli kullanımı anlatır; birkaç haftalık "sorunsuz"
+    ilk izlenimdir. Az örnek bir bulgudur ve raporda yazılır. Daha kısa süreli olumlu yorumlar
+    etiketsiz kalır, `note` kolonuna "kısa süre" yazılabilir.
 - [ ] **Performans aspect'i:** Yıkama ve soğutma yorumları çok sık, ama beş aspect'in dışında kalıyor.
   Hepsiburada kriterlerinde de var (Yıkama, Soğutma). Eklensin mi?
+  - Sayım: yıkama, leke, sıkma, kurutma, soğutma, dondurma sözcükleri 352 yorumda (%10,4) geçiyor:
+    buzdolabında 143, çamaşır makinesinde 209. Enerji (13 aday) ve servisten (18) çok daha sık.
+  - Öneri: **`performance` etiketi şimdi eklensin, skora şimdilik girmesin** (enerjideki gibi).
+    Etiketlemeden sonra eklemek 400 yorumu yeniden okumayı gerektirir; şimdi eklemek ucuz. Skora
+    girip girmeyeceği NLP sonuçlarından sonra B3'te kararlaştırılır.
 - [x] **Enerji:** Enerji kriteri yorumlardan beslenmez (karar 16). `energy` etiketi yine yazılır,
   ama skora girmez; yalnızca analiz ve raporlama içindir.
 
