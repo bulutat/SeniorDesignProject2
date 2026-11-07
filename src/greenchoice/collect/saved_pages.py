@@ -166,14 +166,21 @@ def _product_report(pages: list[SavedPage], reviews: list[dict]) -> dict:
     return report
 
 
-def import_folder(folder: Path, known_products: set[str]) -> tuple[pd.DataFrame, dict]:
-    """Reads every saved page in the folder. Returns the reviews table and a per-product report."""
+def import_folder(folder: Path, known_products: set[str],
+                  aliases: dict[str, str] | None = None) -> tuple[pd.DataFrame, dict]:
+    """Reads every saved page in the folder. Returns the reviews table and a per-product report.
+
+    aliases maps the id a review page reports to the id in the product list. Hepsiburada shows
+    the reviews of a seller listing ("-p-" address) under the product's main "-pm-" number.
+    """
+    aliases = aliases or {}
     paths = sorted(folder.glob("*.htm*"))
     if not paths:
         raise ValueError(f"{folder}: html dosyası yok")
     pages: dict[str, list[SavedPage]] = {}
     for path in paths:
         page = parse_page(path.read_text(encoding="utf-8", errors="replace"), path.name)
+        page.product_id = aliases.get(page.product_id, page.product_id)
         if page.product_id not in known_products:
             raise ValueError(f"{path.name}: {page.product_id} ürün listesinde yok")
         pages.setdefault(page.product_id, []).append(page)
