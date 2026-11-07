@@ -110,7 +110,7 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 150 tests
+pytest                    # 161 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
@@ -127,6 +127,15 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-07 - AHP criterion weights (Person A for Person B, task B3.1)
+
+- `scoring/ahp.py` and `greenchoice ahp`: each person fills a copy of
+  `data/templates/ahp_karsilastirma.yaml` (Saaty 1-9 scale, fractions for the reverse direction)
+  in `data/annotations/ahp/`. The command gives weights (principal eigenvector) and the
+  consistency ratio per category, per person and combined (element-wise geometric mean).
+  Missing, repeated or out-of-range judgements fail with the file and pair named.
+- The weights are a suggestion; `config/categories.yaml` is not changed. 161 tests.
 
 ### 2026-11-02 - 80-product list assembled (Person B)
 
