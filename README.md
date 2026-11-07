@@ -128,6 +128,14 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-07 - NLP background reading and BERTurk notebook (Person A, task A0.2)
+
+- `docs/literatur.md`: 8 sources (BERT, BERTurk, SemEval-2014 ABSA, BERT with auxiliary
+  sentences, three Turkish studies, Cohen's kappa), each checked against its publisher page.
+  Two Turkish papers were read only as abstract or metadata; this is marked in the file.
+- `notebooks/02_A_berturk_denemesi.ipynb` for Colab: tokenizer, sentence vectors and a 9-label
+  multi-label head with a short training run on invented sentences. Not run yet.
+
 ### 2026-11-02 - 80-product list assembled (Person B)
 
 - Applied the selection rule to 15 saved Hepsiburada pages and 17 Trendyol product pages,
