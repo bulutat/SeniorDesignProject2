@@ -128,6 +128,14 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-07 - User study design draft (Person A, task A4.1)
+
+- `docs/kullanici-calismasi.md` (Turkish): within-subjects study with 10–15 participants, score-only
+  versus explained product cards, counterbalanced order and product sets, an objective
+  comprehension question per task, seven Likert items written for this study, Wilcoxon signed-rank
+  with Holm correction, draft consent text and questions for the advisor (ethics approval, analysis).
+- Product pairs are chosen after the scoring decisions (B3). No personal data is collected.
+
 ### 2026-11-02 - 80-product list assembled (Person B)
 
 - Applied the selection rule to 15 saved Hepsiburada pages and 17 Trendyol product pages,
