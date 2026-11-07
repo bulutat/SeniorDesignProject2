@@ -128,6 +128,15 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-07 - Exploratory data analysis (Person A for Person B, task B1.4)
+
+- `notebooks/01_B_eda.ipynb` reads the database built from the real data and saves four figures
+  to `docs/figures/` (price, energy class, star ratings, rule-based aspect mentions). Outputs are
+  counts and shares only; no review text.
+- Main numbers: energy class missing for 50% of refrigerators and 30% of washing machines, no
+  warranty data, 86.5% of reviews are 5 stars, the 3 most reviewed products hold 28% of reviews.
+- `matplotlib` added to the `dev` extra.
+
 ### 2026-11-02 - 80-product list assembled (Person B)
 
 - Applied the selection rule to 15 saved Hepsiburada pages and 17 Trendyol product pages,
