@@ -21,7 +21,7 @@ from greenchoice.collect.eprel_manual import load_manual_eprel
 from greenchoice.collect.http import PoliteClient
 from greenchoice.collect.pilot import load_pilot_list, pilot_report
 from greenchoice.collect.sheets import build_template, export_csvs
-from greenchoice.config import INTERIM_DIR, SAMPLE_DIR, db_path
+from greenchoice.config import INTERIM_DIR, SAMPLE_DIR, categories_config, db_path
 from greenchoice.contracts import PRODUCT_COLUMNS, REVIEW_COLUMNS, conform
 from greenchoice.nlp.aggregate import product_review_features
 from greenchoice.nlp.rule_based import RuleBasedExtractor
@@ -101,6 +101,29 @@ def eval_nlp(gold_csv: Path) -> pd.DataFrame:
     texts["text_clean"] = texts["text"].astype(str).map(normalize_text)
     pred = RuleBasedExtractor().extract_df(texts)
     return evaluate_aspects(gold.dropna(subset=["aspect"]), pred, texts["review_id"].tolist())
+
+
+def ahp(inputs: Path) -> dict:
+    """AHP weights from the filled comparison files in a folder (scoring/ahp.py)."""
+    from greenchoice.config import criteria_ids
+    from greenchoice.scoring.ahp import ahp_report
+
+    paths = sorted(inputs.glob("*.yaml"))
+    if not paths:
+        raise ValueError(f"{inputs}: doldurulmuş .yaml yok (şablon: data/templates/ahp_karsilastirma.yaml)")
+    return ahp_report(paths, criteria_ids(), list(categories_config()["categories"]))
+
+
+def sensitivity_report(db_file: Path) -> dict:
+    """Ranking sensitivity and break-even electricity prices from a built database (B3.3)."""
+    from greenchoice.scoring.sensitivity import breakeven_prices, breakeven_summary, sensitivity
+
+    features = db.read_table("product_features", db_file)
+    table = sensitivity(features)
+    pairs = breakeven_prices(features)
+    price = categories_config()["defaults"]["electricity_price_tl_per_kwh"]
+    return {"rankings": table.to_dict(orient="records"),
+            "breakeven": breakeven_summary(pairs, price).to_dict(orient="records")}
 
 
 def check_pilot(products_csv: Path, eprel_csv: Path | None = None, out: Path | None = None) -> dict:
@@ -216,6 +239,12 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--products", type=Path, default=Path("data/interim/pilot_products.csv"))
     r.add_argument("--out", type=Path, default=Path("data/interim/reviews.csv"))
 
+    ah = sub.add_parser("ahp", help="İkili karşılaştırma dosyalarından AHP ağırlıkları ve tutarlılık")
+    ah.add_argument("--inputs", type=Path, default=Path("data/annotations/ahp"))
+
+    se = sub.add_parser("sensitivity", help="Varsayımlar değişince sıralama ne kadar değişiyor (B3.3)")
+    se.add_argument("--db", type=Path, default=None, help="build çıktısı (varsayılan: data/processed)")
+
     args = parser.parse_args(argv)
     if args.cmd == "build":
         source = SOURCES.get(args.source, Path(args.source))
@@ -251,6 +280,19 @@ def main(argv: list[str] | None = None) -> None:
     elif args.cmd == "check-pilot":
         try:
             report = check_pilot(args.products, args.eprel, args.out)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    elif args.cmd == "sensitivity":
+        report = sensitivity_report(args.db or db_path())
+        table = pd.DataFrame(report["rankings"]).pivot(
+            index="scenario", columns="category", values=["kendall_tau", "top10_overlap", "labels_changed"])
+        print(table.to_string())
+        print()
+        print(pd.DataFrame(report["breakeven"]).to_string(index=False))
+    elif args.cmd == "ahp":
+        try:
+            report = ahp(args.inputs)
         except ValueError as exc:
             raise SystemExit(str(exc)) from exc
         print(json.dumps(report, ensure_ascii=False, indent=2))
