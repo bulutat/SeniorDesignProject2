@@ -114,12 +114,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 184 tests
+pytest                    # 191 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-05, Python 3.12.10 - 184 passed, ruff clean. The
+Last verified: 2026-11-05, Python 3.12.10 - 191 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -131,6 +131,19 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-07 - Learned aspect extractors ready for labels (Person A; B2.1 for Person B, A2.1)
+
+- `nlp/tfidf.py`: TF-IDF (character n-grams within words) + one balanced Logistic Regression per
+  `aspect:polarity` label. `greenchoice train-nlp` trains on `train`, tunes a threshold per label
+  on `val` and reports P/R/F1 on `test` only (`models/tfidf_lr_v0.json`). Labels without a
+  training example are listed, not guessed.
+- `nlp/transformer.py`: `TransformerExtractor` loads a BERTurk model fine-tuned in Colab
+  (`notebooks/03_A_berturk_egitim.ipynb`, class-weighted loss, epoch and thresholds chosen on
+  `val`). `greenchoice export-nlp-data` writes the split files the notebook needs; they hold
+  review text and stay in `data/interim`. The notebook has not been run yet (no labels).
+- `greenchoice build --nlp rule|tfidf|berturk --nlp-model <path>` picks the extractor. 191 tests;
+  the BERTurk class is not covered by tests because torch is not installed locally.
 
 ### 2026-11-07 - Label collection, kappa and gold file (Person A, task O2.1 tools)
 
