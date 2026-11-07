@@ -110,7 +110,7 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 150 tests
+pytest                    # 151 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
@@ -127,6 +127,17 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-06 - 80-product list handed to review collection (Person A)
+
+- `data/interim/pilot_products.csv` now holds the 80 products of Person B's
+  `veri_toplama_v4.xlsx` (40 washing machines, 40 refrigerators), produced with
+  `import-sheets` and `check-pilot --out`. The workbook was only read, not changed.
+- All 26 earlier products are kept; 54 are new (47 Hepsiburada, 7 Trendyol). Reviews for
+  the new products still have to be saved by hand (`docs/yorum-toplama.md`).
+- Hepsiburada shows the reviews of a seller listing (`-p-` address) under the product's main
+  `-pm-` number. Optional column `review_page_id` in `pilot_products.csv` maps that number to the
+  listed product, so ids stay the same as in the workbook and EPREL data. 151 tests.
 
 ### 2026-11-02 - 80-product list assembled (Person B)
 
