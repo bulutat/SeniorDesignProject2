@@ -132,6 +132,13 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-10 - Importance choices instead of weight sliders (Person A for Person B)
+
+- The weight panel now asks, for each criterion, "Önemli değil / Önemli / Çok önemli" (relative
+  weights 0 / 1 / 2; the API scales them to sum to 1). Starting choices follow the category's
+  default weights (0.20 and above is "very important"). With every criterion set to "not
+  important" the re-rank button is disabled. Frontend only; the API is unchanged.
+
 ### 2026-11-07 - Learned aspect extractors ready for labels (Person A; B2.1 for Person B, A2.1)
 
 - `nlp/tfidf.py`: TF-IDF (character n-grams within words) + one balanced Logistic Regression per
