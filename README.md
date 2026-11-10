@@ -188,6 +188,27 @@ other person, then merge to `main`.
   warranty data, 86.5% of reviews are 5 stars, the 3 most reviewed products hold 28% of reviews.
 - `matplotlib` added to the `dev` extra.
 
+### 2026-11-07 - Sensitivity analysis (Person A for Person B, task B3.3)
+
+- `scoring/sensitivity.py` and `greenchoice sensitivity`: electricity price (-50%, +50%, upper
+  tier), lifetime (8, 15 years) and each criterion weight (+/-50%, equal weights) are changed one
+  at a time; the ranking inside each category is compared with Kendall tau, top-10 overlap and
+  label changes. Results and limits: `docs/duyarlilik-analizi.md`.
+- On the real data the ranking hardly moves with electricity price or lifetime (tau >= 0.98) but
+  does move with weights; labels are fragile near the 70 threshold. For the cheap-but-inefficient
+  question, the median break-even electricity price is 49 TL/kWh (refrigerators) and 104 TL/kWh
+  (washing machines), against 2.919 today: the efficient model rarely pays back its higher price.
+  164 tests.
+
+### 2026-11-07 - AHP criterion weights (Person A for Person B, task B3.1)
+
+- `scoring/ahp.py` and `greenchoice ahp`: each person fills a copy of
+  `data/templates/ahp_karsilastirma.yaml` (Saaty 1-9 scale, fractions for the reverse direction)
+  in `data/annotations/ahp/`. The command gives weights (principal eigenvector) and the
+  consistency ratio per category, per person and combined (element-wise geometric mean).
+  Missing, repeated or out-of-range judgements fail with the file and pair named.
+- The weights are a suggestion; `config/categories.yaml` is not changed. 161 tests.
+
 ### 2026-11-06 - 80-product list handed to review collection (Person A)
 
 - `data/interim/pilot_products.csv` now holds the 80 products of Person B's
