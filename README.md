@@ -209,6 +209,14 @@ other person, then merge to `main`.
   Missing, repeated or out-of-range judgements fail with the file and pair named.
 - The weights are a suggestion; `config/categories.yaml` is not changed. 161 tests.
 
+### 2026-11-07 - User study design draft (Person A, task A4.1)
+
+- `docs/kullanici-calismasi.md` (Turkish): within-subjects study with 10–15 participants, score-only
+  versus explained product cards, counterbalanced order and product sets, an objective
+  comprehension question per task, seven Likert items written for this study, Wilcoxon signed-rank
+  with Holm correction, draft consent text and questions for the advisor (ethics approval, analysis).
+- Product pairs are chosen after the scoring decisions (B3). No personal data is collected.
+
 ### 2026-11-06 - 80-product list handed to review collection (Person A)
 
 - `data/interim/pilot_products.csv` now holds the 80 products of Person B's
