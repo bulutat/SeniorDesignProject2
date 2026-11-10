@@ -159,6 +159,15 @@ other person, then merge to `main`.
 - Guideline: counts and proposals for the two open questions (durability at least 6 months; add a
   `performance` label that does not enter the score yet).
 
+### 2026-11-07 - NLP background reading and BERTurk notebook (Person A, task A0.2)
+
+- `docs/literatur.md`: 8 sources (BERT, BERTurk, SemEval-2014 ABSA, BERT with auxiliary
+  sentences, three Turkish studies, Cohen's kappa), each checked against its publisher page.
+  Two Turkish papers were read only as abstract or metadata; this is marked in the file.
+- `notebooks/02_A_berturk_denemesi.ipynb` for Colab: tokenizer, sentence vectors and a 9-label
+  multi-label head with a short training run on invented sentences. Ran without errors in
+  Colab on 2026-11-07; the loss fell from 0.560 to 0.235 in 30 steps (setup check only).
+
 ### 2026-11-06 - 80-product list handed to review collection (Person A)
 
 - `data/interim/pilot_products.csv` now holds the 80 products of Person B's
