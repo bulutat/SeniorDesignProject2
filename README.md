@@ -179,6 +179,15 @@ other person, then merge to `main`.
   higher because the median fills the gap. No product is "not recommended". Options were tried on
   the same data and are listed; nothing was changed before Person B decides.
 
+### 2026-11-07 - Exploratory data analysis (Person A for Person B, task B1.4)
+
+- `notebooks/01_B_eda.ipynb` reads the database built from the real data and saves four figures
+  to `docs/figures/` (price, energy class, star ratings, rule-based aspect mentions). Outputs are
+  counts and shares only; no review text.
+- Main numbers: energy class missing for 50% of refrigerators and 30% of washing machines, no
+  warranty data, 86.5% of reviews are 5 stars, the 3 most reviewed products hold 28% of reviews.
+- `matplotlib` added to the `dev` extra.
+
 ### 2026-11-06 - 80-product list handed to review collection (Person A)
 
 - `data/interim/pilot_products.csv` now holds the 80 products of Person B's
