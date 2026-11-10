@@ -139,6 +139,17 @@ other person, then merge to `main`.
   default weights (0.20 and above is "very important"). With every criterion set to "not
   important" the re-rank button is disabled. Frontend only; the API is unchanged.
 
+### 2026-11-10 - Energy data for products outside EPREL (Person A)
+
+- 32 of 80 products had no energy class. The official EU energy labels of 23 of them were read
+  by hand from the manufacturers' Turkish sites and stored with their URLs in
+  `data/manual/energy_labels.csv`; 7 more get the class from the store title ("E Enerji Sınıfı").
+  Pre-2021 classes (A+++ ...) are never used. 2 products remain unknown.
+- New `preprocess/energy_labels.py`; `build` fills only empty fields in the order EPREL, label,
+  shop data, title, and writes the source to `energy_source`. Method and doubts:
+  `docs/enerji-etiketleri.md`. Energy class known for 78 products (was 48), annual kWh for 71
+  (was 48). 161 tests.
+
 ### 2026-11-07 - Learned aspect extractors ready for labels (Person A; B2.1 for Person B, A2.1)
 
 - `nlp/tfidf.py`: TF-IDF (character n-grams within words) + one balanced Logistic Regression per
