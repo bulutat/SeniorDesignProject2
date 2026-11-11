@@ -1,0 +1,51 @@
+# AHP ikili karşılaştırma formu (scoring/ahp.py, görev B3.1)
+#
+# Kopyalayıp adınızla kaydedin: data/annotations/ahp/<ad>.yaml (ör. atahan.yaml).
+# Her satır için: 'a vs b' -> a, b'ye göre ne kadar önemli?
+#   1 eşit, 3 biraz daha önemli, 5 belirgin şekilde, 7 çok, 9 son derece önemli
+#   (2, 4, 6, 8 ara değerler). b daha önemliyse kesir yazın: 1/3, 1/5 ...
+# Soru: "Bu kategoride bir ürün önerirken hangisi daha önemli olmalı?"
+# Her kategoriyi ayrı düşünün. Tutarlılık oranı (CR) 0,1'in üstündeyse komut bildirir;
+# o zaman en çelişkili görünen karşılaştırmaları yeniden düşünün.
+#
+# Kriterler:
+#   energy_efficiency: Enerji verimliliği
+#   lifetime_cost: Uzun vadeli maliyet
+#   durability: Dayanıklılık
+#   service: Servis ve arıza
+#   price_advantage: Fiyat avantajı
+#   satisfaction: Genel memnuniyet
+
+categories:
+  refrigerator:   # Buzdolabı
+    energy_efficiency vs lifetime_cost: 
+    energy_efficiency vs durability: 
+    energy_efficiency vs service: 
+    energy_efficiency vs price_advantage: 
+    energy_efficiency vs satisfaction: 
+    lifetime_cost vs durability: 
+    lifetime_cost vs service: 
+    lifetime_cost vs price_advantage: 
+    lifetime_cost vs satisfaction: 
+    durability vs service: 
+    durability vs price_advantage: 
+    durability vs satisfaction: 
+    service vs price_advantage: 
+    service vs satisfaction: 
+    price_advantage vs satisfaction: 
+  washing_machine:   # Çamaşır makinesi
+    energy_efficiency vs lifetime_cost: 
+    energy_efficiency vs durability: 
+    energy_efficiency vs service: 
+    energy_efficiency vs price_advantage: 
+    energy_efficiency vs satisfaction: 
+    lifetime_cost vs durability: 
+    lifetime_cost vs service: 
+    lifetime_cost vs price_advantage: 
+    lifetime_cost vs satisfaction: 
+    durability vs service: 
+    durability vs price_advantage: 
+    durability vs satisfaction: 
+    service vs price_advantage: 
+    service vs satisfaction: 
+    price_advantage vs satisfaction: 

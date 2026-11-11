@@ -1,1 +1,1 @@
-review_id,product_id,annotator,text,aspect,polarity
+review_id,product_id,split,aspect,polarity

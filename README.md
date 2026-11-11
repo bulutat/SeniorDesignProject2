@@ -101,6 +101,10 @@ automated collection (`docs/kaynak-inceleme.md`). This command only reads local 
 extracts usernames; guide: `docs/yorum-toplama.md`:
 `greenchoice import-reviews --pages data/raw/yorum_sayfalari --out data/interim/reviews.csv`
 
+Choose the reviews to annotate and write one sheet per annotator (`nlp/pool.py`). Sheets contain
+review text and stay in `data/interim/etiketleme/`, which is not committed:
+`greenchoice annotation-pool`
+
 The `--eprel` file is the hand-collected EPREL CSV (the EPREL public API needs a key that
 requires a sealed declaration). Template: `data/templates/eprel_manual.csv`; collection
 guide: `docs/eprel-manual-toplama.md` (Turkish). The file is validated row by row: energy
@@ -110,12 +114,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 161 tests
+pytest                    # 164 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-02, Python 3.12.10, Node 26.13.0 - 150 passed, ruff clean. The
+Last verified: 2026-11-05, Python 3.12.10 - 191 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -127,6 +131,13 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-10 - Importance choices instead of weight sliders (Person A for Person B)
+
+- The weight panel now asks, for each criterion, "Önemli değil / Önemli / Çok önemli" (relative
+  weights 0 / 1 / 2; the API scales them to sum to 1). Starting choices follow the category's
+  default weights (0.20 and above is "very important"). With every criterion set to "not
+  important" the re-rank button is disabled. Frontend only; the API is unchanged.
 
 ### 2026-11-10 - Energy data for products outside EPREL (Person A)
 
@@ -148,6 +159,105 @@ other person, then merge to `main`.
 - `notebooks/02_A_berturk_denemesi.ipynb` for Colab: tokenizer, sentence vectors and a 9-label
   multi-label head with a short training run on invented sentences. Ran without errors in
   Colab on 2026-11-07; the loss fell from 0.560 to 0.235 in 30 steps (setup check only).
+
+### 2026-11-07 - Exploratory data analysis (Person A for Person B, task B1.4)
+
+- `notebooks/01_B_eda.ipynb` reads the database built from the real data and saves four figures
+  to `docs/figures/` (price, energy class, star ratings, rule-based aspect mentions). Outputs are
+  counts and shares only; no review text.
+- Main numbers: energy class missing for 50% of refrigerators and 30% of washing machines, no
+  warranty data, 86.5% of reviews are 5 stars, the 3 most reviewed products hold 28% of reviews.
+- `matplotlib` added to the `dev` extra.
+
+### 2026-11-07 - First end-to-end run on real data (Person A for Person B, task B1.3)
+
+- `greenchoice build` ran on the 80 products, EPREL records and 3,467 collected reviews; the
+  API serves the real products. No code changed. Steps and findings: `docs/gercek-veri-ilk-calisma.md`.
+- Findings for the scoring work (B3): the label depends mostly on the category (37/40 washing
+  machines but 10/40 refrigerators are "recommended"). Most of the 15-point gap comes from the
+  service criterion, which is nearly constant (0.98) but weighted 0.20 for washing machines and
+  0.10 for refrigerators; energy class adds only 2.3 points. Products without an energy class score
+  higher because the median fills the gap. No product is "not recommended". Options were tried on
+  the same data and are listed; nothing was changed before Person B decides.
+
+### 2026-11-07 - Sensitivity analysis (Person A for Person B, task B3.3)
+
+- `scoring/sensitivity.py` and `greenchoice sensitivity`: electricity price (-50%, +50%, upper
+  tier), lifetime (8, 15 years) and each criterion weight (+/-50%, equal weights) are changed one
+  at a time; the ranking inside each category is compared with Kendall tau, top-10 overlap and
+  label changes. Results and limits: `docs/duyarlilik-analizi.md`.
+- On the real data the ranking hardly moves with electricity price or lifetime (tau >= 0.98) but
+  does move with weights; labels are fragile near the 70 threshold. For the cheap-but-inefficient
+  question, the median break-even electricity price is 49 TL/kWh (refrigerators) and 104 TL/kWh
+  (washing machines), against 2.919 today: the efficient model rarely pays back its higher price.
+  164 tests.
+
+### 2026-11-07 - AHP criterion weights (Person A for Person B, task B3.1)
+
+- `scoring/ahp.py` and `greenchoice ahp`: each person fills a copy of
+  `data/templates/ahp_karsilastirma.yaml` (Saaty 1-9 scale, fractions for the reverse direction)
+  in `data/annotations/ahp/`. The command gives weights (principal eigenvector) and the
+  consistency ratio per category, per person and combined (element-wise geometric mean).
+  Missing, repeated or out-of-range judgements fail with the file and pair named.
+- The weights are a suggestion; `config/categories.yaml` is not changed. 161 tests.
+
+### 2026-11-07 - Learned aspect extractors ready for labels (Person A; B2.1 for Person B, A2.1)
+
+- `nlp/tfidf.py`: TF-IDF (character n-grams within words) + one balanced Logistic Regression per
+  `aspect:polarity` label. `greenchoice train-nlp` trains on `train`, tunes a threshold per label
+  on `val` and reports P/R/F1 on `test` only (`models/tfidf_lr_v0.json`). Labels without a
+  training example are listed, not guessed.
+- `nlp/transformer.py`: `TransformerExtractor` loads a BERTurk model fine-tuned in Colab
+  (`notebooks/03_A_berturk_egitim.ipynb`, class-weighted loss, epoch and thresholds chosen on
+  `val`). `greenchoice export-nlp-data` writes the split files the notebook needs; they hold
+  review text and stay in `data/interim`. The notebook has not been run yet (no labels).
+- `greenchoice build --nlp rule|tfidf|berturk --nlp-model <path>` picks the extractor. 191 tests;
+  the BERTurk class is not covered by tests because torch is not installed locally.
+
+### 2026-11-07 - Label collection, kappa and gold file (Person A, task O2.1 tools)
+
+- New `greenchoice collect-labels` (`nlp/labels.py`): reads the filled sheets, checks every value
+  (row number in the error), computes Cohen's kappa per aspect on the shared test reviews, writes
+  the disagreements to `data/interim/etiketleme/uzlasma.csv` for a decision and builds the gold
+  file. 20% of train becomes `val` for threshold tuning. Undecided test reviews stay out.
+- **Contract change, needs Person B's approval:** `data/annotations/reviews_gold.csv` no longer has
+  a `text` column (review text is never committed); it now has `split`. `eval-nlp` joins the text
+  from `data/interim/reviews.csv`, cleans it like `build` and scores the `test` split by default.
+- Sheets have a `checked` column, so an empty row can mean "no aspect". Sheets were regenerated;
+  the 400 chosen reviews did not change. 184 tests.
+- Guideline: counts and proposals for the two open questions (durability at least 6 months; add a
+  `performance` label that does not enter the score yet).
+
+### 2026-11-06 - 80-product list handed to review collection (Person A)
+
+- `data/interim/pilot_products.csv` now holds the 80 products of Person B's
+  `veri_toplama_v4.xlsx` (40 washing machines, 40 refrigerators), produced with
+  `import-sheets` and `check-pilot --out`. The workbook was only read, not changed.
+- All 26 earlier products are kept; 54 are new (47 Hepsiburada, 7 Trendyol). Reviews for
+  the new products still have to be saved by hand (`docs/yorum-toplama.md`).
+- Hepsiburada shows the reviews of a seller listing (`-p-` address) under the product's main
+  `-pm-` number. Optional column `review_page_id` in `pilot_products.csv` maps that number to the
+  listed product, so ids stay the same as in the workbook and EPREL data. 151 tests.
+
+### 2026-11-05 - Annotation pool (Person A, task O1.1)
+
+- New `greenchoice annotation-pool` (`nlp/pool.py`): 100 random test reviews that both people
+  label, and 300 train reviews enriched with keyword candidates (energy, failure, noise,
+  service), reviews rated 3 or lower, then random reviews alternating between categories. At
+  most 30 train reviews per product. Fixed seed; it refuses to overwrite an existing pool.
+- Each annotator gets one sheet of 250 reviews (shared 100 + own 150) in random order, without
+  the split, the reason or the rating.
+- Dry run on the 1,460 pilot reviews: the rule extractor finds few candidates (energy 1,
+  service 6, failure 14), so 180 of the 300 train reviews are random. To be run again on the
+  80-product reviews before labelling starts. 176 tests.
+
+### 2026-11-05 - Clear error for a broken Trendyol review card (Person A)
+
+- `import-reviews` crashed with `AttributeError` when a saved Trendyol review card had no star bar
+  or no width in it (reported by Person B). It now stops with a `ValueError` that names the file
+  and the review id, like the other parse errors.
+- 2 new tests; 152 in total. The 1,492 pilot reviews still import unchanged.
+
 
 
 ### 2026-11-02 - 80-product list assembled (Person B)
@@ -201,6 +311,24 @@ other person, then merge to `main`.
   the five known Trendyol products. Search, listing and reviews stay unavailable (robots.txt).
 - `requests` and `beautifulsoup4` added to the `dev` extra. 29 new tests.
 - Fixed `docs/decisions.md`, where a previous edit had removed the "Açık sorular" heading.
+
+### 2026-11-01 - Annotation guideline and energy decision (Person A, task A1.3)
+
+- `docs/annotation-guideline.md` tried on 32 real reviews chosen to be difficult: aspect scopes,
+  a table of confusing cases (examples are invented) and a pool plan with a random test set.
+- Decision 16: the energy criterion is not fed from reviews. Scoring already used only the energy
+  class and kWh, so no scoring code changed; a new test guards it. 104 tests.
+
+### 2026-11-01 - Review cleaning (Person A, task A1.2)
+
+- `normalize_text` shortens elongated letters and removes emoji. No language filter: non-Turkish
+  reviews did not appear in the pilot data (samples were Turkish typed without diacritics).
+- New `preprocess/scope.py`: "sorunsuz" and "sağlam" next to delivery or installation words no
+  longer count as durability. New columns `text_product` and `mentions_logistics`; the raw text
+  is unchanged and the extractor reads `text_product`.
+- On 1,460 pilot reviews `durability:pos` fell from 218 to 41, other aspects unchanged. Removing
+  whole clauses was tried first and dropped: it lost real product mentions.
+- 17 new tests; 103 in total. Accuracy is not measured yet, labelled data comes next.
 
 ### 2026-11-01 - Review source check and saved-page import (Person A, tasks A0.1, A1.1)
 
