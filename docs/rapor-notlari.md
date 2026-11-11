@@ -46,29 +46,29 @@ Her madde koddaki veya belgelerdeki bir duruma dayanıyor; köşeli parantez iç
 **Yöntem:** Aşağıdan yukarı, görev bazlı tahmin. İş kırılımındaki her görev (`gorev-dagilimi.md`) sahibine
 göre saatlendirildi ve aşama aşama toplandı. Sorumluluk bölümü: Kişi A (Atahan) yorumlar, NLP,
 açıklanabilirlik, kullanıcı çalışması; Kişi B (Ali Rubar) ürün ve enerji verisi, skorlama, ML, arayüz.
-Ortak işler yarı yarıya bölündü. İkisi de diğer derslerle birlikte haftada yaklaşık 13 saat çalışıyor.
+Ortak işler yarı yarıya bölündü. İkisi de diğer derslerle birlikte haftada 5–6 saat çalışıyor.
 
 **Süre:** 15.10.2026 – 25.01.2027, yaklaşık **3,4 ay** (14,5 hafta).
 
 | Aşama | Tarih | Kişi A (saat) | Kişi B (saat) | A'nın ana işleri | B'nin ana işleri |
 |---|---|---|---|---|---|
-| 0. Keşif ve kararlar | 22.10–31.10 | 20 | 20 | Yorum kaynağı incelemesi, NLP ön araştırması | EPREL erişimi, ürün sayfaları, maliyet varsayımları, ortam kurulumu |
-| 1. Veri toplama ve ön işleme | 27.10–10.11 | 40 | 40 | Yorum toplama ve içe aktarma, temizleme, etiketleme kılavuzu | Ürün listesi, EPREL eşleştirme, uçtan uca çalışma, keşifsel veri analizi |
-| Ara rapor ve sunum | 10.11–13.11 | 10 | 10 | Literatür, NLP bölümleri | Veri seti, mimari bölümleri |
-| 2. NLP ve özellik çıkarımı | 10.11–05.12 | 50 | 40 | Etiketleme (yarısı), BERTurk ince ayarı, hata analizi | Etiketleme (yarısı), TF-IDF, kural sözlüğü, skorlama iyileştirmesi |
-| 3. Skorlama modeli | 05.12–31.12 | 30 | 40 | SHAP açıklamaları, yorum kanıtları, ürün etiketleme (yarısı) | AHP, ML karşılaştırması, duyarlılık, ürün etiketleme (yarısı), arayüz |
-| 4. Açıklanabilirlik, arayüz, teslim | 01.01–25.01 | 40 | 40 | Kullanıcı çalışması, açıklama API'si, final rapor (yarısı) | Arayüzün son hali, demo, final rapor (yarısı) |
-| **Toplam** | | **190** | **190** | | |
+| 0. Keşif ve kararlar | 22.10–31.10 | 8 | 8 | Yorum kaynağı incelemesi, NLP ön araştırması | EPREL erişimi, ürün sayfaları, maliyet varsayımları, ortam kurulumu |
+| 1. Veri toplama ve ön işleme | 27.10–10.11 | 16 | 16 | Yorum toplama ve içe aktarma, temizleme, etiketleme kılavuzu | Ürün listesi, EPREL eşleştirme, uçtan uca çalışma, keşifsel veri analizi |
+| Ara rapor ve sunum | 10.11–13.11 | 6 | 6 | Literatür, NLP bölümleri | Veri seti, mimari bölümleri |
+| 2. NLP ve özellik çıkarımı | 10.11–05.12 | 20 | 16 | Etiketleme (yarısı), BERTurk ince ayarı, hata analizi | Etiketleme (yarısı), TF-IDF, kural sözlüğü, skorlama iyileştirmesi |
+| 3. Skorlama modeli | 05.12–31.12 | 12 | 16 | SHAP açıklamaları, yorum kanıtları, ürün etiketleme (yarısı) | AHP, ML karşılaştırması, duyarlılık, ürün etiketleme (yarısı), arayüz |
+| 4. Açıklanabilirlik, arayüz, teslim | 01.01–25.01 | 18 | 18 | Kullanıcı çalışması, açıklama API'si, final rapor (yarısı) | Arayüzün son hali, demo, final rapor (yarısı) |
+| **Toplam** | | **80** | **80** | | |
 
-**Emek:** 1 kişi-ay = 160 saat (tam zamanlı bir ay) kabulüyle kişi başına 190 / 160 ≈ **1,2 kişi-ay**,
-toplam ≈ **2,4 kişi-ay**. Takvim süresi 3,4 ay olduğu için bu, iki kişinin yarı zamanlı (%35 civarı)
-çalışmasına karşılık geliyor.
+**Emek:** 1 kişi-ay = 160 saat (tam zamanlı bir ay) kabulüyle kişi başına 80 / 160 = **0,5 kişi-ay**,
+toplam **1,0 kişi-ay**. 80 saat / 14,5 hafta ≈ haftada 5,5 saat; takvim süresi 3,4 ay olduğu için bu,
+iki kişinin yaklaşık %15 zamanla çalışmasına karşılık geliyor.
 
 **Maliyet:**
 
 | Kalem | Tahmin | Not |
 |---|---|---|
-| İnsan kaynağı | 380 saat × saatlik ücret | Saatlik ücret için güncel ve kaynağı gösterilebilir bir değer kullanın (ör. yeni mezun yazılım mühendisi maaş araştırması). Rakamı uydurmayın. |
+| İnsan kaynağı | 160 saat × saatlik ücret | Saatlik ücret için güncel ve kaynağı gösterilebilir bir değer kullanın (ör. yeni mezun yazılım mühendisi maaş araştırması). Rakamı uydurmayın. |
 | Donanım | 0 TL ek maliyet | Kişisel bilgisayarlar. İsterseniz amortisman ekleyin. |
 | GPU | 0 TL | Google Colab ücretsiz katmanı (T4). Ücretsiz katman garanti değil; risk tablosunda R7. |
 | Yazılım | 0 TL | Python, FastAPI, React, scikit-learn, PyTorch, transformers: açık kaynak |
