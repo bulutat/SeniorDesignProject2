@@ -80,6 +80,16 @@ def test_hepsiburada_page_reads_rating_date_aspects_and_counts_empty_cards():
     assert "G**" not in json.dumps(page.reviews, ensure_ascii=False)
 
 
+@pytest.mark.parametrize("broken", [
+    lambda h: h.replace('<div class="star-rating-full-star" style="padding-inline-end: 0px;"></div>', ""),
+    lambda h: h.replace("padding-inline-end: 0px;", "width: 80%;"),
+])
+def test_trendyol_card_with_a_broken_star_bar_fails_with_file_and_review(broken):
+    html = broken(ty_page([ty_review(7, "Sessiz")]))
+    with pytest.raises(ValueError, match=r"c\.html.*ty-7"):
+        parse_page(html, "c.html")
+
+
 def test_page_without_reviews_fails_with_the_file_name():
     html = f'<html><head><link rel="canonical" href="{TY_URL}"></head></html>'
     with pytest.raises(ValueError, match="bos.html"):
@@ -117,3 +127,10 @@ def test_import_folder_rejects_a_product_outside_the_list(tmp_path):
 def test_import_folder_rejects_an_empty_folder(tmp_path):
     with pytest.raises(ValueError, match="html"):
         import_folder(tmp_path, {"ty-111"})
+
+
+def test_import_folder_maps_a_review_page_id_to_the_listed_product(tmp_path):
+    write(tmp_path, "h1.html", hb_page([hb_card("Dayanıklı")], page=1, total=1))
+    table, report = import_folder(tmp_path, {"hb-LISTED"}, aliases={"hb-HBCAAA": "hb-LISTED"})
+    assert set(table["product_id"]) == {"hb-LISTED"} and report["hb-LISTED"]["reviews"] == 1
+    assert table["review_id"].str.startswith("hb-").all()
