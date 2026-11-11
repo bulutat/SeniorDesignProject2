@@ -53,12 +53,15 @@ def _product_number(url: str, name: str) -> str:
     return found[-1]
 
 
-def _trendyol_rating(review: Tag, name: str) -> int:
-    style = review.select_one(".review-stars .star-rating-full-star").get("style", "")
-    padding = float(re.search(r"padding-inline-end:\s*([\d.]+)px", style).group(1))
-    missing = padding / TRENDYOL_STAR_PX
+def _trendyol_rating(review: Tag, name: str, review_id: str) -> int:
+    bar = review.select_one(".review-stars .star-rating-full-star")
+    style = bar.get("style", "") if bar else ""
+    found = re.search(r"padding-inline-end:\s*([\d.]+)px", style)
+    if found is None:
+        raise ValueError(f"{name}: {review_id} yorumunda yıldız çubuğu okunamadı: {style!r}")
+    missing = float(found.group(1)) / TRENDYOL_STAR_PX
     if abs(missing - round(missing)) > 0.05 or not 0 <= round(missing) <= 4:
-        raise ValueError(f"{name}: yıldız genişliği beklenmedik: {style!r}")
+        raise ValueError(f"{name}: {review_id} yorumunda yıldız genişliği beklenmedik: {style!r}")
     return 5 - round(missing)
 
 
@@ -83,7 +86,7 @@ def _parse_trendyol(soup: BeautifulSoup, html: str, url: str, name: str) -> Save
         more = card.select_one("button.read-more")
         reviews.append({
             "review_id": f"ty-{comment_id}",
-            "rating": _trendyol_rating(card, name),
+            "rating": _trendyol_rating(card, name, f"ty-{comment_id}"),
             "text": " ".join(text.get_text(" ").split()),
             "date": _trendyol_date(card),
             "truncated": bool(more and "Devamını" in more.get_text()),
