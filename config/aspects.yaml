@@ -6,6 +6,21 @@
 #
 # Bu liste etiketleme kılavuzundaki (docs/annotation-guideline.md) aspect'lerle aynı olmalı.
 
+
+# "Sorunsuz ulaştı" ürünün dayanıklılığını değil teslimatı anlatır (preprocess/scope.py).
+# Belirsiz sözcük, yanında bağlam sözcüğü varsa analiz metninden çıkarılır. Yorumdan başka bir
+# şey silinmez. Bütün sözcükler kelime başından aranır, ekler serbesttir.
+logistics:
+  ambiguous: [sorunsuz, sağlam, sapasağlam]
+  window: 4                 # belirsiz sözcüğün iki yanında bakılacak kelime sayısı
+  # Yorumda geçmesi "mentions_logistics" olarak işaretlenir, bağlam olarak da kullanılır
+  terms: [kargo, kurye, teslim, teslım, paketle, paket, ambalaj, satıcı, mağaza, sipariş, nakliye,
+          lojistik, elime, gönderi, hasarsız, alışveriş]
+  # Ek bağlam: varış, taşıma ve kurulum
+  context: [geldi, gelmiş, gelen, ulaş, taşı, koli, kurulum, kurul, montaj, yapıldı, iletişim]
+  # Belirsiz sözcükten hemen sonra gelirse ürün kullanımı anlatılıyordur ("sorunsuz çalışıyor")
+  product_use: [çalış, kullan]
+
 aspects:
   durability:
     name: Dayanıklılık
