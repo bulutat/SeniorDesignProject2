@@ -132,6 +132,13 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-10 - Importance choices instead of weight sliders (Person A for Person B)
+
+- The weight panel now asks, for each criterion, "Önemli değil / Önemli / Çok önemli" (relative
+  weights 0 / 1 / 2; the API scales them to sum to 1). Starting choices follow the category's
+  default weights (0.20 and above is "very important"). With every criterion set to "not
+  important" the re-rank button is disabled. Frontend only; the API is unchanged.
+
 ### 2026-11-10 - Energy data for products outside EPREL (Person A)
 
 - 32 of 80 products had no energy class. The official EU energy labels of 23 of them were read
@@ -220,7 +227,6 @@ other person, then merge to `main`.
   or no width in it (reported by Person B). It now stops with a `ValueError` that names the file
   and the review id, like the other parse errors.
 - 2 new tests; 152 in total. The 1,492 pilot reviews still import unchanged.
-
 
 
 ### 2026-11-02 - 80-product list assembled (Person B)
