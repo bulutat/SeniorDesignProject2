@@ -207,8 +207,12 @@ def import_reviews(pages: Path, products: Path, out: Path) -> dict:
     """Saved review pages -> reviews CSV. Importing here keeps bs4 optional for other commands."""
     from greenchoice.collect.saved_pages import import_folder
 
-    known = set(pd.read_csv(products, dtype=str)["product_id"])
-    table, report = import_folder(pages, known)
+    listed = pd.read_csv(products, dtype=str)
+    aliases = {}
+    if "review_page_id" in listed.columns:  # optional: id the review page shows, if different
+        rows = listed.dropna(subset=["review_page_id"])
+        aliases = dict(zip(rows["review_page_id"], rows["product_id"], strict=True))
+    table, report = import_folder(pages, set(listed["product_id"]), aliases)
     out.parent.mkdir(parents=True, exist_ok=True)
     table.to_csv(out, index=False)
     return {"reviews": len(table), "out": str(out), "products": report}
