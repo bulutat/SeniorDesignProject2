@@ -171,6 +171,17 @@ other person, then merge to `main`.
 - Guideline: counts and proposals for the two open questions (durability at least 6 months; add a
   `performance` label that does not enter the score yet).
 
+### 2026-11-06 - 80-product list handed to review collection (Person A)
+
+- `data/interim/pilot_products.csv` now holds the 80 products of Person B's
+  `veri_toplama_v4.xlsx` (40 washing machines, 40 refrigerators), produced with
+  `import-sheets` and `check-pilot --out`. The workbook was only read, not changed.
+- All 26 earlier products are kept; 54 are new (47 Hepsiburada, 7 Trendyol). Reviews for
+  the new products still have to be saved by hand (`docs/yorum-toplama.md`).
+- Hepsiburada shows the reviews of a seller listing (`-p-` address) under the product's main
+  `-pm-` number. Optional column `review_page_id` in `pilot_products.csv` maps that number to the
+  listed product, so ids stay the same as in the workbook and EPREL data. 151 tests.
+
 ### 2026-11-05 - Annotation pool (Person A, task O1.1)
 
 - New `greenchoice annotation-pool` (`nlp/pool.py`): 100 random test reviews that both people
@@ -182,6 +193,14 @@ other person, then merge to `main`.
 - Dry run on the 1,460 pilot reviews: the rule extractor finds few candidates (energy 1,
   service 6, failure 14), so 180 of the 300 train reviews are random. To be run again on the
   80-product reviews before labelling starts. 176 tests.
+
+### 2026-11-05 - Clear error for a broken Trendyol review card (Person A)
+
+- `import-reviews` crashed with `AttributeError` when a saved Trendyol review card had no star bar
+  or no width in it (reported by Person B). It now stops with a `ValueError` that names the file
+  and the review id, like the other parse errors.
+- 2 new tests; 152 in total. The 1,492 pilot reviews still import unchanged.
+
 
 
 ### 2026-11-02 - 80-product list assembled (Person B)
