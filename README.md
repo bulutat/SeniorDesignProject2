@@ -128,12 +128,24 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-10 - Energy data for products outside EPREL (Person A)
+
+- 32 of 80 products had no energy class. The official EU energy labels of 23 of them were read
+  by hand from the manufacturers' Turkish sites and stored with their URLs in
+  `data/manual/energy_labels.csv`; 7 more get the class from the store title ("E Enerji Sınıfı").
+  Pre-2021 classes (A+++ ...) are never used. 2 products remain unknown.
+- New `preprocess/energy_labels.py`; `build` fills only empty fields in the order EPREL, label,
+  shop data, title, and writes the source to `energy_source`. Method and doubts:
+  `docs/enerji-etiketleri.md`. Energy class known for 78 products (was 48), annual kWh for 71
+  (was 48). 161 tests.
+
 ### 2026-11-05 - Clear error for a broken Trendyol review card (Person A)
 
 - `import-reviews` crashed with `AttributeError` when a saved Trendyol review card had no star bar
   or no width in it (reported by Person B). It now stops with a `ValueError` that names the file
   and the review id, like the other parse errors.
 - 2 new tests; 152 in total. The 1,492 pilot reviews still import unchanged.
+
 
 ### 2026-11-02 - 80-product list assembled (Person B)
 
