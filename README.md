@@ -110,7 +110,7 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 150 tests
+pytest                    # 161 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
@@ -127,6 +127,17 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-10 - Energy data for products outside EPREL (Person A)
+
+- 32 of 80 products had no energy class. The official EU energy labels of 23 of them were read
+  by hand from the manufacturers' Turkish sites and stored with their URLs in
+  `data/manual/energy_labels.csv`; 7 more get the class from the store title ("E Enerji Sınıfı").
+  Pre-2021 classes (A+++ ...) are never used. 2 products remain unknown.
+- New `preprocess/energy_labels.py`; `build` fills only empty fields in the order EPREL, label,
+  shop data, title, and writes the source to `energy_source`. Method and doubts:
+  `docs/enerji-etiketleri.md`. Energy class known for 78 products (was 48), annual kWh for 71
+  (was 48). 161 tests.
 
 ### 2026-11-02 - 80-product list assembled (Person B)
 
