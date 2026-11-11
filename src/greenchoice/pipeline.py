@@ -25,6 +25,7 @@ from greenchoice.config import INTERIM_DIR, SAMPLE_DIR, db_path
 from greenchoice.contracts import PRODUCT_COLUMNS, REVIEW_COLUMNS, conform
 from greenchoice.nlp.aggregate import product_review_features
 from greenchoice.nlp.rule_based import RuleBasedExtractor
+from greenchoice.preprocess.energy_labels import apply_energy_sources, load_energy_labels
 from greenchoice.preprocess.matching import merge_eprel
 from greenchoice.preprocess.products import clean_products
 from greenchoice.preprocess.reviews import clean_reviews
@@ -35,7 +36,8 @@ from greenchoice.scoring.service import score_products
 SOURCES = {"sample": SAMPLE_DIR, "interim": INTERIM_DIR}
 
 
-def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None) -> dict:
+def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None,
+          energy_labels_csv: Path | None = None) -> dict:
     products = conform(pd.read_csv(source_dir / "products.csv", dtype={"product_id": str}),
                        PRODUCT_COLUMNS)
     reviews = conform(pd.read_csv(source_dir / "reviews.csv",
@@ -44,6 +46,8 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None) -> dict
     products = clean_products(products)
     if eprel_csv:
         products = merge_eprel(products, load_manual_eprel(eprel_csv))
+    labels = load_energy_labels(energy_labels_csv) if energy_labels_csv else None
+    products = apply_energy_sources(products, labels)
     products = add_tco(products)
     reviews = clean_reviews(reviews)
     reviews = reviews[reviews["product_id"].isin(products["product_id"])]
@@ -80,6 +84,7 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None) -> dict
         "db": str(out_db),
         "products": len(products),
         "eprel_matched": int(products["eprel_matched"].sum()) if "eprel_matched" in products else 0,
+        "energy_source": products["energy_source"].fillna("none").value_counts().to_dict(),
         "reviews": len(reviews),
         "aspect_mentions": len(review_aspects),
         "nlp_method": extractor.method,
@@ -181,6 +186,8 @@ def main(argv: list[str] | None = None) -> None:
     b.add_argument("--source", default="sample", help="sample | interim | klasör yolu")
     b.add_argument("--eprel", type=Path, default=None, help="EPREL CSV (isteğe bağlı)")
     b.add_argument("--db", type=Path, default=None, help="Çıktı veritabanı yolu")
+    b.add_argument("--energy-labels", type=Path, default=Path("data/manual/energy_labels.csv"),
+                   help="üretici enerji etiketlerinden elle okunan değerler (dosya yoksa atlanır)")
 
     e = sub.add_parser("eval-nlp", help="NLP baseline'ını altın etiketlerle değerlendir")
     e.add_argument("--gold", type=Path, required=True)
@@ -223,7 +230,8 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     if args.cmd == "build":
         source = SOURCES.get(args.source, Path(args.source))
-        summary = build(source, args.db or db_path(), args.eprel)
+        labels = args.energy_labels if args.energy_labels.exists() else None
+        summary = build(source, args.db or db_path(), args.eprel, labels)
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     elif args.cmd == "eval-nlp":
         print(eval_nlp(args.gold).to_string(index=False, float_format="%.3f"))
