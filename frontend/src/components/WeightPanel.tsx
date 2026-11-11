@@ -8,40 +8,65 @@ interface Props {
   onReset: () => void;
 }
 
-const defaults = (c: Category) => Object.fromEntries(c.criteria.map((k) => [k.id, k.weight]));
+// Each choice is a relative weight; the API scales the weights so that they sum to 1.
+// "Not important" leaves the criterion out of the score.
+export const LEVELS = [
+  { id: "none", label: "Önemli değil", weight: 0 },
+  { id: "normal", label: "Önemli", weight: 1 },
+  { id: "high", label: "Çok önemli", weight: 2 },
+] as const;
+type Level = (typeof LEVELS)[number]["id"];
+
+// Starting choices follow the category's default weights (0.20 and above count as "very important").
+export const levelFor = (weight: number): Level => (weight >= 0.2 ? "high" : weight > 0 ? "normal" : "none");
+const defaults = (c: Category) =>
+  Object.fromEntries(c.criteria.map((k) => [k.id, levelFor(k.weight)])) as Record<string, Level>;
+export const toWeights = (levels: Record<string, Level>) =>
+  Object.fromEntries(
+    Object.entries(levels).map(([id, level]) => [id, LEVELS.find((l) => l.id === level)!.weight]),
+  );
 
 export default function WeightPanel({ category, onScored, onReset }: Props) {
-  const [weights, setWeights] = useState<Record<string, number>>(defaults(category));
+  const [levels, setLevels] = useState<Record<string, Level>>(defaults(category));
 
-  useEffect(() => setWeights(defaults(category)), [category]);
+  useEffect(() => setLevels(defaults(category)), [category]);
 
-  const apply = () => api.customScore(category.id, weights).then(onScored);
+  const nothingSelected = Object.values(levels).every((l) => l === "none");
+  const apply = () => api.customScore(category.id, toWeights(levels)).then(onScored);
   const reset = () => {
-    setWeights(defaults(category));
+    setLevels(defaults(category));
     onReset();
   };
 
   return (
     <details className="weights">
-      <summary>Kriterlerin önemini kendiniz ayarlayın</summary>
+      <summary>Sizin için hangi kriter ne kadar önemli?</summary>
       <div className="weight-grid">
         {category.criteria.map((c) => (
-          <label key={c.id} htmlFor={`w-${c.id}`}>
-            <span>{c.name}</span>
-            <input
-              id={`w-${c.id}`}
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={weights[c.id] ?? 0}
-              onChange={(e) => setWeights({ ...weights, [c.id]: Number(e.target.value) })}
-            />
-          </label>
+          <fieldset key={c.id} className="level-group">
+            <legend>{c.name}</legend>
+            <div className="level-options">
+              {LEVELS.map((l) => (
+                <label key={l.id} className={levels[c.id] === l.id ? "chosen" : undefined}>
+                  <input
+                    type="radio"
+                    name={`level-${c.id}`}
+                    value={l.id}
+                    checked={levels[c.id] === l.id}
+                    onChange={() => setLevels({ ...levels, [c.id]: l.id })}
+                  />
+                  {l.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
         ))}
       </div>
+      {nothingSelected && (
+        <p className="weight-note">En az bir kriteri "Önemli" veya "Çok önemli" seçin.</p>
+      )}
       <div className="weight-actions">
-        <button onClick={apply}>Yeniden sırala</button>
+        <button onClick={apply} disabled={nothingSelected}>Yeniden sırala</button>
         <button className="secondary" onClick={reset}>Varsayılana dön</button>
       </div>
     </details>
