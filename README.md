@@ -110,7 +110,7 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 150 tests
+pytest                    # 161 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
@@ -128,6 +128,17 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-10 - Energy data for products outside EPREL (Person A)
+
+- 32 of 80 products had no energy class. The official EU energy labels of 23 of them were read
+  by hand from the manufacturers' Turkish sites and stored with their URLs in
+  `data/manual/energy_labels.csv`; 7 more get the class from the store title ("E Enerji Sınıfı").
+  Pre-2021 classes (A+++ ...) are never used. 2 products remain unknown.
+- New `preprocess/energy_labels.py`; `build` fills only empty fields in the order EPREL, label,
+  shop data, title, and writes the source to `energy_source`. Method and doubts:
+  `docs/enerji-etiketleri.md`. Energy class known for 78 products (was 48), annual kWh for 71
+  (was 48). 161 tests.
+
 ### 2026-11-07 - User study design draft (Person A, task A4.1)
 
 - `docs/kullanici-calismasi.md` (Turkish): within-subjects study with 10–15 participants, score-only
@@ -135,6 +146,7 @@ other person, then merge to `main`.
   comprehension question per task, seven Likert items written for this study, Wilcoxon signed-rank
   with Holm correction, draft consent text and questions for the advisor (ethics approval, analysis).
 - Product pairs are chosen after the scoring decisions (B3). No personal data is collected.
+
 
 ### 2026-11-02 - 80-product list assembled (Person B)
 
