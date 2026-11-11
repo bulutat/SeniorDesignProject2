@@ -57,3 +57,31 @@ Bir dosya okunamazsa komut dosya adıyla durur. Site tasarımı değiştiyse se�
 
 Bazı yorumlarda kullanıcılar "Enerji Tüketimi", "Sessiz Çalışma" gibi kriterlere ayrıca puan veriyor.
 Bunlar `site_aspects` kolonuna JSON olarak yazılır. Kriter adları kategoriye göre değişebilir.
+
+## Temizleme (A1.2)
+
+`clean_reviews` ham metni değiştirmez, `text_clean` ve `text_product` kolonlarını ekler.
+
+- **Uzatılmış harf ve emoji:** "çoook" → "çok", emojiler silinir. Üç aynı harf tek harfe iner, bu
+  yüzden nadiren "etttim" → "etim" gibi bozulma olur.
+- **Dil filtresi yok:** Pilot yorumlarda Türkçe dışı yorum görülmedi. Şüpheli görünenlerin baktığımız
+  örnekleri Türkçe karaktersiz yazılmış Türkçeydi ("cok memnunum").
+- **Teslimat bağlamı:** "sorunsuz" ve "sağlam" yanındaki 4 kelime içinde teslimat veya kurulum
+  sözcüğü varsa `text_product`'tan çıkar. Hemen ardından "çalışıyor/kullanıyorum" geliyorsa kalır.
+
+Pilot yorumlarda kural tabanlı `durability:pos` sayısı (1.460 yorum, 01.11.2026):
+
+| Yöntem | durability:pos | Diğer aspect'ler |
+|---|---|---|
+| Temizleme yok | 218 | |
+| Tümce parçası silme (denendi, bırakıldı) | 63 | Sessizlik 183 → 159 düştü, 256 yorum tamamen elendi |
+| Yalnızca belirsiz sözcüğü çıkarma (seçildi) | 41 | Değişmedi |
+
+Tümce silme bırakıldı, çünkü noktalama az olduğunda ürün bilgisi de siliniyordu. Kalan 41 sonucun
+rastgele 30'luk örneğini elle okuduk: yaklaşık üçte ikisi gerçekten dayanıklılık, kalanı hatalı
+("sağlamak", satıcı adı "Dayanıklı Tüketim"). Bu resmî bir ölçüm değildir, gerçek başarı etiketli
+veriyle ölçülecek (P/R/F1).
+
+Bilinen sınırlar: kargo veya satıcı şikâyeti içeren yorumlar silinmez ve yıldız puanına etkisi
+düzeltilmez. Aspect sözlüğü Türkçe karaktersiz yazımı ("sorunsuz" dışında "cok", "calisiyor")
+yakalamaz.
