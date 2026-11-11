@@ -38,6 +38,7 @@ SOURCES = {"sample": SAMPLE_DIR, "interim": INTERIM_DIR}
 
 
 def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None,
+          nlp: str = "rule", nlp_model: Path | None = None,
           energy_labels_csv: Path | None = None) -> dict:
     products = conform(pd.read_csv(source_dir / "products.csv", dtype={"product_id": str}),
                        PRODUCT_COLUMNS)
@@ -53,7 +54,9 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None,
     reviews = clean_reviews(reviews)
     reviews = reviews[reviews["product_id"].isin(products["product_id"])]
 
-    extractor = RuleBasedExtractor()
+    from greenchoice.nlp.training import load_extractor
+
+    extractor = load_extractor(nlp, nlp_model)
     review_aspects = extractor.extract_df(reviews, column="text_product")
     review_feats = product_review_features(reviews, review_aspects)
 
@@ -171,6 +174,38 @@ def collect_labels(sheets_dir: Path, out_dir: Path, seed: int = 491) -> dict:
             "kappa": kappa.round(3).to_dict(orient="records")}
 
 
+def train_nlp(gold_csv: Path, reviews_csv: Path, out: Path, seed: int = 491) -> dict:
+    """TF-IDF + LR on the train split, thresholds on val, P/R/F1 on test (nlp/training.py)."""
+    from greenchoice.nlp.training import train_tfidf
+
+    gold = pd.read_csv(gold_csv, dtype={"review_id": str})
+    reviews = pd.read_csv(reviews_csv, dtype={"review_id": str, "product_id": str})
+    return train_tfidf(gold, reviews, out, seed)
+
+
+def export_nlp_data(gold_csv: Path, reviews_csv: Path, out_dir: Path) -> dict:
+    """One CSV per split for the Colab notebook: review_id, text, one 0/1 column per label.
+
+    The files hold review text, so they stay in data/interim and are shared privately.
+    """
+    from greenchoice.nlp.dataset import TEXT_COLUMN, label_names, split_data
+
+    gold = pd.read_csv(gold_csv, dtype={"review_id": str})
+    reviews = pd.read_csv(reviews_csv, dtype={"review_id": str, "product_id": str})
+    out_dir.mkdir(parents=True, exist_ok=True)
+    counts = {}
+    for split in ("train", "val", "test"):
+        if not (gold["split"] == split).any():
+            continue
+        part, y = split_data(gold, reviews, split)
+        table = pd.DataFrame(y.astype(int), columns=label_names())
+        table.insert(0, "text", part[TEXT_COLUMN].to_numpy())
+        table.insert(0, "review_id", part["review_id"].to_numpy())
+        table.to_csv(out_dir / f"{split}.csv", index=False, encoding="utf-8")
+        counts[split] = len(table)
+    return {**counts, "out_dir": str(out_dir)}
+
+
 def check_pilot(products_csv: Path, eprel_csv: Path | None = None, out: Path | None = None) -> dict:
     products = load_pilot_list(products_csv)
     eprel = load_manual_eprel(eprel_csv) if eprel_csv else None
@@ -270,6 +305,19 @@ def main(argv: list[str] | None = None) -> None:
     b.add_argument("--source", default="sample", help="sample | interim | klasör yolu")
     b.add_argument("--eprel", type=Path, default=None, help="EPREL CSV (isteğe bağlı)")
     b.add_argument("--db", type=Path, default=None, help="Çıktı veritabanı yolu")
+    b.add_argument("--nlp", default="rule", help="rule | tfidf | berturk")
+    b.add_argument("--nlp-model", type=Path, default=None,
+                   help="tfidf: models/tfidf_lr_v0.joblib, berturk: model klasörü")
+
+    tn = sub.add_parser("train-nlp", help="TF-IDF + LR aspect modelini altın etiketlerle eğit")
+    tn.add_argument("--gold", type=Path, default=Path("data/annotations/reviews_gold.csv"))
+    tn.add_argument("--reviews", type=Path, default=Path("data/interim/reviews.csv"))
+    tn.add_argument("--out", type=Path, default=Path("models/tfidf_lr_v0.joblib"))
+
+    ex = sub.add_parser("export-nlp-data", help="Colab BERTurk eğitimi için train/val/test CSV'leri")
+    ex.add_argument("--gold", type=Path, default=Path("data/annotations/reviews_gold.csv"))
+    ex.add_argument("--reviews", type=Path, default=Path("data/interim/reviews.csv"))
+    ex.add_argument("--out-dir", type=Path, default=Path("data/interim/nlp_egitim"))
     b.add_argument("--energy-labels", type=Path, default=Path("data/manual/energy_labels.csv"),
                    help="üretici enerji etiketlerinden elle okunan değerler (dosya yoksa atlanır)")
 
@@ -329,8 +377,20 @@ def main(argv: list[str] | None = None) -> None:
     if args.cmd == "build":
         source = SOURCES.get(args.source, Path(args.source))
         labels = args.energy_labels if args.energy_labels.exists() else None
-        summary = build(source, args.db or db_path(), args.eprel, labels)
+        try:
+            summary = build(source, args.db or db_path(), args.eprel, args.nlp, args.nlp_model, labels)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
         print(json.dumps(summary, ensure_ascii=False, indent=2))
+    elif args.cmd in ("train-nlp", "export-nlp-data"):
+        try:
+            if args.cmd == "train-nlp":
+                report = train_nlp(args.gold, args.reviews, args.out)
+            else:
+                report = export_nlp_data(args.gold, args.reviews, args.out_dir)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
     elif args.cmd == "eval-nlp":
         try:
             table = eval_nlp(args.gold, args.reviews, args.split)
