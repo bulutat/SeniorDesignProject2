@@ -150,6 +150,15 @@ other person, then merge to `main`.
   `docs/enerji-etiketleri.md`. Energy class known for 78 products (was 48), annual kWh for 71
   (was 48). 161 tests.
 
+### 2026-11-07 - Exploratory data analysis (Person A for Person B, task B1.4)
+
+- `notebooks/01_B_eda.ipynb` reads the database built from the real data and saves four figures
+  to `docs/figures/` (price, energy class, star ratings, rule-based aspect mentions). Outputs are
+  counts and shares only; no review text.
+- Main numbers: energy class missing for 50% of refrigerators and 30% of washing machines, no
+  warranty data, 86.5% of reviews are 5 stars, the 3 most reviewed products hold 28% of reviews.
+- `matplotlib` added to the `dev` extra.
+
 ### 2026-11-07 - First end-to-end run on real data (Person A for Person B, task B1.3)
 
 - `greenchoice build` ran on the 80 products, EPREL records and 3,467 collected reviews; the
