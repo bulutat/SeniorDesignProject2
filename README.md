@@ -101,6 +101,10 @@ automated collection (`docs/kaynak-inceleme.md`). This command only reads local 
 extracts usernames; guide: `docs/yorum-toplama.md`:
 `greenchoice import-reviews --pages data/raw/yorum_sayfalari --out data/interim/reviews.csv`
 
+Choose the reviews to annotate and write one sheet per annotator (`nlp/pool.py`). Sheets contain
+review text and stay in `data/interim/etiketleme/`, which is not committed:
+`greenchoice annotation-pool`
+
 The `--eprel` file is the hand-collected EPREL CSV (the EPREL public API needs a key that
 requires a sealed declaration). Template: `data/templates/eprel_manual.csv`; collection
 guide: `docs/eprel-manual-toplama.md` (Turkish). The file is validated row by row: energy
@@ -110,12 +114,12 @@ model codes must agree. The build summary reports `eprel_matched`.
 ## Tests
 
 ```bash
-pytest                    # 151 tests
+pytest                    # 184 tests
 ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-05, Python 3.12.10, Node 26.13.0 - 152 passed, ruff clean. The
+Last verified: 2026-11-05, Python 3.12.10 - 184 passed, ruff clean. The
 frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
 
 ## Team workflow
@@ -139,6 +143,20 @@ other person, then merge to `main`.
   `docs/enerji-etiketleri.md`. Energy class known for 78 products (was 48), annual kWh for 71
   (was 48). 161 tests.
 
+### 2026-11-07 - Label collection, kappa and gold file (Person A, task O2.1 tools)
+
+- New `greenchoice collect-labels` (`nlp/labels.py`): reads the filled sheets, checks every value
+  (row number in the error), computes Cohen's kappa per aspect on the shared test reviews, writes
+  the disagreements to `data/interim/etiketleme/uzlasma.csv` for a decision and builds the gold
+  file. 20% of train becomes `val` for threshold tuning. Undecided test reviews stay out.
+- **Contract change, needs Person B's approval:** `data/annotations/reviews_gold.csv` no longer has
+  a `text` column (review text is never committed); it now has `split`. `eval-nlp` joins the text
+  from `data/interim/reviews.csv`, cleans it like `build` and scores the `test` split by default.
+- Sheets have a `checked` column, so an empty row can mean "no aspect". Sheets were regenerated;
+  the 400 chosen reviews did not change. 184 tests.
+- Guideline: counts and proposals for the two open questions (durability at least 6 months; add a
+  `performance` label that does not enter the score yet).
+
 ### 2026-11-06 - 80-product list handed to review collection (Person A)
 
 - `data/interim/pilot_products.csv` now holds the 80 products of Person B's
@@ -149,6 +167,18 @@ other person, then merge to `main`.
 - Hepsiburada shows the reviews of a seller listing (`-p-` address) under the product's main
   `-pm-` number. Optional column `review_page_id` in `pilot_products.csv` maps that number to the
   listed product, so ids stay the same as in the workbook and EPREL data. 151 tests.
+
+### 2026-11-05 - Annotation pool (Person A, task O1.1)
+
+- New `greenchoice annotation-pool` (`nlp/pool.py`): 100 random test reviews that both people
+  label, and 300 train reviews enriched with keyword candidates (energy, failure, noise,
+  service), reviews rated 3 or lower, then random reviews alternating between categories. At
+  most 30 train reviews per product. Fixed seed; it refuses to overwrite an existing pool.
+- Each annotator gets one sheet of 250 reviews (shared 100 + own 150) in random order, without
+  the split, the reason or the rating.
+- Dry run on the 1,460 pilot reviews: the rule extractor finds few candidates (energy 1,
+  service 6, failure 14), so 180 of the 300 train reviews are random. To be run again on the
+  80-product reviews before labelling starts. 176 tests.
 
 ### 2026-11-05 - Clear error for a broken Trendyol review card (Person A)
 
@@ -210,6 +240,24 @@ other person, then merge to `main`.
   the five known Trendyol products. Search, listing and reviews stay unavailable (robots.txt).
 - `requests` and `beautifulsoup4` added to the `dev` extra. 29 new tests.
 - Fixed `docs/decisions.md`, where a previous edit had removed the "Açık sorular" heading.
+
+### 2026-11-01 - Annotation guideline and energy decision (Person A, task A1.3)
+
+- `docs/annotation-guideline.md` tried on 32 real reviews chosen to be difficult: aspect scopes,
+  a table of confusing cases (examples are invented) and a pool plan with a random test set.
+- Decision 16: the energy criterion is not fed from reviews. Scoring already used only the energy
+  class and kWh, so no scoring code changed; a new test guards it. 104 tests.
+
+### 2026-11-01 - Review cleaning (Person A, task A1.2)
+
+- `normalize_text` shortens elongated letters and removes emoji. No language filter: non-Turkish
+  reviews did not appear in the pilot data (samples were Turkish typed without diacritics).
+- New `preprocess/scope.py`: "sorunsuz" and "sağlam" next to delivery or installation words no
+  longer count as durability. New columns `text_product` and `mentions_logistics`; the raw text
+  is unchanged and the extractor reads `text_product`.
+- On 1,460 pilot reviews `durability:pos` fell from 218 to 41, other aspects unchanged. Removing
+  whole clauses was tried first and dropped: it lost real product mentions.
+- 17 new tests; 103 in total. Accuracy is not measured yet, labelled data comes next.
 
 ### 2026-11-01 - Review source check and saved-page import (Person A, tasks A0.1, A1.1)
 

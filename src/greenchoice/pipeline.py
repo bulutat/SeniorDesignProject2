@@ -4,7 +4,8 @@ Kullanım:
     greenchoice build                      # data/sample ile (sentetik örnek veri)
     greenchoice build --source interim     # data/interim/products.csv + reviews.csv
     greenchoice build --source <klasör> --eprel data/raw/eprel.csv --db <yol>
-    greenchoice eval-nlp --gold data/annotations/reviews_gold.csv
+    greenchoice collect-labels             # etiketleme tabloları -> kappa + altın etiketler
+    greenchoice eval-nlp                   # altın etiketlerin test bölümünde P/R/F1
     greenchoice check-pilot --products data/raw/pilot_products.csv --eprel data/raw/eprel_manual.csv
 """
 
@@ -53,7 +54,7 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None,
     reviews = reviews[reviews["product_id"].isin(products["product_id"])]
 
     extractor = RuleBasedExtractor()
-    review_aspects = extractor.extract_df(reviews)
+    review_aspects = extractor.extract_df(reviews, column="text_product")
     review_feats = product_review_features(reviews, review_aspects)
 
     features = products.merge(review_feats, on="product_id", how="left")
@@ -92,20 +93,82 @@ def build(source_dir: Path, out_db: Path, eprel_csv: Path | None = None,
     }
 
 
-def eval_nlp(gold_csv: Path) -> pd.DataFrame:
-    """Kural tabanlı çıkarıcıyı altın etiketlere karşı değerlendirir.
+def eval_nlp(gold_csv: Path, reviews_csv: Path = INTERIM_DIR / "reviews.csv",
+             split: str = "test") -> pd.DataFrame:
+    """Rule-based extractor against the gold labels of one split (nlp/labels.py).
 
-    gold_csv: review_id, text, aspect, polarity. Aspect içermeyen yorumlar aspect boş bırakılarak
-    bir satırla yer alır.
+    The gold file holds ids and labels only; review text comes from reviews_csv and goes through
+    the same cleaning as `build`. An older gold file with a "text" column is still accepted.
     """
     from greenchoice.nlp.evaluate import evaluate_aspects
-    from greenchoice.preprocess.text import normalize_text
 
     gold = pd.read_csv(gold_csv, dtype={"review_id": str})
-    texts = gold.drop_duplicates("review_id")[["review_id", "text"]].copy()
-    texts["text_clean"] = texts["text"].astype(str).map(normalize_text)
-    pred = RuleBasedExtractor().extract_df(texts)
-    return evaluate_aspects(gold.dropna(subset=["aspect"]), pred, texts["review_id"].tolist())
+    if "split" in gold.columns:
+        gold = gold[gold["split"] == split]
+    if gold.empty:
+        raise ValueError(f"{gold_csv}: '{split}' bölümünde etiket yok")
+    ids = gold["review_id"].drop_duplicates().tolist()
+    if "text" in gold.columns:
+        source = gold.drop_duplicates("review_id")[["review_id", "text"]].assign(
+            product_id="", rating=None, date=None)
+    else:
+        source = pd.read_csv(reviews_csv, dtype={"review_id": str, "product_id": str})
+    reviews = clean_reviews(conform(source[source["review_id"].isin(ids)], REVIEW_COLUMNS))
+    lost = sorted(set(ids) - set(reviews["review_id"]))
+    if lost:
+        raise ValueError(f"{len(lost)} etiketli yorum metni bulunamadı veya temizlikte düştü: {lost[:5]}")
+    pred = RuleBasedExtractor().extract_df(reviews, column="text_product")
+    return evaluate_aspects(gold.dropna(subset=["aspect"]), pred, ids)
+
+
+def collect_labels(sheets_dir: Path, out_dir: Path, seed: int = 491) -> dict:
+    """Filled sheets -> raw labels, kappa table, disagreement file and gold file (nlp/labels.py)."""
+    from greenchoice.nlp.labels import agreement, build_gold, read_sheet
+    from greenchoice.nlp.pool import ANNOTATORS
+
+    pool = pd.read_csv(sheets_dir / "pool.csv", dtype=str)
+    parts, report, texts = [], {}, {}
+    for name in ANNOTATORS:
+        path = sheets_dir / f"etiketleme_{name}.csv"
+        if not path.exists():
+            continue
+        sheet = pd.read_csv(path, dtype=str, encoding="utf-8-sig", keep_default_na=False)
+        mine = set(pool.loc[pool["annotators"].str.split(",").map(lambda a, n=name: n in a),
+                            "review_id"])
+        extra = sorted(set(sheet["review_id"]) - mine)
+        if extra:
+            raise ValueError(f"{path.name}: havuzda {name} için olmayan yorumlar var: {extra[:5]}")
+        labels, counts = read_sheet(sheet, name, path.name)
+        parts.append(labels)
+        report[f"sheet_{name}"] = counts
+        texts.update(zip(sheet["review_id"], sheet["text"], strict=True))
+    if not parts:
+        raise ValueError(f"{sheets_dir}: etiketleme_A.csv veya etiketleme_B.csv yok")
+    raw = pd.concat(parts, ignore_index=True)
+
+    both = raw.groupby("review_id")["annotator"].nunique()
+    test = set(pool.loc[pool["split"] == "test", "review_id"])
+    shared = sorted(r for r in both.index[both == 2] if r in test)
+    kappa, disagreements = agreement(raw, shared)
+
+    decisions_path = sheets_dir / "uzlasma.csv"
+    previous = None
+    if decisions_path.exists():
+        previous = pd.read_csv(decisions_path, dtype=str, encoding="utf-8-sig",
+                               keep_default_na=False)[["review_id", "aspect", "decision"]]
+    merged = disagreements.merge(previous, on=["review_id", "aspect"], how="left")         if previous is not None else disagreements.assign(decision="")
+    merged["decision"] = merged["decision"].fillna("")
+    merged["text"] = merged["review_id"].map(texts)
+    merged.to_csv(decisions_path, index=False, encoding="utf-8-sig")  # holds text: data/interim only
+
+    gold, gold_report = build_gold(raw, pool, disagreements, merged, seed)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    raw.to_csv(out_dir / "reviews_labels_raw.csv", index=False)
+    gold.to_csv(out_dir / "reviews_gold.csv", index=False)
+    kappa.to_csv(out_dir / "kappa.csv", index=False, float_format="%.3f")
+    return {**report, "shared_reviews": len(shared), "disagreements": len(disagreements),
+            "undecided": int((merged["decision"] == "").sum()), **gold_report,
+            "kappa": kappa.round(3).to_dict(orient="records")}
 
 
 def check_pilot(products_csv: Path, eprel_csv: Path | None = None, out: Path | None = None) -> dict:
@@ -178,6 +241,27 @@ def select_candidates(listings: Path | None, trendyol: Path | None, existing: Pa
     return report
 
 
+def annotation_pool(reviews: Path, products: Path, out_dir: Path, seed: int,
+                    force: bool = False) -> dict:
+    """Raw reviews -> annotation manifest and one sheet per annotator (nlp/pool.py)."""
+    from greenchoice.nlp.pool import ANNOTATORS, PoolPlan, annotation_sheet, select_pool
+
+    manifest = out_dir / "pool.csv"
+    if manifest.exists() and not force:
+        raise ValueError(f"{manifest} zaten var. Etiketleme başladıysa havuzu değiştirmeyin; "
+                         "yine de yeniden seçmek için --force")
+    cleaned = clean_reviews(pd.read_csv(reviews, dtype={"review_id": str, "product_id": str}))
+    pool, report = select_pool(cleaned, pd.read_csv(products, dtype=str), PoolPlan(seed=seed))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    pool.to_csv(manifest, index=False)
+    for name in ANNOTATORS:
+        sheet = annotation_sheet(pool, cleaned, name, seed)
+        # utf-8-sig so that Excel shows Turkish letters correctly
+        sheet.to_csv(out_dir / f"etiketleme_{name}.csv", index=False, encoding="utf-8-sig")
+        report[f"sheet_{name}"] = len(sheet)
+    return {**report, "out_dir": str(out_dir), "seed": seed}
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="greenchoice")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -190,7 +274,14 @@ def main(argv: list[str] | None = None) -> None:
                    help="üretici enerji etiketlerinden elle okunan değerler (dosya yoksa atlanır)")
 
     e = sub.add_parser("eval-nlp", help="NLP baseline'ını altın etiketlerle değerlendir")
-    e.add_argument("--gold", type=Path, required=True)
+    e.add_argument("--gold", type=Path, default=Path("data/annotations/reviews_gold.csv"))
+    e.add_argument("--reviews", type=Path, default=Path("data/interim/reviews.csv"))
+    e.add_argument("--split", default="test", help="test | val | train")
+
+    cl = sub.add_parser("collect-labels", help="Doldurulan etiketleme tablolarından kappa ve altın etiket")
+    cl.add_argument("--sheets-dir", type=Path, default=Path("data/interim/etiketleme"))
+    cl.add_argument("--out-dir", type=Path, default=Path("data/annotations"))
+    cl.add_argument("--seed", type=int, default=491)
 
     m = sub.add_parser("make-sheets", help="Boş veri toplama Excel dosyasını üret")
     m.add_argument("--out", type=Path, default=Path("data/raw/veri_toplama.xlsx"))
@@ -227,6 +318,13 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--products", type=Path, default=Path("data/interim/pilot_products.csv"))
     r.add_argument("--out", type=Path, default=Path("data/interim/reviews.csv"))
 
+    a = sub.add_parser("annotation-pool", help="Etiketlenecek yorumları seç, etiketçi tablolarını yaz")
+    a.add_argument("--reviews", type=Path, default=Path("data/interim/reviews.csv"))
+    a.add_argument("--products", type=Path, default=Path("data/interim/pilot_products.csv"))
+    a.add_argument("--out-dir", type=Path, default=Path("data/interim/etiketleme"))
+    a.add_argument("--seed", type=int, default=491)
+    a.add_argument("--force", action="store_true", help="var olan havuzun üstüne yaz")
+
     args = parser.parse_args(argv)
     if args.cmd == "build":
         source = SOURCES.get(args.source, Path(args.source))
@@ -234,7 +332,17 @@ def main(argv: list[str] | None = None) -> None:
         summary = build(source, args.db or db_path(), args.eprel, labels)
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     elif args.cmd == "eval-nlp":
-        print(eval_nlp(args.gold).to_string(index=False, float_format="%.3f"))
+        try:
+            table = eval_nlp(args.gold, args.reviews, args.split)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(table.to_string(index=False, float_format="%.3f"))
+    elif args.cmd == "collect-labels":
+        try:
+            report = collect_labels(args.sheets_dir, args.out_dir, args.seed)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
     elif args.cmd == "make-sheets":
         build_template(args.out)
         print(f"Excel şablonu yazıldı: {args.out}")
@@ -269,6 +377,12 @@ def main(argv: list[str] | None = None) -> None:
     elif args.cmd == "import-reviews":
         try:
             report = import_reviews(args.pages, args.products, args.out)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    elif args.cmd == "annotation-pool":
+        try:
+            report = annotation_pool(args.reviews, args.products, args.out_dir, args.seed, args.force)
         except ValueError as exc:
             raise SystemExit(str(exc)) from exc
         print(json.dumps(report, ensure_ascii=False, indent=2))
