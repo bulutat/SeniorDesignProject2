@@ -150,6 +150,14 @@ other person, then merge to `main`.
   `docs/enerji-etiketleri.md`. Energy class known for 78 products (was 48), annual kWh for 71
   (was 48). 161 tests.
 
+### 2026-11-07 - User study design draft (Person A, task A4.1)
+
+- `docs/kullanici-calismasi.md` (Turkish): within-subjects study with 10–15 participants, score-only
+  versus explained product cards, counterbalanced order and product sets, an objective
+  comprehension question per task, seven Likert items written for this study, Wilcoxon signed-rank
+  with Holm correction, draft consent text and questions for the advisor (ethics approval, analysis).
+- Product pairs are chosen after the scoring decisions (B3). No personal data is collected.
+
 ### 2026-11-07 - NLP background reading and BERTurk notebook (Person A, task A0.2)
 
 - `docs/literatur.md`: 20 sources (19 papers + the BERTurk release) in five themes: review
