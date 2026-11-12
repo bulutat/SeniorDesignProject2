@@ -1,0 +1,33 @@
+@startuml
+skinparam dpi 200
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam sequence {
+  ParticipantBackgroundColor #E3EEF9
+  ParticipantBorderColor #4A5560
+  ActorBorderColor #4A5560
+  ActorBackgroundColor #E3EEF9
+  DatabaseBackgroundColor #FFF3DC
+  LifeLineBorderColor #8A949E
+  ArrowColor #4A5560
+}
+actor Shopper
+participant "React UI" as UI
+participant "FastAPI" as API
+database "SQLite" as DB
+
+Shopper -> UI : select category
+UI -> API : GET /api/products?category=refrigerator
+API -> DB : read products + scores
+DB --> API : rows
+API --> UI : list (score, label)
+Shopper -> UI : open product
+UI -> API : GET /api/products/{id}
+API -> DB : read product, features, score
+API --> UI : detail (sub-scores, TCO, explanations)
+Shopper -> UI : move weight sliders
+UI -> API : POST /api/score {category, weights}
+API -> DB : read product_features
+API -> API : weighted sum + explanations\n(score_products)
+API --> UI : re-ranked list
+@enduml

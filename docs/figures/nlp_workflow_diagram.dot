@@ -1,0 +1,18 @@
+digraph G {
+  rankdir=LR;
+  graph [fontname="Helvetica", nodesep=0.25, ranksep=0.35, dpi=200, pad=0.15];
+  node  [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#4A5560", fontname="Helvetica", fontsize=10.5, margin="0.1,0.05"];
+  edge  [color="#4A5560", arrowsize=0.7];
+  RV  [label="3,467 reviews\n(73 products)", fillcolor="#E3EEF9"];
+  PL  [label="annotation-pool\n100 random test +\n300 enriched train"];
+  SH  [label="Two sheets\nA: 250, B: 250\n(100 shared)"];
+  CLB [label="collect-labels\nvalue checks, kappa,\ndisagreements"];
+  GD  [label="Gold labels\ntrain / val / test", fillcolor="#FFF3DC"];
+  RB  [label="Rule-based"];
+  TF  [label="train-nlp\nTF-IDF + LR"];
+  BT  [label="Colab\nBERTurk fine-tune"];
+  EV  [label="Same test set:\nP / R / F1", fillcolor="#EAF4EA"];
+  RV -> PL -> SH -> CLB -> GD;
+  GD -> RB; GD -> TF; GD -> BT;
+  RB -> EV; TF -> EV; BT -> EV;
+}
