@@ -1,0 +1,36 @@
+digraph G {
+  rankdir=TB; newrank=true;
+  graph [fontname="Helvetica", fontsize=12, nodesep=0.35, ranksep=0.5, dpi=200, pad=0.2];
+  node  [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#4A5560", fontname="Helvetica", fontsize=10.5, margin="0.12,0.06"];
+  edge  [color="#4A5560", arrowsize=0.7];
+
+  subgraph cluster_src { label="Sources"; style="rounded,dashed"; color="#8A949E";
+    EC [label="E-commerce pages\nsaved by hand", fillcolor="#E3EEF9"];
+    EP [label="EPREL records\ncollected by hand", fillcolor="#E3EEF9"];
+    XL [label="Data collection\nworkbook (xlsx)", fillcolor="#E3EEF9"];
+  }
+  subgraph cluster_pipe { label="Offline pipeline: greenchoice build"; style="rounded"; color="#4A5560";
+    IM [label="collect\nimport-sheets,\nimport-reviews"];
+    PR [label="preprocess\ncleaning, EPREL\nmatching, TCO"];
+    NL [label="nlp\nAspectExtractor:\nrule / TF-IDF / BERTurk"];
+    AG [label="nlp.aggregate\nproduct review\nfeatures"];
+    CR [label="scoring.criteria\n6 criteria in 0–1"];
+    SC [label="scoring\nweighted (AHP\nweights) / ML"];
+    EX [label="explain\ncontributions to\nTurkish text"];
+    {rank=same; IM; PR; NL; AG;}
+    {rank=same; EX; SC; CR;}
+  }
+  DB  [label="SQLite\ngreenchoice.db", shape=cylinder, fillcolor="#FFF3DC"];
+  subgraph cluster_srv { label="Service (reads only)"; style="rounded"; color="#4A5560";
+    API [label="FastAPI\n7 endpoints under /api"];
+    UI  [label="React UI\nlist, detail, compare,\nweight sliders", fillcolor="#EAF4EA"];
+    {rank=same; API; UI;}
+  }
+  EC -> IM; EP -> IM; XL -> IM;
+  IM -> PR -> NL -> AG;
+  AG -> CR; PR -> CR;
+  SC -> CR [dir=back];
+  EX -> SC [dir=back];
+  EX -> DB; PR -> DB [constraint=false]; NL -> DB [constraint=false];
+  DB -> API -> UI;
+}

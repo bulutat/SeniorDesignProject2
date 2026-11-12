@@ -1,0 +1,65 @@
+@startuml
+skinparam dpi 200
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #F4F6F8
+  BorderColor #4A5560
+  ArrowColor #4A5560
+}
+hide circle
+hide methods
+
+entity products {
+  * product_id : text <<PK>>
+  --
+  category : text
+  brand : text
+  model_code : text
+  price_tl : real
+  energy_class : text
+  annual_kwh : real
+  tco_tl : real
+  eprel_matched : int
+}
+entity reviews {
+  * review_id : text <<PK>>
+  --
+  product_id : text <<FK>>
+  rating : int
+  text_clean : text
+  text_product : text
+  mentions_logistics : int
+}
+entity review_aspects {
+  review_id : text <<FK>>
+  aspect : text
+  polarity : text
+  method : text
+  evidence : text
+}
+entity product_features {
+  * product_id : text <<PK, FK>>
+  --
+  n_reviews : int
+  durability_score : real
+  service_issue_rate : real
+  c_energy_efficiency : real
+  c_lifetime_cost : real
+  imputed : text
+}
+entity scores {
+  product_id : text <<FK>>
+  method : text
+  score : real
+  label : text
+  sub_scores_json : text
+  explanations_json : text
+}
+
+products ||--o{ reviews : has
+reviews ||--o{ review_aspects : yields
+products ||--|| product_features : "described by"
+products ||--o{ scores : "scored by method"
+@enduml

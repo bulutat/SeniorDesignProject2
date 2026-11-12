@@ -1,0 +1,71 @@
+@startuml
+skinparam dpi 200
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #F4F6F8
+  BorderColor #4A5560
+  ArrowColor #4A5560
+}
+hide empty members
+
+package "nlp" {
+  abstract class AspectExtractor {
+    +method: str
+    +{abstract} extract(text_clean): list<AspectMention>
+    +extract_df(reviews, column): DataFrame
+  }
+  class RuleBasedExtractor {
+    +method = "rule_based_v0"
+    -patterns from config/aspects.yaml
+    +extract(text_clean)
+  }
+  class TfidfExtractor {
+    +method = "tfidf_lr_v0"
+    +train(texts, y)
+    +predict_proba(texts)
+    +save(path) / load(path)
+  }
+  class TransformerExtractor {
+    +method = "berturk_v0"
+    -thresholds from thresholds.json
+    +predict_proba(texts)
+  }
+  class AspectMention <<dataclass>> {
+    +aspect: str
+    +polarity: "pos" | "neg"
+    +evidence: str
+  }
+}
+
+package "scoring" {
+  class WeightedScorer {
+    +method = "weighted_v0"
+    +weights_for(category, override)
+    +score(criteria): DataFrame
+  }
+}
+
+package "collect" {
+  abstract class ProductSource {
+    +source: str
+    +{abstract} iter_product_urls(category, max)
+    +{abstract} fetch_product(url, category)
+    +{abstract} fetch_reviews(product, max)
+    +collect(category, out_dir)
+  }
+  class TrendyolSource {
+    +source = "trendyol"
+    +fetch_product(url, category)
+  }
+}
+
+AspectExtractor <|-- RuleBasedExtractor
+AspectExtractor <|-- TfidfExtractor
+AspectExtractor <|-- TransformerExtractor
+AspectExtractor ..> AspectMention : creates
+ProductSource <|-- TrendyolSource
+RuleBasedExtractor -[hidden]down- WeightedScorer
+TransformerExtractor -[hidden]down- ProductSource
+@enduml

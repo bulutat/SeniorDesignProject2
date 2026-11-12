@@ -1,0 +1,31 @@
+digraph G {
+  rankdir=TB;
+  graph [fontname="Helvetica", nodesep=0.35, ranksep=0.45, dpi=200, pad=0.2];
+  node  [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#4A5560", fontname="Helvetica", fontsize=11, margin="0.15,0.07"];
+  edge  [color="#4A5560", arrowsize=0.7];
+
+  P   [label="Product data\nprice, energy class,\nkWh, water, rating", fillcolor="#E3EEF9"];
+  R   [label="Reviews", fillcolor="#E3EEF9"];
+  T   [label="TCO = price + years ×\n(kWh × TL/kWh + m³ × TL/m³)"];
+  CL  [label="Cleaning\nnormalise, drop spam,\nmask delivery phrases"];
+  AX  [label="Aspect extraction\ndurability, energy, service,\nfailure, noise × pos/neg"];
+  AGG [label="Per product:\ndurability score,\nservice issue rate"];
+
+  C1 [label="Energy\nefficiency", fillcolor="#EAF4EA"];
+  C2 [label="Lifetime\ncost", fillcolor="#EAF4EA"];
+  C3 [label="Durability", fillcolor="#EAF4EA"];
+  C4 [label="Service", fillcolor="#EAF4EA"];
+  C5 [label="Price\nadvantage", fillcolor="#EAF4EA"];
+  C6 [label="Satisfaction\n(Bayesian rating)", fillcolor="#EAF4EA"];
+
+  W [label="Weighted sum\n(category weights)"];
+  S [label="Score 0–100\nlabel: recommended / neutral / not recommended", fillcolor="#FFF3DC"];
+  E [label="Contribution of each criterion\nvs category mean"];
+  X [label="Explanation sentences\n(imputed criteria are not explained)", fillcolor="#FFF3DC"];
+
+  P -> T; R -> CL -> AX -> AGG;
+  P -> C1; T -> C2; AGG -> C3; AGG -> C4; P -> C5; P -> C6;
+  {rank=same; C1; C2; C3; C4; C5; C6;}
+  C1 -> W; C2 -> W; C3 -> W; C4 -> W; C5 -> W; C6 -> W;
+  W -> S; W -> E -> X;
+}
