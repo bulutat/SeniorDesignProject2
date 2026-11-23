@@ -17,17 +17,26 @@ defaults:
     recommended: 70                   # skor >= 70  -> Önerilir
     neutral: 45                       # 45 <= skor < 70 -> Nötr, altı -> Önerilmez
 
+# `name` is Turkish (the source language); `names` adds the other interface languages
+# (src/greenchoice/i18n.py). The German names still need a check by a native speaker.
 criteria:
-  energy_efficiency: { name: Enerji verimliliği,   source: structured }
-  lifetime_cost:     { name: Uzun vadeli maliyet,  source: structured }
-  durability:        { name: Dayanıklılık,         source: reviews }
-  service:           { name: Servis ve arıza,      source: reviews }
-  price_advantage:   { name: Fiyat avantajı,       source: structured }
-  satisfaction:      { name: Genel memnuniyet,     source: mixed }
+  energy_efficiency: { name: Enerji verimliliği, source: structured,
+                       names: { en: Energy efficiency, de: Energieeffizienz } }
+  lifetime_cost:     { name: Uzun vadeli maliyet, source: structured,
+                       names: { en: Lifetime cost, de: Langfristige Kosten } }
+  durability:        { name: Dayanıklılık, source: reviews,
+                       names: { en: Durability, de: Haltbarkeit } }
+  service:           { name: Servis ve arıza, source: reviews,
+                       names: { en: Service and failures, de: Service und Defekte } }
+  price_advantage:   { name: Fiyat avantajı, source: structured,
+                       names: { en: Price advantage, de: Preisvorteil } }
+  satisfaction:      { name: Genel memnuniyet, source: mixed,
+                       names: { en: Overall satisfaction, de: Gesamtzufriedenheit } }
 
 categories:
   refrigerator:
     name: Buzdolabı
+    names: { en: Refrigerator, de: Kühlschrank }
     lifetime_years: 12                         # KAYNAKSIZ varsayım, karar 12
     eprel_group: refrigeratingappliances2019   # EPREL adresinde doğrulandı (2026-10-30)
     weights:
@@ -40,6 +49,7 @@ categories:
 
   washing_machine:
     name: Çamaşır makinesi
+    names: { en: Washing machine, de: Waschmaschine }
     lifetime_years: 12                          # Eko-tasarım çalışmalarında 12,5 yıl; karar 12
     annual_cycles: 220                          # Yönetmelik (AB) 2019/2023 Ek V'de yılda 220 yıkama
     eprel_group: washingmachines2019            # EPREL adresinde doğrulandı (2026-10-30)

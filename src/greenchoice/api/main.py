@@ -16,13 +16,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from greenchoice import db
 from greenchoice.config import aspects_config, categories_config, db_path
-from greenchoice.contracts import LABELS
+from greenchoice.explain.templates import localize_explanations
+from greenchoice.i18n import DEFAULT_LANGUAGE, display_name, label_text
 from greenchoice.schemas import (
     AspectCount,
     Category,
     Criterion,
     CustomScoreRequest,
     Explanation,
+    Language,
     ProductDetail,
     ProductSummary,
     ReviewStats,
@@ -69,12 +71,17 @@ class Store:
         return {k: _clean(v) for k, v in match.iloc[0].to_dict().items()}
 
 
-def _summary(row: dict, score: float, label: str) -> ProductSummary:
+# Every endpoint takes an optional ?lang=tr|en|de (names, labels, explanation texts).
+# Without it the responses are the original Turkish ones.
+LANG = DEFAULT_LANGUAGE
+
+
+def _summary(row: dict, score: float, label: str, lang: str = DEFAULT_LANGUAGE) -> ProductSummary:
     return ProductSummary(
         id=row["product_id"], name=row["name"], brand=row.get("brand"),
         category=row["category"], price_tl=row.get("price_tl"),
         energy_class=row.get("energy_class"), score=score, label=label,
-        label_text=LABELS[label],
+        label_text=label_text(label, lang),
     )
 
 
@@ -87,19 +94,21 @@ def create_app(path: Path | None = None) -> FastAPI:
     app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"],
                        allow_methods=["*"], allow_headers=["*"])
 
-    def detail(product_id: str) -> ProductDetail:
+    def detail(product_id: str, lang: str) -> ProductDetail:
         row = store.row(product_id)
         s = store.scores.loc[product_id]
         cat_cfg = cfg["categories"][row["category"]]
+        explanations = localize_explanations(json.loads(s["explanations_json"]), row,
+                                             cfg["criteria"], cat_cfg["lifetime_years"], lang)
         return ProductDetail(
-            **_summary(row, float(s["score"]), s["label"]).model_dump(),
+            **_summary(row, float(s["score"]), s["label"], lang).model_dump(),
             model_code=row.get("model_code"), url=row.get("url"),
             specs={k: row.get(k) for k in SPEC_FIELDS if row.get(k) is not None},
             annual_kwh=row.get("annual_kwh"), tco_tl=row.get("tco_tl"),
             lifetime_years=cat_cfg["lifetime_years"],
             sub_scores=json.loads(s["sub_scores_json"]),
             imputed=[c for c in (row.get("imputed") or "").split(",") if c],
-            explanations=[Explanation(**e) for e in json.loads(s["explanations_json"])],
+            explanations=[Explanation(**e) for e in explanations],
             review_stats=ReviewStats(
                 n_reviews=int(row.get("n_reviews") or 0),
                 rating_avg=row.get("rating_avg") or row.get("review_rating_avg"),
@@ -115,12 +124,13 @@ def create_app(path: Path | None = None) -> FastAPI:
         return {"status": "ok", "db_exists": store.path.exists()}
 
     @app.get("/api/categories", response_model=list[Category])
-    def categories():
+    def categories(lang: Language = LANG):
         store.ensure_loaded()
         counts = store.features["category"].value_counts()
         return [
-            Category(id=cid, name=c["name"], product_count=int(counts.get(cid, 0)),
-                     criteria=[Criterion(id=k, name=cfg["criteria"][k]["name"], weight=w)
+            Category(id=cid, name=display_name(c, lang), product_count=int(counts.get(cid, 0)),
+                     criteria=[Criterion(id=k, name=display_name(cfg["criteria"][k], lang),
+                                         weight=w)
                                for k, w in c["weights"].items()])
             for cid, c in cfg["categories"].items()
         ]
@@ -129,7 +139,7 @@ def create_app(path: Path | None = None) -> FastAPI:
     def products(category: str | None = None, q: str | None = None,
                  label: str | None = None,
                  sort: str = Query("score", pattern="^(score|price|tco)$"),
-                 limit: int = Query(100, ge=1, le=500)):
+                 limit: int = Query(100, ge=1, le=500), lang: Language = LANG):
         store.ensure_loaded()
         df = store.features.join(store.scores[["score", "label"]], on="product_id")
         if category:
@@ -142,26 +152,27 @@ def create_app(path: Path | None = None) -> FastAPI:
         key, asc = {"score": ("score", False), "price": ("price_tl", True),
                     "tco": ("tco_tl", True)}[sort]
         df = df.sort_values(key, ascending=asc, na_position="last").head(limit)
-        return [_summary({k: _clean(v) for k, v in r.items()}, float(r["score"]), r["label"])
+        return [_summary({k: _clean(v) for k, v in r.items()}, float(r["score"]), r["label"], lang)
                 for r in df.to_dict("records")]
 
     @app.get("/api/products/{product_id}", response_model=ProductDetail)
-    def product(product_id: str):
-        return detail(product_id)
+    def product(product_id: str, lang: Language = LANG):
+        return detail(product_id, lang)
 
     @app.get("/api/products/{product_id}/explain", response_model=list[Explanation])
-    def explain(product_id: str):
-        return detail(product_id).explanations
+    def explain(product_id: str, lang: Language = LANG):
+        return detail(product_id, lang).explanations
 
     @app.get("/api/compare", response_model=list[ProductDetail])
-    def compare(ids: str = Query(..., description="Virgülle ayrılmış 2-4 ürün id'si")):
+    def compare(ids: str = Query(..., description="Virgülle ayrılmış 2-4 ürün id'si"),
+                lang: Language = LANG):
         id_list = [i.strip() for i in ids.split(",") if i.strip()]
         if not 2 <= len(id_list) <= 4:
             raise HTTPException(422, "Karşılaştırma için 2-4 ürün seçin")
-        return [detail(i) for i in id_list]
+        return [detail(i, lang) for i in id_list]
 
     @app.post("/api/score", response_model=list[ProductSummary])
-    def custom_score(req: CustomScoreRequest):
+    def custom_score(req: CustomScoreRequest, lang: Language = LANG):
         """Kullanıcının kriter ağırlıklarıyla bir kategoriyi yeniden skorlar (ağırlık slider'ı)."""
         store.ensure_loaded()
         if req.category not in cfg["categories"]:
@@ -175,7 +186,7 @@ def create_app(path: Path | None = None) -> FastAPI:
         scored = scored.sort_values("score", ascending=False)
         return [_summary({"product_id": r["product_id"],
                           **{k: _clean(v) for k, v in by_id.loc[r["product_id"]].items()}},
-                         float(r["score"]), r["label"])
+                         float(r["score"]), r["label"], lang)
                 for _, r in scored.iterrows()]
 
     return app

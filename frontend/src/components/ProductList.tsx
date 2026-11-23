@@ -1,5 +1,5 @@
 import type { ProductSummary } from "../types";
-import { formatTl } from "../format";
+import { useI18n } from "../i18n";
 
 interface Props {
   products: ProductSummary[];
@@ -9,7 +9,9 @@ interface Props {
   onToggleCompare: (id: string) => void;
 }
 
+// The label is shown from its id (not label_text), so switching language needs no refetch.
 export default function ProductList({ products, selected, compareIds, onSelect, onToggleCompare }: Props) {
+  const { t, formatTl } = useI18n();
   return (
     <ul className="product-list">
       {products.map((p) => (
@@ -19,10 +21,10 @@ export default function ProductList({ products, selected, compareIds, onSelect, 
             <span className="product-text">
               <strong>{p.name}</strong>
               <span className="muted">
-                {formatTl(p.price_tl)} · Enerji sınıfı {p.energy_class ?? "—"}
+                {formatTl(p.price_tl)} · {t.list.energyClass} {p.energy_class ?? "—"}
               </span>
             </span>
-            <span className={`chip ${p.label}`}>{p.label_text}</span>
+            <span className={`chip ${p.label}`}>{t.labels[p.label]}</span>
           </button>
           <label className="compare-toggle">
             <input
@@ -31,7 +33,7 @@ export default function ProductList({ products, selected, compareIds, onSelect, 
               checked={compareIds.includes(p.id)}
               onChange={() => onToggleCompare(p.id)}
             />
-            Karşılaştır
+            {t.list.compare}
           </label>
         </li>
       ))}

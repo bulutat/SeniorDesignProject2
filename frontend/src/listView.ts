@@ -13,12 +13,8 @@ export interface ListFilter {
 
 export const DEFAULT_FILTER: ListFilter = { query: "", energy: "", label: "", sort: "score" };
 
-export const SORT_OPTIONS: { id: SortKey; label: string }[] = [
-  { id: "score", label: "Sırala: Skor" },
-  { id: "price_asc", label: "Sırala: Fiyat ↑" },
-  { id: "price_desc", label: "Sırala: Fiyat ↓" },
-  { id: "energy", label: "Sırala: Enerji (A→G)" },
-];
+// Display texts are in i18n (list.sortScore ...), keyed by these ids.
+export const SORT_KEYS: SortKey[] = ["score", "price_asc", "price_desc", "energy"];
 
 // Lower-case in Turkish and fold the Turkish letters, so "SIEMENS", "Siemens" and
 // "siemens" match, and "camasir" finds "Çamaşır".
@@ -69,11 +65,10 @@ export function applyFilter(products: ProductSummary[], f: ListFilter): ProductS
 export const energyClasses = (products: ProductSummary[]) =>
   [...new Set(products.map((p) => p.energy_class).filter((c): c is string => !!c))].sort();
 
-export const labelOptions = (products: ProductSummary[]) => {
-  const seen = new Map<Label, string>();
-  products.forEach((p) => seen.set(p.label, p.label_text));
+export const labelOptions = (products: ProductSummary[]): Label[] => {
+  const present = new Set(products.map((p) => p.label));
   const order: Label[] = ["recommended", "neutral", "not_recommended"];
-  return order.filter((l) => seen.has(l)).map((l) => ({ id: l, text: seen.get(l)! }));
+  return order.filter((l) => present.has(l));
 };
 
 export const isFiltered = (f: ListFilter) => !!(f.query.trim() || f.energy || f.label);
