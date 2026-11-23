@@ -13,6 +13,12 @@ API çalışırken etkileşimli dokümantasyon: http://localhost:8000/docs
 | GET | `/api/compare?ids=a,b,c` | 2–4 ürünün detayı | `ProductDetail[]` |
 | POST | `/api/score` | Kullanıcı ağırlıklarıyla yeniden skorlama | `ProductSummary[]` |
 
+**Dil (`lang`).** Her uç nokta isteğe bağlı `?lang=tr|en|de` alır (`/api/score` için sorgu
+parametresi olarak, gövde değişmez). Etkilediği alanlar: `Category.name`, `Criterion.name`,
+`label_text`, `Explanation.criterion_name` ve `Explanation.text`. Skorlar, sıralama, ürün adı, marka,
+fiyat (TL) ve diğer veriler dilden bağımsızdır. Parametre verilmezse yanıt Türkçedir ve eskisiyle
+birebir aynıdır; desteklenmeyen dil 422 döner. Karar 20 (`decisions.md`).
+
 `/api/products` sorgu parametreleri: `category`, `q` (ad/marka araması), `label`,
 `sort` (`score` | `price` | `tco`), `limit` (1–500).
 

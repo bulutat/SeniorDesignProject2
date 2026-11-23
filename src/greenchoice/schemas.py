@@ -10,6 +10,8 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 Label = Literal["recommended", "neutral", "not_recommended"]
+# Interface language for names, labels and explanation texts (greenchoice.i18n.LANGUAGES).
+Language = Literal["tr", "en", "de"]
 
 
 class Criterion(BaseModel):

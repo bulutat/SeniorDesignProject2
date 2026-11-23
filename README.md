@@ -50,7 +50,7 @@ data/
   raw/ interim/ processed/   collected and generated data (not committed, except the
                              hand-off list data/interim/pilot_products.csv)
 docs/            architecture, data and API contracts, decisions, source review, schedule
-frontend/        React + Vite UI
+frontend/        React + Vite UI (interface texts in src/i18n/: tr, en, de)
 notebooks/       exploration notebooks
 src/greenchoice/
   collect/       data collection: reviews from browser-saved pages (saved_pages.py), EPREL
@@ -60,6 +60,7 @@ src/greenchoice/
   scoring/       criteria sub-scores, weighted baseline, ML comparison
   explain/       explanation sentences
   api/           FastAPI app
+  i18n.py        interface languages (tr, en, de) for names, labels, explanations
   pipeline.py    command line entry point (`greenchoice`)
 tests/           pytest
 ```
@@ -119,8 +120,9 @@ ruff check src tests      # lint
 cd frontend && npm run build
 ```
 
-Last verified: 2026-11-05, Python 3.12.10 - 191 passed, ruff clean. The
-frontend build was last run on 2026-10-29; nothing since then touches `frontend/`.
+Last verified: 2026-11-05, Python 3.12.10 - 191 passed, ruff clean. On 2026-11-24 (Python 3.13,
+without FastAPI): 224 passed outside `tests/test_api.py`. The frontend changed on 2026-11-24 and its
+pinned build (`npm run build`) has not been run locally since 2026-10-29; CI runs it.
 
 ## Team workflow
 
@@ -131,6 +133,28 @@ Rules: [CONTRIBUTING.md](CONTRIBUTING.md). One branch per task, pull request, re
 other person, then merge to `main`.
 
 ## Progress and changelog
+
+### 2026-11-24 - Interface languages: Turkish, English, German (Person B, approved by Person A)
+
+- A language menu in the header (globe icon, language names in their own language: Türkçe ·
+  English · Deutsch; no flags, because a flag names a country, not a language). The choice is
+  remembered in the browser and sets `<html lang>`. Turkish stays the default.
+- Every API endpoint takes an optional `?lang=tr|en|de` for category and criterion names, the
+  label text and the explanation sentences (`docs/api.md`). Without it the response is the
+  original Turkish one, unchanged. Explanations are still stored in Turkish; for another
+  language the API re-renders them from the stored criterion, direction and impact and the real
+  values in the same product row (`explain/locales.py`, `explain/templates.py::localize_explanations`).
+  New `greenchoice/i18n.py`; English and German names in `config/categories.yaml` (`names`).
+- Frontend texts live in `frontend/src/i18n/` (`tr.ts`, `en.ts`, `de.ts`). The other languages
+  are typed against the Turkish one, so a missing text fails `tsc`. Numbers follow the
+  language's format; prices stay in TL and product names stay as in the shop (no invented
+  data: no currency conversion, no translated titles). Switching language keeps the selected
+  category, filters, comparison and custom weights; only names and sentences are refetched.
+- Verified: the sample build's `scores` table is identical before and after the change
+  (Turkish output unchanged); 224 tests pass (new `tests/test_i18n.py`; new API tests in
+  `tests/test_api.py` need FastAPI and run in CI); all three languages checked in a headless
+  browser against responses from the real API handlers. The German texts still need a check by
+  a native speaker (decision 20). `npm run build` with the pinned toolchain still has to run.
 
 ### 2026-11-24 - In-app user guide (Person B)
 

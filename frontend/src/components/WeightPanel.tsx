@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { useI18n } from "../i18n";
 import type { Category, ProductSummary } from "../types";
 
 interface Props {
@@ -10,10 +11,11 @@ interface Props {
 
 // Each choice is a relative weight; the API scales the weights so that they sum to 1.
 // "Not important" leaves the criterion out of the score.
+// Display texts are in i18n (weights.none / normal / high).
 export const LEVELS = [
-  { id: "none", label: "Önemli değil", weight: 0 },
-  { id: "normal", label: "Önemli", weight: 1 },
-  { id: "high", label: "Çok önemli", weight: 2 },
+  { id: "none", weight: 0 },
+  { id: "normal", weight: 1 },
+  { id: "high", weight: 2 },
 ] as const;
 type Level = (typeof LEVELS)[number]["id"];
 
@@ -27,12 +29,14 @@ export const toWeights = (levels: Record<string, Level>) =>
   );
 
 export default function WeightPanel({ category, onScored, onReset }: Props) {
+  const { lang, t } = useI18n();
   const [levels, setLevels] = useState<Record<string, Level>>(defaults(category));
 
-  useEffect(() => setLevels(defaults(category)), [category]);
+  // Keyed on the id: a language switch reloads the category (new names) but must keep the choices.
+  useEffect(() => setLevels(defaults(category)), [category.id]);
 
   const nothingSelected = Object.values(levels).every((l) => l === "none");
-  const apply = () => api.customScore(category.id, toWeights(levels)).then(onScored);
+  const apply = () => api.customScore(category.id, toWeights(levels), lang).then(onScored);
   const reset = () => {
     setLevels(defaults(category));
     onReset();
@@ -40,7 +44,7 @@ export default function WeightPanel({ category, onScored, onReset }: Props) {
 
   return (
     <details className="weights">
-      <summary>Sizin için hangi kriter ne kadar önemli?</summary>
+      <summary>{t.weights.title}</summary>
       <div className="weight-grid">
         {category.criteria.map((c) => (
           <fieldset key={c.id} className="level-group">
@@ -55,7 +59,7 @@ export default function WeightPanel({ category, onScored, onReset }: Props) {
                     checked={levels[c.id] === l.id}
                     onChange={() => setLevels({ ...levels, [c.id]: l.id })}
                   />
-                  {l.label}
+                  {t.weights[l.id]}
                 </label>
               ))}
             </div>
@@ -63,11 +67,11 @@ export default function WeightPanel({ category, onScored, onReset }: Props) {
         ))}
       </div>
       {nothingSelected && (
-        <p className="weight-note">En az bir kriteri "Önemli" veya "Çok önemli" seçin.</p>
+        <p className="weight-note">{t.weights.pickOne}</p>
       )}
       <div className="weight-actions">
-        <button onClick={apply} disabled={nothingSelected}>Yeniden sırala</button>
-        <button className="secondary" onClick={reset}>Varsayılana dön</button>
+        <button onClick={apply} disabled={nothingSelected}>{t.weights.apply}</button>
+        <button className="secondary" onClick={reset}>{t.weights.reset}</button>
       </div>
     </details>
   );

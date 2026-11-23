@@ -49,3 +49,36 @@ def test_custom_weights_change_ranking(client):
     res = client.post("/api/score", json={"category": "refrigerator", "weights": price_only})
     assert res.status_code == 200
     assert res.json()[0]["id"] == "s-rf-06"  # en ucuz buzdolabı
+
+
+def test_language_defaults_to_the_original_turkish_response(client):
+    assert client.get("/api/products/s-rf-01").json() == \
+        client.get("/api/products/s-rf-01", params={"lang": "tr"}).json()
+
+
+def test_english_names_labels_and_explanations(client):
+    cats = {c["id"]: c for c in client.get("/api/categories", params={"lang": "en"}).json()}
+    assert cats["refrigerator"]["name"] == "Refrigerator"
+    assert {c["name"] for c in cats["refrigerator"]["criteria"]} >= {"Energy efficiency"}
+
+    tr = client.get("/api/products/s-rf-01").json()
+    en = client.get("/api/products/s-rf-01", params={"lang": "en"}).json()
+    assert en["label_text"] in {"Recommended", "Neutral", "Not recommended"}
+    assert en["name"] == tr["name"] and en["price_tl"] == tr["price_tl"]  # data is not translated
+    assert [(e["criterion"], e["impact"]) for e in en["explanations"]] == \
+        [(e["criterion"], e["impact"]) for e in tr["explanations"]]
+    assert en["explanations"][0]["text"] != tr["explanations"][0]["text"]
+
+
+def test_language_on_list_compare_and_custom_score(client):
+    items = client.get("/api/products", params={"category": "refrigerator", "lang": "de"}).json()
+    assert {p["label_text"] for p in items} <= {"Empfohlen", "Neutral", "Nicht empfohlen"}
+    res = client.get("/api/compare", params={"ids": "s-rf-01,s-rf-04", "lang": "de"}).json()
+    assert all(e["text"] for p in res for e in p["explanations"])
+    scored = client.post("/api/score", params={"lang": "en"},
+                         json={"category": "refrigerator", "weights": {}}).json()
+    assert {p["label_text"] for p in scored} <= {"Recommended", "Neutral", "Not recommended"}
+
+
+def test_unsupported_language_is_422(client):
+    assert client.get("/api/categories", params={"lang": "fr"}).status_code == 422

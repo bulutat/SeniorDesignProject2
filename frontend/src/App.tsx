@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { api } from "./api";
+import { ApiError, api } from "./api";
+import { useI18n } from "./i18n";
+import LanguageSelect from "./components/LanguageSelect";
 import type { Category, ProductSummary } from "./types";
 import ProductList from "./components/ProductList";
 import ProductDetailPanel from "./components/ProductDetailPanel";
@@ -11,32 +13,43 @@ import type { GuideTab } from "./components/guide/sections";
 import { DEFAULT_FILTER, applyFilter, type ListFilter } from "./listView";
 
 export default function App() {
+  const { lang, t } = useI18n();
   const [categories, setCategories] = useState<Category[]>([]);
   const [category, setCategory] = useState<string | null>(null);
   const [products, setProducts] = useState<ProductSummary[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [filter, setFilter] = useState<ListFilter>(DEFAULT_FILTER);
   const [guideTab, setGuideTab] = useState<GuideTab | null>(null); // null = guide closed
   const closeGuide = useCallback(() => setGuideTab(null), []);
 
+  // Reloaded on a language change for the translated category and criterion names.
+  // The selected category, filters, comparison and custom weights stay as they are.
   useEffect(() => {
-    api.categories()
+    api.categories(lang)
       .then((cats) => {
         setCategories(cats);
-        if (cats.length) setCategory(cats[0].id);
+        setCategory((cur) => cur ?? cats[0]?.id ?? null);
       })
-      .catch((e: Error) => setError(e.message));
-  }, []);
+      .catch(setError);
+  }, [lang]);
 
+  // Not reloaded on a language change: the list shows labels from their id, and a reload
+  // would drop scores re-ranked with custom weights.
   useEffect(() => {
     if (!category) return;
     setSelected(null);
     setCompareIds([]);
     setFilter(DEFAULT_FILTER);
-    api.products(category).then(setProducts).catch((e: Error) => setError(e.message));
+    api.products(category, lang).then(setProducts).catch(setError);
   }, [category]);
+
+  // The API's own message is Turkish, so it is shown only in Turkish.
+  const errorText =
+    error instanceof ApiError
+      ? lang === "tr" && error.detail ? error.detail : t.app.requestFailed(error.status)
+      : error instanceof Error ? error.message : null;
 
   const current = categories.find((c) => c.id === category);
   const visible = useMemo(() => applyFilter(products, filter), [products, filter]);
@@ -51,12 +64,15 @@ export default function App() {
       <header className="top">
         <div className="top-row">
           <h1>GreenChoice</h1>
-          <button className="help-button" onClick={() => setGuideTab("start")}>
-            <span className="help-icon" aria-hidden="true">?</span> Nasıl kullanılır?
-          </button>
+          <div className="top-actions">
+            <LanguageSelect />
+            <button className="help-button" onClick={() => setGuideTab("start")}>
+              <span className="help-icon" aria-hidden="true">?</span> {t.app.help}
+            </button>
+          </div>
         </div>
-        <p>Ürünleri fiyatın yanında enerji, uzun vadeli maliyet ve dayanıklılığa göre karşılaştırın.</p>
-        <nav className="tabs" aria-label="Kategoriler">
+        <p>{t.app.subtitle}</p>
+        <nav className="tabs" aria-label={t.app.categoriesNav}>
           {categories.map((c) => (
             <button
               key={c.id}
@@ -69,13 +85,13 @@ export default function App() {
         </nav>
       </header>
 
-      {error && <div className="error">{error}</div>}
+      {errorText && <div className="error">{errorText}</div>}
 
       {current && (
         <WeightPanel
           category={current}
           onScored={setProducts}
-          onReset={() => api.products(current.id).then(setProducts)}
+          onReset={() => api.products(current.id, lang).then(setProducts)}
         />
       )}
 
@@ -92,7 +108,7 @@ export default function App() {
             onChange={setFilter}
           />
           {products.length > 0 && visible.length === 0 ? (
-            <p className="panel empty">Bu filtrelere uyan ürün yok.</p>
+            <p className="panel empty">{t.app.noMatch}</p>
           ) : (
             <ProductList
               products={visible}
@@ -107,9 +123,9 @@ export default function App() {
           <ProductDetailPanel id={selected} criteria={current?.criteria ?? []} />
         ) : (
           <aside className="panel empty">
-            <p>Ayrıntıları ve skorun nedenlerini görmek için bir ürün seçin.</p>
+            <p>{t.app.pickProduct}</p>
             <button className="link" onClick={() => setGuideTab("reading")}>
-              Skorlar nasıl yorumlanır?
+              {t.app.howToRead}
             </button>
           </aside>
         )}

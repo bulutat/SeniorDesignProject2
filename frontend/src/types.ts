@@ -2,6 +2,9 @@
 
 export type Label = "recommended" | "neutral" | "not_recommended";
 
+// Optional ?lang= on every endpoint (schemas.Language).
+export type Language = "tr" | "en" | "de";
+
 export interface Criterion {
   id: string;
   name: string;
