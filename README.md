@@ -132,6 +132,24 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-24 - Search, filter and sort in the product list (Person B)
+
+- A toolbar above the product list: free-text search on name and brand (case-insensitive,
+  Turkish letters folded, so "camasir" finds "Çamaşır" and "SIEMENS" finds "Siemens"; every
+  word must match), filters for energy class and recommendation label, and sorting by score,
+  price (up or down) or energy class (A to G). It shows "shown / total" and a reset link.
+- Filter options are built from the loaded products, so the UI never offers an empty choice.
+  Missing prices or energy classes always sort last. Values outside the 2021 A-G scale (the
+  synthetic sample still has one "A++") are not ranked against it and sort with the unknowns.
+- Filtering runs in the browser on what `/api/products` or `/api/score` returned, so it also
+  works after re-ranking with custom weights. Switching category resets the filters.
+  Frontend only (`frontend/src/listView.ts`, `components/ListToolbar.tsx`); the API and the
+  contracts are unchanged.
+- Verified without the pinned toolchain (no package network in that environment): strict
+  `tsc` on `listView.ts`, 20 assertions on the pure filter/sort functions, and a headless
+  browser run of the bundled UI against JSON produced by the real API handlers on the sample
+  database. `npm run build` with the pinned versions still has to run before merging.
+
 ### 2026-11-10 - Importance choices instead of weight sliders (Person A for Person B)
 
 - The weight panel now asks, for each criterion, "Önemli değil / Önemli / Çok önemli" (relative
