@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "./api";
 import type { Category, ProductSummary } from "./types";
 import ProductList from "./components/ProductList";
 import ProductDetailPanel from "./components/ProductDetailPanel";
 import WeightPanel from "./components/WeightPanel";
 import CompareTable from "./components/CompareTable";
+import ListToolbar from "./components/ListToolbar";
+import { DEFAULT_FILTER, applyFilter, type ListFilter } from "./listView";
 
 export default function App() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -13,6 +15,7 @@ export default function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<ListFilter>(DEFAULT_FILTER);
 
   useEffect(() => {
     api.categories()
@@ -27,10 +30,12 @@ export default function App() {
     if (!category) return;
     setSelected(null);
     setCompareIds([]);
+    setFilter(DEFAULT_FILTER);
     api.products(category).then(setProducts).catch((e: Error) => setError(e.message));
   }, [category]);
 
   const current = categories.find((c) => c.id === category);
+  const visible = useMemo(() => applyFilter(products, filter), [products, filter]);
 
   const toggleCompare = (id: string) =>
     setCompareIds((ids) =>
@@ -70,13 +75,25 @@ export default function App() {
       )}
 
       <main className="layout">
-        <ProductList
-          products={products}
-          selected={selected}
-          compareIds={compareIds}
-          onSelect={setSelected}
-          onToggleCompare={toggleCompare}
-        />
+        <section className="list-column">
+          <ListToolbar
+            products={products}
+            shown={visible.length}
+            filter={filter}
+            onChange={setFilter}
+          />
+          {products.length > 0 && visible.length === 0 ? (
+            <p className="panel empty">Bu filtrelere uyan ürün yok.</p>
+          ) : (
+            <ProductList
+              products={visible}
+              selected={selected}
+              compareIds={compareIds}
+              onSelect={setSelected}
+              onToggleCompare={toggleCompare}
+            />
+          )}
+        </section>
         {selected ? (
           <ProductDetailPanel id={selected} criteria={current?.criteria ?? []} />
         ) : (
