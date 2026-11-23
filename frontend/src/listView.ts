@@ -1,6 +1,7 @@
 // Client-side search, filter and sort for the product list. Pure functions, no API calls:
 // the list only rearranges what /api/products (or /api/score) returned.
 import type { Label, ProductSummary } from "./types";
+import { energyRank } from "./compareBest";
 
 export type SortKey = "score" | "price_asc" | "price_desc" | "energy";
 
@@ -35,14 +36,6 @@ const compareNullable = (a: number | null, b: number | null, dir: 1 | -1) => {
   if (a == null) return 1;
   if (b == null) return -1;
   return (a - b) * dir;
-};
-
-// The 2021 EU scale runs A (best) to G. Any other value (for example an old "A++" that is
-// still in the synthetic sample data) is not comparable with it and sorts with the unknowns.
-const NEW_SCALE = "ABCDEFG";
-const energyRank = (c: string | null) => {
-  const k = c?.trim().toUpperCase() ?? "";
-  return k.length === 1 && NEW_SCALE.includes(k) ? NEW_SCALE.indexOf(k) : null;
 };
 
 const comparators: Record<SortKey, (a: ProductSummary, b: ProductSummary) => number> = {

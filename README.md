@@ -134,6 +134,18 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-24 - Best values in the comparison and energy class badges (Person B)
+
+- The comparison table marks the best cell of every row in green (lowest price, total cost and
+  kWh, best energy class, highest score and criterion scores) and gains an energy class row.
+  Missing values and values filled with the category median never win, ties all win, and a row
+  where all real values are equal has no winner (`frontend/src/compareBest.ts`). A legend under
+  the table says this in the chosen language; screen readers hear "best" in the cell.
+- Energy classes are shown as coloured arrows after the EU label's A (dark green) to G (red)
+  scale (`components/EnergyBadge.tsx`). The colours approximate that scale and are not the
+  official print values; text contrast is at least 4.5:1. Values outside A-G get a grey badge.
+- Frontend only; checked in a headless browser in all three languages.
+
 ### 2026-11-24 - Shop link and model code in the product details (Person B)
 
 - The detail panel shows the model code (when known) and a "Mağazada gör" link to the product's
