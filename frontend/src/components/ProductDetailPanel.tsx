@@ -3,6 +3,9 @@ import { api } from "../api";
 import { useI18n } from "../i18n";
 import type { Criterion, ProductDetail } from "../types";
 
+// Only http(s) addresses become links; anything else in the data is not rendered as a link.
+const isWebLink = (url: string | null): url is string => !!url && /^https?:\/\//i.test(url);
+
 export default function ProductDetailPanel({ id, criteria }: { id: string; criteria: Criterion[] }) {
   const { lang, t, formatTl, formatNum } = useI18n();
   const [p, setP] = useState<ProductDetail | null>(null);
@@ -33,7 +36,14 @@ export default function ProductDetailPanel({ id, criteria }: { id: string; crite
         <div><dt>{t.detail.tco(p.lifetime_years)}</dt><dd>{formatTl(p.tco_tl)}</dd></div>
         <div><dt>{t.detail.annual}</dt><dd>{formatNum(p.annual_kwh)} kWh</dd></div>
         <div><dt>{t.detail.energyClass}</dt><dd>{p.energy_class ?? "—"}</dd></div>
+        {p.model_code && <div><dt>{t.detail.modelCode}</dt><dd>{p.model_code}</dd></div>}
       </dl>
+
+      {isWebLink(p.url) && (
+        <a className="shop-link" href={p.url} target="_blank" rel="noopener noreferrer">
+          {t.detail.viewInShop} ↗<span className="visually-hidden"> {t.detail.opensNewTab}</span>
+        </a>
+      )}
 
       <h3>{t.detail.why}</h3>
       <ul className="explanations">

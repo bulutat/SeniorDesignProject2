@@ -134,6 +134,13 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-24 - Shop link and model code in the product details (Person B)
+
+- The detail panel shows the model code (when known) and a "Mağazada gör" link to the product's
+  shop page, opened in a new tab (`rel="noopener noreferrer"`). Both fields already came from
+  the API (`ProductDetail.url`, `model_code`); only `http(s)` addresses become links. Texts in all
+  three languages. Frontend only; checked in a headless browser.
+
 ### 2026-11-24 - Interface languages: Turkish, English, German (Person B, approved by Person A)
 
 - A language menu in the header (globe icon, language names in their own language: Türkçe ·
