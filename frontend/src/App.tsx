@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "./api";
 import type { Category, ProductSummary } from "./types";
 import ProductList from "./components/ProductList";
@@ -6,6 +6,8 @@ import ProductDetailPanel from "./components/ProductDetailPanel";
 import WeightPanel from "./components/WeightPanel";
 import CompareTable from "./components/CompareTable";
 import ListToolbar from "./components/ListToolbar";
+import GuideDrawer from "./components/GuideDrawer";
+import type { GuideTab } from "./components/guide/sections";
 import { DEFAULT_FILTER, applyFilter, type ListFilter } from "./listView";
 
 export default function App() {
@@ -16,6 +18,8 @@ export default function App() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<ListFilter>(DEFAULT_FILTER);
+  const [guideTab, setGuideTab] = useState<GuideTab | null>(null); // null = guide closed
+  const closeGuide = useCallback(() => setGuideTab(null), []);
 
   useEffect(() => {
     api.categories()
@@ -45,7 +49,12 @@ export default function App() {
   return (
     <div className="app">
       <header className="top">
-        <h1>GreenChoice</h1>
+        <div className="top-row">
+          <h1>GreenChoice</h1>
+          <button className="help-button" onClick={() => setGuideTab("start")}>
+            <span className="help-icon" aria-hidden="true">?</span> Nasıl kullanılır?
+          </button>
+        </div>
         <p>Ürünleri fiyatın yanında enerji, uzun vadeli maliyet ve dayanıklılığa göre karşılaştırın.</p>
         <nav className="tabs" aria-label="Kategoriler">
           {categories.map((c) => (
@@ -97,9 +106,22 @@ export default function App() {
         {selected ? (
           <ProductDetailPanel id={selected} criteria={current?.criteria ?? []} />
         ) : (
-          <aside className="panel empty">Ayrıntıları ve skorun nedenlerini görmek için bir ürün seçin.</aside>
+          <aside className="panel empty">
+            <p>Ayrıntıları ve skorun nedenlerini görmek için bir ürün seçin.</p>
+            <button className="link" onClick={() => setGuideTab("reading")}>
+              Skorlar nasıl yorumlanır?
+            </button>
+          </aside>
         )}
       </main>
+
+      <GuideDrawer
+        open={guideTab !== null}
+        tab={guideTab ?? "start"}
+        category={current}
+        onTab={setGuideTab}
+        onClose={closeGuide}
+      />
     </div>
   );
 }
