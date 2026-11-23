@@ -132,6 +132,22 @@ other person, then merge to `main`.
 
 ## Progress and changelog
 
+### 2026-11-24 - In-app user guide (Person B)
+
+- A "Nasıl kullanılır?" button in the header opens a side panel with four tabs: getting started
+  (what the tool is, step-by-step use), criteria (what each of the six criteria measures, its
+  data source, what earns a high score, and the current category's default weights from the
+  API), reading the results (score and label thresholds, "compared with similar products",
+  the +/- impact numbers, "(veri yok)" imputation, lifetime cost) and data limits. The empty
+  detail panel links straight to the results tab.
+- The texts describe what the pipeline does today (`scoring/criteria.py`, `preprocess/tco.py`,
+  `explain/templates.py`). The label thresholds 70/45 are repeated in
+  `components/guide/sections.tsx` and must stay equal to `config/categories.yaml`.
+- Accessible dialog: Esc, the close button or a backdrop click closes it, focus moves in and
+  back, tabs use ARIA roles, the animation respects reduced motion. Frontend only.
+- Checked in a headless browser on desktop and mobile widths (bundled with esbuild against
+  JSON from the real API handlers); `npm run build` with the pinned toolchain still has to run.
+
 ### 2026-11-24 - Search, filter and sort in the product list (Person B)
 
 - A toolbar above the product list: free-text search on name and brand (case-insensitive,
