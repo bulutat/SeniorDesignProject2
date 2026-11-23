@@ -1,5 +1,6 @@
 import type { ProductSummary } from "../types";
 import { useI18n } from "../i18n";
+import EnergyBadge from "./EnergyBadge";
 
 interface Props {
   products: ProductSummary[];
@@ -21,7 +22,7 @@ export default function ProductList({ products, selected, compareIds, onSelect, 
             <span className="product-text">
               <strong>{p.name}</strong>
               <span className="muted">
-                {formatTl(p.price_tl)} · {t.list.energyClass} {p.energy_class ?? "—"}
+                {formatTl(p.price_tl)} · {t.list.energyClass} <EnergyBadge value={p.energy_class} />
               </span>
             </span>
             <span className={`chip ${p.label}`}>{t.labels[p.label]}</span>

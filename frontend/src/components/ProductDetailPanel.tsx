@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 import { useI18n } from "../i18n";
 import type { Criterion, ProductDetail } from "../types";
+import EnergyBadge from "./EnergyBadge";
 
 // Only http(s) addresses become links; anything else in the data is not rendered as a link.
 const isWebLink = (url: string | null): url is string => !!url && /^https?:\/\//i.test(url);
@@ -35,7 +36,7 @@ export default function ProductDetailPanel({ id, criteria }: { id: string; crite
         <div><dt>{t.detail.price}</dt><dd>{formatTl(p.price_tl)}</dd></div>
         <div><dt>{t.detail.tco(p.lifetime_years)}</dt><dd>{formatTl(p.tco_tl)}</dd></div>
         <div><dt>{t.detail.annual}</dt><dd>{formatNum(p.annual_kwh)} kWh</dd></div>
-        <div><dt>{t.detail.energyClass}</dt><dd>{p.energy_class ?? "—"}</dd></div>
+        <div><dt>{t.detail.energyClass}</dt><dd><EnergyBadge value={p.energy_class} /></dd></div>
         {p.model_code && <div><dt>{t.detail.modelCode}</dt><dd>{p.model_code}</dd></div>}
       </dl>
 

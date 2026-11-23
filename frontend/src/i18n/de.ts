@@ -64,6 +64,9 @@ export const de: Messages = {
     price: "Preis",
     tco: "Gesamtkosten",
     kwh: "kWh pro Jahr",
+    energyClass: "Energieklasse",
+    best: "bester Wert",
+    legend: "Grün: der beste Wert in dieser Zeile. Werte ohne Daten (mit dem Median aufgefüllt) zählen nie als bester Wert.",
   },
   guide: {
     title: "GreenChoice-Anleitung",

@@ -66,6 +66,9 @@ export const tr = {
     price: "Fiyat",
     tco: "Toplam maliyet",
     kwh: "Yıllık kWh",
+    energyClass: "Enerji sınıfı",
+    best: "en iyi",
+    legend: "Yeşil: o satırdaki en iyi değer. Verisi olmayan (medyanla doldurulan) değerler en iyi sayılmaz.",
   },
   guide: {
     title: "GreenChoice rehberi",

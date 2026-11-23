@@ -63,6 +63,9 @@ export const en: Messages = {
     price: "Price",
     tco: "Total cost",
     kwh: "Annual kWh",
+    energyClass: "Energy class",
+    best: "best",
+    legend: "Green: the best value in that row. Values with no data (filled with the median) never count as best.",
   },
   guide: {
     title: "GreenChoice guide",
